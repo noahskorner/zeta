@@ -1,0 +1,23 @@
+{
+  "name": "zeta",
+  "private": true,
+  "scripts": {
+    "clean": "find . ( -name node_modules -o -name .turbo -o -name .next  -o -name .vite -o -name dist -o -name out ) -type d -prune -exec rm -rf '{}' +",
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck"
+  },
+  "devDependencies": {
+    "turbo": "^2.8.9",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "npm@10.8.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
