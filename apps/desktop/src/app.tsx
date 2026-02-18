@@ -1,144 +1,318 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 export default function App() {
+  const [projects, setProjects] = useState<ProjectMetadata[]>([]);
+  const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
+  const [projectFiles, setProjectFiles] = useState<string[]>([]);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [fileContent, setFileContent] = useState<ProjectFileContent | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isAddingProject, setIsAddingProject] = useState(false);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
+  const [isLoadingFiles, setIsLoadingFiles] = useState(false);
+  const [isLoadingFileContent, setIsLoadingFileContent] = useState(false);
+
+  const selectedProject = useMemo(() => {
+    if (!selectedProjectPath) {
+      return null;
+    }
+
+    return projects.find((project) => project.folderPath === selectedProjectPath) ?? null;
+  }, [projects, selectedProjectPath]);
+
+  useEffect(() => {
+    void loadProjects();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedProjectPath) {
+      setProjectFiles([]);
+      setSelectedFile(null);
+      setFileContent(null);
+      return;
+    }
+
+    void loadProjectFiles(selectedProjectPath);
+  }, [selectedProjectPath]);
+
+  useEffect(() => {
+    if (!selectedProjectPath || !selectedFile) {
+      setFileContent(null);
+      return;
+    }
+
+    void loadProjectFileContent(selectedProjectPath, selectedFile);
+  }, [selectedProjectPath, selectedFile]);
+
+  async function handleAddProject() {
+    setErrorMessage(null);
+    setIsAddingProject(true);
+
+    try {
+      const newProject = await window.zetaApi.addProject();
+
+      if (!newProject) {
+        return;
+      }
+
+      await loadProjects(newProject.folderPath);
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsAddingProject(false);
+    }
+  }
+
+  async function loadProjects(projectPathToSelect?: string) {
+    setIsLoadingProjects(true);
+
+    try {
+      const savedProjects = await window.zetaApi.listProjects();
+      const sortedProjects = [...savedProjects].sort((first, second) =>
+        second.createdAt.localeCompare(first.createdAt),
+      );
+      setProjects(sortedProjects);
+
+      if (sortedProjects.length === 0) {
+        setSelectedProjectPath(null);
+        return;
+      }
+
+      if (projectPathToSelect) {
+        setSelectedProjectPath(projectPathToSelect);
+        return;
+      }
+
+      if (
+        selectedProjectPath &&
+        sortedProjects.some((project) => project.folderPath === selectedProjectPath)
+      ) {
+        return;
+      }
+
+      setSelectedProjectPath(sortedProjects[0].folderPath);
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsLoadingProjects(false);
+    }
+  }
+
+  async function loadProjectFiles(projectPath: string) {
+    setIsLoadingFiles(true);
+    setErrorMessage(null);
+
+    try {
+      const files = await window.zetaApi.listProjectFiles(projectPath);
+      setProjectFiles(files);
+      setSelectedFile(files[0] ?? null);
+    } catch (error) {
+      setProjectFiles([]);
+      setSelectedFile(null);
+      setFileContent(null);
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsLoadingFiles(false);
+    }
+  }
+
+  async function loadProjectFileContent(
+    projectPath: string,
+    relativeFilePath: string,
+  ) {
+    setIsLoadingFileContent(true);
+    setErrorMessage(null);
+
+    try {
+      const content = await window.zetaApi.readProjectFile(projectPath, relativeFilePath);
+      setFileContent(content);
+    } catch (error) {
+      setFileContent(null);
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsLoadingFileContent(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border">
-              <span className="text-sm font-semibold">S</span>
-            </div>
-            <div className="leading-tight">
-              <div className="text-sm font-semibold">Sparky Desktop</div>
-              <div className="text-xs text-muted-foreground">Local-first tools</div>
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div>
+            <div className="text-lg font-semibold">Zeta Projects</div>
+            <div className="text-xs text-muted-foreground">
+              Open a local folder and inspect its files.
             </div>
           </div>
-
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">v0.1</Badge>
-            <Button size="sm" variant="outline">
-              Settings
-            </Button>
-          </div>
+          <Button onClick={handleAddProject} disabled={isAddingProject}>
+            {isAddingProject ? "Adding..." : "Add Project"}
+          </Button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-8">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">Home</h1>
-          <p className="text-sm text-muted-foreground">
-            Quick actions and recent activity. Keep it simple.
-          </p>
-        </div>
+      <main className="mx-auto grid max-w-7xl gap-6 px-6 py-6 lg:grid-cols-[320px_1fr]">
+        <Card className="min-h-[640px]">
+          <CardHeader>
+            <CardTitle>Projects</CardTitle>
+            <CardDescription>Saved local project folders.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {isLoadingProjects ? <EmptyState label="Loading projects..." /> : null}
 
-        <Separator className="my-6" />
+            {!isLoadingProjects && projects.length === 0 ? (
+              <EmptyState label="No projects yet. Click Add Project to start." />
+            ) : null}
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick actions</CardTitle>
-              <CardDescription>Start something in one click.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-              <div className="flex flex-wrap gap-2">
-                <Button>New Project</Button>
-                <Button variant="secondary">Open Repo</Button>
-                <Button variant="outline">Import Tasks</Button>
-              </div>
+            <div className="max-h-[520px] space-y-2 overflow-auto pr-2">
+              {projects.map((project) => {
+                const isSelected = project.folderPath === selectedProjectPath;
 
-              <Separator className="my-2" />
+                return (
+                  <button
+                    key={project.folderPath}
+                    type="button"
+                    className={[
+                      "w-full rounded-md border p-3 text-left transition-colors",
+                      isSelected ? "border-primary bg-secondary/60" : "hover:bg-accent",
+                    ].join(" ")}
+                    onClick={() => {
+                      setSelectedProjectPath(project.folderPath);
+                    }}
+                  >
+                    <div className="truncate text-sm font-medium">{project.name}</div>
+                    <div className="truncate text-xs text-muted-foreground">
+                      {project.folderPath}
+                    </div>
+                    <div className="mt-2">
+                      <Badge variant="outline">{formatTimestamp(project.createdAt)}</Badge>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
 
-              <div className="flex items-center gap-2">
-                <Input placeholder="Search tasks, files, prompts..." />
-                <Button variant="outline">Search</Button>
-              </div>
-
-              <p className="text-xs text-muted-foreground">
-                Tip: map these to keyboard shortcuts later.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent</CardTitle>
-              <CardDescription>Your last few things.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-              {[
-                { name: "NFPA LiNK indexing", meta: "Updated 12m ago", tag: "Work" },
-                { name: "Agentic task runner", meta: "Updated 2h ago", tag: "Side" },
-                { name: "Golf mobility plan", meta: "Updated yesterday", tag: "Life" },
-              ].map((item) => (
-                <div
-                  key={item.name}
-                  className="flex items-center justify-between rounded-xl border p-3"
-                >
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-medium">{item.name}</div>
-                    <div className="text-xs text-muted-foreground">{item.meta}</div>
+        <Card className="min-h-[640px]">
+          <CardHeader>
+            <CardTitle>Files</CardTitle>
+            <CardDescription>
+              {selectedProject
+                ? `${selectedProject.name} (${selectedProject.folderPath})`
+                : "Select a project to browse files."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!selectedProject ? (
+              <EmptyState label="No project selected." />
+            ) : (
+              <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
+                <div className="space-y-3">
+                  <div className="text-xs font-medium uppercase text-muted-foreground">
+                    Project Files
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{item.tag}</Badge>
-                    <Button size="sm" variant="ghost">
-                      Open
-                    </Button>
+                  <Separator />
+                  {isLoadingFiles ? <EmptyState label="Loading files..." /> : null}
+                  {!isLoadingFiles && projectFiles.length === 0 ? (
+                    <EmptyState label="No files found in this project." />
+                  ) : null}
+
+                  <div className="max-h-[500px] overflow-auto pr-2">
+                    <div className="space-y-1">
+                      {projectFiles.map((relativeFilePath) => (
+                        <button
+                          key={relativeFilePath}
+                          type="button"
+                          className={[
+                            "w-full rounded px-2 py-1.5 text-left font-mono text-xs transition-colors",
+                            selectedFile === relativeFilePath
+                              ? "bg-primary text-primary-foreground"
+                              : "hover:bg-accent",
+                          ].join(" ")}
+                          onClick={() => setSelectedFile(relativeFilePath)}
+                        >
+                          {relativeFilePath}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
 
-        <div className="mt-6 grid gap-6 md:grid-cols-3">
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Status</CardTitle>
-              <CardDescription>At-a-glance metrics (placeholder).</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-3 sm:grid-cols-3">
-              <Stat label="Active tasks" value="12" />
-              <Stat label="Queued jobs" value="3" />
-              <Stat label="Last sync" value="Local" />
-            </CardContent>
-          </Card>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs font-medium uppercase text-muted-foreground">
+                      File Preview
+                    </div>
+                    {selectedFile ? (
+                      <Badge variant="secondary" className="font-mono">
+                        {selectedFile}
+                      </Badge>
+                    ) : null}
+                  </div>
+                  <Separator />
+                  {!selectedFile ? <EmptyState label="Select a file to view content." /> : null}
+                  {selectedFile && isLoadingFileContent ? (
+                    <EmptyState label="Loading file content..." />
+                  ) : null}
+                  {selectedFile && fileContent && fileContent.isBinary ? (
+                    <EmptyState label="Binary file content is not shown." />
+                  ) : null}
+                  {selectedFile && fileContent && !fileContent.isBinary ? (
+                    <div className="rounded-md border bg-muted/20 p-3">
+                      <pre className="max-h-[500px] overflow-auto whitespace-pre-wrap break-words font-mono text-xs leading-5">
+                        {fileContent.content}
+                      </pre>
+                      {fileContent.truncated ? (
+                        <div className="mt-3 text-xs text-muted-foreground">
+                          File preview truncated at 200KB.
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Notes</CardTitle>
-              <CardDescription>Scratchpad (placeholder).</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-              <Input placeholder="Write a note..." />
-              <Button variant="secondary">Save</Button>
-              <p className="text-xs text-muted-foreground">
-                Later: persist to a local sqlite/db and show history.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+            {errorMessage ? (
+              <div className="mt-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+                {errorMessage}
+              </div>
+            ) : null}
+          </CardContent>
+        </Card>
       </main>
-
-      <footer className="border-t">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 text-xs text-muted-foreground">
-          <span>Ready.</span>
-          <span>⌘K to search (soon)</span>
-        </div>
-      </footer>
     </div>
   );
 }
 
-function Stat(props: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border p-4">
-      <div className="text-xs text-muted-foreground">{props.label}</div>
-      <div className="mt-1 text-lg font-semibold">{props.value}</div>
-    </div>
-  );
+function EmptyState(props: { label: string }) {
+  return <div className="text-sm text-muted-foreground">{props.label}</div>;
+}
+
+function formatTimestamp(isoTimestamp: string): string {
+  const parsedDate = new Date(isoTimestamp);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return isoTimestamp;
+  }
+
+  return parsedDate.toLocaleString();
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return "Unknown error";
 }
