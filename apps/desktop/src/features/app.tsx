@@ -15,6 +15,7 @@ import {
   SidebarTrigger,
 } from "../components/ui/sidebar";
 import { AppSidebar, type SidebarView } from "./app-sidebar";
+import { ThemeSelector } from "./theme-selector";
 
 const mockedTaskColumns = [
   { label: "Backlog", value: 7 },
@@ -148,6 +149,7 @@ export default function App() {
 
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b bg-background px-4">
+          <ThemeSelector />
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-5" />
           <div>
