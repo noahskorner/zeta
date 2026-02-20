@@ -9,6 +9,7 @@ import {
   Workflow,
 } from "lucide-react";
 import { type ComponentType } from "react";
+import { AvatarFooter } from "./avatar";
 import {
   Sidebar,
   SidebarContent,
@@ -123,6 +124,10 @@ export function AppSidebar(props: AppSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarSeparator />
+      <AvatarFooter />
+
       <SidebarRail />
     </Sidebar>
   );
