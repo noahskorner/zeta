@@ -15,14 +15,7 @@ import {
   SidebarTrigger,
 } from "../components/ui/sidebar";
 import { AppSidebar, type SidebarView } from "./app-sidebar";
-
-const mockedTaskColumns = [
-  { label: "Backlog", value: 7 },
-  { label: "Ready", value: 4 },
-  { label: "In Progress", value: 2 },
-  { label: "Review", value: 1 },
-  { label: "Complete", value: 12 },
-];
+import { TasksBoard } from "./tasks/tasks-board";
 
 const mockedAgentRuntimes = [
   { label: "Codex", status: "healthy", latency: "220ms" },
@@ -156,7 +149,7 @@ export default function App() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl p-6">
+        <main className="mx-auto w-full p-6">
           {activeView === "workspace" ? (
             <WorkspacePanel
               isLoadingProjects={isLoadingProjects}
@@ -307,21 +300,7 @@ function WorkspacePanel(props: {
 }
 
 function TasksPanel() {
-  return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-      {mockedTaskColumns.map((column) => (
-        <Card key={column.label}>
-          <CardHeader>
-            <CardTitle className="text-base">{column.label}</CardTitle>
-            <CardDescription>Task count in this status.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold tabular-nums">{column.value}</div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
+  return <TasksBoard />;
 }
 
 function AgentsPanel() {
