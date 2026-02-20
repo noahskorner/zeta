@@ -33,6 +33,7 @@ Package-level examples:
 - Naming: `PascalCase` for React components, `camelCase` for functions/variables, kebab-case for filenames unless framework conventions require otherwise.
 - Use path alias `@/*` inside each workspace for local source imports.
 - Linting: `apps/desktop` uses ESLint with `@typescript-eslint` and `eslint-plugin-import`.
+- For UI components, always add them with `npx shadcn@latest add <component-name>`.
 - Always add a simple, concise comment above logical groupings of code.
 
 ## Testing Guidelines

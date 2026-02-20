@@ -1,6 +1,5 @@
 import {
   Bot,
-  FolderGit2,
   GitBranch,
   ListTodo,
   PlayCircle,
@@ -25,12 +24,11 @@ import {
   SidebarSeparator,
 } from "../components/ui/sidebar";
 
-export type SidebarView = "workspace" | "tasks" | "agents" | "automations";
+export type SidebarView = "tasks" | "agents" | "automations";
 
 type AppSidebarProps = {
   activeView: SidebarView;
   setActiveView: (view: SidebarView) => void;
-  projectCount: number;
   isAddingProject: boolean;
   onAddProject: () => void;
   onRefreshProjects: () => void;
@@ -44,12 +42,6 @@ export function AppSidebar(props: AppSidebarProps) {
     icon: ComponentType<{ className?: string }>;
     badge?: string;
   }> = [
-    {
-      view: "workspace",
-      label: "Workspace",
-      icon: FolderGit2,
-      badge: props.projectCount > 0 ? String(props.projectCount) : undefined,
-    },
     { view: "tasks", label: "Tasks", icon: ListTodo, badge: "14" },
     { view: "agents", label: "Agents", icon: Bot, badge: "3" },
     {
