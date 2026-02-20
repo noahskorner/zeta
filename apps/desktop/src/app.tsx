@@ -106,23 +106,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div>
-            <div className="text-lg font-semibold">Zeta Projects</div>
-            <div className="text-xs text-muted-foreground">
-              Open a local folder and inspect its files.
-            </div>
-          </div>
-          <Button onClick={handleAddProject} disabled={isAddingProject}>
-            {isAddingProject ? "Adding..." : "Add Project"}
-          </Button>
-        </div>
-      </header>
-
       <main className="mx-auto grid max-w-7xl gap-6 px-6 py-6 lg:grid-cols-[320px_1fr]">
         <Card className="min-h-[640px]">
           <CardHeader>
+            <Button onClick={handleAddProject} disabled={isAddingProject}>
+              {isAddingProject ? "Adding..." : "Add Project"}
+            </Button>
             <CardTitle>Projects</CardTitle>
             <CardDescription>Saved local project folders.</CardDescription>
           </CardHeader>
