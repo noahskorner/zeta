@@ -1,5 +1,8 @@
 # Repository Guidelines
 
+## Product Context
+For information about features, the product, and what we are building, see `PRODUCT.md`.
+
 ## Project Structure & Module Organization
 This repository is an npm workspace/Turborepo monorepo.
 

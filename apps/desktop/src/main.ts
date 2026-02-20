@@ -16,6 +16,7 @@ if (started) {
 }
 
 const createWindow = () => {
+  console.log("Creating main window...");
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
