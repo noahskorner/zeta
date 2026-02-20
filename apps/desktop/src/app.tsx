@@ -1,33 +1,36 @@
 import { useEffect, useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "./components/ui/button";
 import {
   Card,
-  CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+  CardDescription,
+  CardContent,
+} from "./components/ui/card";
+import { Badge } from "./components/ui/badge";
+import { Separator } from "./components/ui/separator";
+import { FindProjectResponse } from "@zeta/commands";
 
 export default function App() {
-  const [projects, setProjects] = useState<ProjectMetadata[]>([]);
-  const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
+  const [projects, setProjects] = useState<FindProjectResponse[]>([]);
+  const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(
+    null,
+  );
   const [projectFiles, setProjectFiles] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [fileContent, setFileContent] = useState<ProjectFileContent | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
-  const [isLoadingFiles, setIsLoadingFiles] = useState(false);
-  const [isLoadingFileContent, setIsLoadingFileContent] = useState(false);
 
   const selectedProject = useMemo(() => {
     if (!selectedProjectPath) {
       return null;
     }
 
-    return projects.find((project) => project.folderPath === selectedProjectPath) ?? null;
+    return (
+      projects.find((project) => project.folderPath === selectedProjectPath) ??
+      null
+    );
   }, [projects, selectedProjectPath]);
 
   useEffect(() => {
@@ -38,34 +41,25 @@ export default function App() {
     if (!selectedProjectPath) {
       setProjectFiles([]);
       setSelectedFile(null);
-      setFileContent(null);
       return;
     }
-
-    void loadProjectFiles(selectedProjectPath);
   }, [selectedProjectPath]);
 
   useEffect(() => {
     if (!selectedProjectPath || !selectedFile) {
-      setFileContent(null);
       return;
     }
-
-    void loadProjectFileContent(selectedProjectPath, selectedFile);
   }, [selectedProjectPath, selectedFile]);
 
   async function handleAddProject() {
     setErrorMessage(null);
     setIsAddingProject(true);
-
     try {
       const newProject = await window.zetaApi.addProject();
-
       if (!newProject) {
         return;
       }
-
-      await loadProjects(newProject.folderPath);
+      await loadProjects();
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     } finally {
@@ -77,8 +71,8 @@ export default function App() {
     setIsLoadingProjects(true);
 
     try {
-      const savedProjects = await window.zetaApi.listProjects();
-      const sortedProjects = [...savedProjects].sort((first, second) =>
+      const { projects } = await window.zetaApi.listProjects();
+      const sortedProjects = [...projects].sort((first, second) =>
         second.createdAt.localeCompare(first.createdAt),
       );
       setProjects(sortedProjects);
@@ -95,7 +89,9 @@ export default function App() {
 
       if (
         selectedProjectPath &&
-        sortedProjects.some((project) => project.folderPath === selectedProjectPath)
+        sortedProjects.some(
+          (project) => project.folderPath === selectedProjectPath,
+        )
       ) {
         return;
       }
@@ -105,42 +101,6 @@ export default function App() {
       setErrorMessage(getErrorMessage(error));
     } finally {
       setIsLoadingProjects(false);
-    }
-  }
-
-  async function loadProjectFiles(projectPath: string) {
-    setIsLoadingFiles(true);
-    setErrorMessage(null);
-
-    try {
-      const files = await window.zetaApi.listProjectFiles(projectPath);
-      setProjectFiles(files);
-      setSelectedFile(files[0] ?? null);
-    } catch (error) {
-      setProjectFiles([]);
-      setSelectedFile(null);
-      setFileContent(null);
-      setErrorMessage(getErrorMessage(error));
-    } finally {
-      setIsLoadingFiles(false);
-    }
-  }
-
-  async function loadProjectFileContent(
-    projectPath: string,
-    relativeFilePath: string,
-  ) {
-    setIsLoadingFileContent(true);
-    setErrorMessage(null);
-
-    try {
-      const content = await window.zetaApi.readProjectFile(projectPath, relativeFilePath);
-      setFileContent(content);
-    } catch (error) {
-      setFileContent(null);
-      setErrorMessage(getErrorMessage(error));
-    } finally {
-      setIsLoadingFileContent(false);
     }
   }
 
@@ -167,7 +127,9 @@ export default function App() {
             <CardDescription>Saved local project folders.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {isLoadingProjects ? <EmptyState label="Loading projects..." /> : null}
+            {isLoadingProjects ? (
+              <EmptyState label="Loading projects..." />
+            ) : null}
 
             {!isLoadingProjects && projects.length === 0 ? (
               <EmptyState label="No projects yet. Click Add Project to start." />
@@ -183,18 +145,24 @@ export default function App() {
                     type="button"
                     className={[
                       "w-full rounded-md border p-3 text-left transition-colors",
-                      isSelected ? "border-primary bg-secondary/60" : "hover:bg-accent",
+                      isSelected
+                        ? "border-primary bg-secondary/60"
+                        : "hover:bg-accent",
                     ].join(" ")}
                     onClick={() => {
                       setSelectedProjectPath(project.folderPath);
                     }}
                   >
-                    <div className="truncate text-sm font-medium">{project.name}</div>
+                    <div className="truncate text-sm font-medium">
+                      {project.name}
+                    </div>
                     <div className="truncate text-xs text-muted-foreground">
                       {project.folderPath}
                     </div>
                     <div className="mt-2">
-                      <Badge variant="outline">{formatTimestamp(project.createdAt)}</Badge>
+                      <Badge variant="outline">
+                        {formatTimestamp(project.createdAt)}
+                      </Badge>
                     </div>
                   </button>
                 );
@@ -222,11 +190,6 @@ export default function App() {
                     Project Files
                   </div>
                   <Separator />
-                  {isLoadingFiles ? <EmptyState label="Loading files..." /> : null}
-                  {!isLoadingFiles && projectFiles.length === 0 ? (
-                    <EmptyState label="No files found in this project." />
-                  ) : null}
-
                   <div className="max-h-[500px] overflow-auto pr-2">
                     <div className="space-y-1">
                       {projectFiles.map((relativeFilePath) => (
@@ -260,25 +223,6 @@ export default function App() {
                     ) : null}
                   </div>
                   <Separator />
-                  {!selectedFile ? <EmptyState label="Select a file to view content." /> : null}
-                  {selectedFile && isLoadingFileContent ? (
-                    <EmptyState label="Loading file content..." />
-                  ) : null}
-                  {selectedFile && fileContent && fileContent.isBinary ? (
-                    <EmptyState label="Binary file content is not shown." />
-                  ) : null}
-                  {selectedFile && fileContent && !fileContent.isBinary ? (
-                    <div className="rounded-md border bg-muted/20 p-3">
-                      <pre className="max-h-[500px] overflow-auto whitespace-pre-wrap break-words font-mono text-xs leading-5">
-                        {fileContent.content}
-                      </pre>
-                      {fileContent.truncated ? (
-                        <div className="mt-3 text-xs text-muted-foreground">
-                          File preview truncated at 200KB.
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : null}
                 </div>
               </div>
             )}

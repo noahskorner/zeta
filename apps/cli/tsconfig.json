@@ -4,10 +4,7 @@
     "module": "CommonJS",
     "outDir": "dist",
     "types": ["node"],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "baseUrl": "."
   },
   "include": ["src/**/*"]
 }
