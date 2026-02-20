@@ -15,6 +15,7 @@ import {
   SidebarTrigger,
 } from "../components/ui/sidebar";
 import { AppSidebar, type SidebarView } from "./app-sidebar";
+import { ThemeSelector } from "./theme-selector";
 import { ProjectDropdown } from "./projects/project-dropdown";
 import { TasksBoard } from "./tasks/tasks-board";
 
@@ -110,15 +111,21 @@ export default function App() {
       />
 
       <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b bg-background px-4">
-          <SidebarTrigger />
-          <Separator orientation="vertical" className="h-5" />
-          <ProjectDropdown
-            projects={projects}
-            selectedProjectPath={selectedProjectPath}
-            isLoadingProjects={isLoadingProjects}
-            onSelectProject={setSelectedProjectPath}
-          />
+        <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background px-4">
+          {/* Left side */}
+          <div className="flex items-center gap-3">
+            <SidebarTrigger />
+            <Separator orientation="vertical" className="h-5" />
+            <ProjectDropdown
+              projects={projects}
+              selectedProjectPath={selectedProjectPath}
+              isLoadingProjects={isLoadingProjects}
+              onSelectProject={setSelectedProjectPath}
+            />
+          </div>
+
+          {/* Right side */}
+          <ThemeSelector />
         </header>
 
         <main className="mx-auto w-full p-6">
