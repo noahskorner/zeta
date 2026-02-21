@@ -1,11 +1,11 @@
-import { FindProjectResponse } from "@zeta/commands";
+import { FindProjectResponse } from '@zeta/commands';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../components/ui/select";
+} from '../../components/ui/select';
 
 type ProjectDropdownProps = {
   projects: FindProjectResponse[];
@@ -21,10 +21,10 @@ export function ProjectDropdown(props: ProjectDropdownProps) {
       ? props.selectedProjectId
       : hasProjects
         ? props.projects[0].id
-        : "";
+        : '';
 
   return (
-    <div className="min-w-[280px] max-w-[480px]">
+    <div className="min-w-70 max-w-120">
       {/* Render the active project selector in the app header. */}
       <Select
         value={hasProjects ? selectedValue : undefined}
@@ -33,7 +33,7 @@ export function ProjectDropdown(props: ProjectDropdownProps) {
       >
         <SelectTrigger className="h-10 w-full">
           <SelectValue
-            placeholder={props.isLoadingProjects ? "Loading projects..." : "No projects available"}
+            placeholder={props.isLoadingProjects ? 'Loading projects...' : 'No projects available'}
           />
         </SelectTrigger>
         <SelectContent>

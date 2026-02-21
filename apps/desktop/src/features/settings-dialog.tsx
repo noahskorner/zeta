@@ -1,8 +1,17 @@
-import { Bell, FolderOpen, Shield } from 'lucide-react';
+import { Bell, FolderOpen, Laptop, Moon, Shield, Sun } from 'lucide-react';
 import { useState } from 'react';
+import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import { Button } from '../components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '../components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu';
 import {
   Sidebar,
   SidebarContent,
@@ -133,6 +142,10 @@ function GeneralSettingsSection(props: GeneralSettingsSectionProps) {
       </div>
 
       <div className="space-y-3 rounded-md border p-4">
+        <ThemeSetting />
+      </div>
+
+      <div className="space-y-3 rounded-md border p-4">
         <div className="flex items-start gap-3">
           <FolderOpen className="mt-0.5 size-4 text-muted-foreground" />
           <div className="space-y-1">
@@ -155,6 +168,51 @@ function GeneralSettingsSection(props: GeneralSettingsSectionProps) {
         </Button>
       </div>
     </div>
+  );
+}
+
+function ThemeSetting() {
+  const { theme, resolvedTheme, setTheme } = useTheme();
+  const selectedTheme = theme ?? resolvedTheme ?? 'system';
+  const themeLabel = getThemeLabel(selectedTheme);
+
+  return (
+    <>
+      {/* Let users choose an explicit app theme preference. */}
+      <div className="flex items-start gap-3">
+        <Sun className="mt-0.5 size-4 text-muted-foreground" />
+        <div className="space-y-1">
+          <div className="text-sm font-medium">Theme</div>
+          <p className="text-sm text-muted-foreground">Choose light, dark, or follow system.</p>
+        </div>
+      </div>
+
+      {/* Use a dropdown radio list for theme selection. */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button type="button" variant="outline" className="w-fit justify-start">
+            {themeLabel}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          <DropdownMenuLabel>Theme</DropdownMenuLabel>
+          <DropdownMenuRadioGroup value={selectedTheme} onValueChange={(value) => setTheme(value)}>
+            <DropdownMenuRadioItem value="light" className="flex items-center gap-2">
+              <Sun className="size-4 text-muted-foreground" />
+              <span>Light</span>
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="dark" className="flex items-center gap-2">
+              <Moon className="size-4 text-muted-foreground" />
+              <span>Dark</span>
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="system" className="flex items-center gap-2">
+              <Laptop className="size-4 text-muted-foreground" />
+              <span>System</span>
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }
 
@@ -208,4 +266,16 @@ function getErrorMessage(error: unknown): string {
   }
 
   return 'Unknown error';
+}
+
+function getThemeLabel(theme: string): string {
+  if (theme === 'light') {
+    return 'Light';
+  }
+
+  if (theme === 'dark') {
+    return 'Dark';
+  }
+
+  return 'System';
 }

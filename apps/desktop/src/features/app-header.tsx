@@ -1,10 +1,8 @@
 import type { FindProjectResponse } from '@zeta/commands';
 import { Copy, Minus, Square, X } from 'lucide-react';
-import { Button } from '../components/ui/button';
 import { Separator } from '../components/ui/separator';
 import { SidebarTrigger } from '../components/ui/sidebar';
 import { ProjectDropdown } from './projects/project-dropdown';
-import { ThemeSelector } from './theme-selector';
 
 type AppHeaderProps = {
   projects: FindProjectResponse[];
@@ -28,7 +26,7 @@ export function AppHeader({
   onCloseWindow,
 }: AppHeaderProps) {
   return (
-    <header className="sticky top-0 z-10 flex h-12 items-center justify-between border-b bg-background pl-4 [-webkit-app-region:drag]">
+    <header className="sticky top-0 z-10 flex h-10 items-center justify-between border-b bg-background pl-4 [-webkit-app-region:drag]">
       {/* Left side controls */}
       <div className="flex items-center gap-3 [-webkit-app-region:no-drag]">
         <SidebarTrigger />
@@ -43,7 +41,6 @@ export function AppHeader({
 
       {/* Right side controls */}
       <div className="h-full flex gap-2 items-center [-webkit-app-region:no-drag]">
-        <ThemeSelector />
         <div className="flex h-full">
           <button
             className="h-full hover:bg-accent w-12 flex items-center justify-center"
