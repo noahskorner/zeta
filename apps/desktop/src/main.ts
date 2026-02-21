@@ -1,4 +1,5 @@
-import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
+import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import started from "electron-squirrel-startup";
 import {
@@ -15,6 +16,7 @@ import {
   ListTasksQuery,
   ListTasksRepository,
   ProjectsRepository,
+  Repository,
 } from "@zeta/commands";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -51,6 +53,7 @@ const createWindow = () => {
 app.on("ready", createWindow);
 app.on("ready", registerProjectIpcHandlers);
 app.on("ready", registerTaskIpcHandlers);
+app.on("ready", registerAppIpcHandlers);
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -124,5 +127,20 @@ function registerTaskIpcHandlers(): void {
 
     // Return project tasks.
     return facade.execute(query);
+  });
+}
+
+function registerAppIpcHandlers(): void {
+  ipcMain.handle("app:open-data-folder", async () => {
+    // Resolve and ensure the zeta app data path exists before opening it.
+    const appDataFolderPath = Repository.getStoragePath();
+    await mkdir(appDataFolderPath, { recursive: true });
+
+    const openErrorMessage = await shell.openPath(appDataFolderPath);
+    if (openErrorMessage) {
+      throw new Error(openErrorMessage);
+    }
+
+    return appDataFolderPath;
   });
 }

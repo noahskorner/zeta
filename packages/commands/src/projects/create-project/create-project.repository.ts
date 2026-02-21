@@ -1,8 +1,8 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { CreateProjectModel } from "./create-project.model";
-import { ProjectsRepository } from "../projects.repository";
-import { ProjectEntity } from "../project.entity";
+import { mkdir, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import { CreateProjectModel } from './create-project.model';
+import { ProjectsRepository } from '../projects.repository';
+import { ProjectEntity } from '../project.entity';
 
 export class CreateProjectRepository extends ProjectsRepository {
   public async exists(folderPath: string): Promise<boolean> {
@@ -16,8 +16,8 @@ export class CreateProjectRepository extends ProjectsRepository {
   public async createProject(model: CreateProjectModel): Promise<string> {
     // TODO: We could probably move this to a central place, so we don't have to worry about it.
     // Create the initial storage directory if it doesn't exist
-    await mkdir(this.STORAGE_PATH, { recursive: true });
-    await mkdir(path.join(model.folderPath, ".zeta"), { recursive: true });
+    await mkdir(CreateProjectRepository.STORAGE_PATH, { recursive: true });
+    await mkdir(path.join(model.folderPath, '.zeta'), { recursive: true });
 
     // Load the existing projects
     const projects = await this.findAll();
@@ -26,7 +26,7 @@ export class CreateProjectRepository extends ProjectsRepository {
     const id = crypto.randomUUID();
     const createdAt = new Date().toISOString();
     await writeFile(
-      this.PROJECTS_FILE_PATH,
+      CreateProjectRepository.PROJECTS_FILE_PATH,
       JSON.stringify(
         [
           ...projects,
@@ -39,7 +39,7 @@ export class CreateProjectRepository extends ProjectsRepository {
         null,
         2,
       ),
-      "utf8",
+      'utf8',
     );
 
     // Return the project id
