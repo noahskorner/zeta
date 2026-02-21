@@ -3,6 +3,81 @@
 ## Product Context
 For information about features, the product, and what we are building, see `PRODUCT.md`.
 
+## Repository Architecture
+This repository is an npm workspace/Turborepo monorepo organized around feature slices and shared business commands.
+
+### Architectural Principles
+- Vertical Slice / Feature Slice: Organize code by feature, not by technical layer. Move code to shared locations only when it is truly shared across features.
+- CQRS: Keep write operations (commands) and read operations (queries) separate in modeling and handling.
+- Composition over Inheritance: Prefer composing focused units unless inheritance provides clear value.
+- Single Responsibility Execution Model: Most classes represent one operation and expose one `execute` method. Class names describe the operation.
+
+### Package Responsibilities
+- `packages/commands` (`packages/command` in some docs): Shared feature logic and business operations used by multiple apps. Core command/query workflows originate here.
+- `apps/cli`: Thin `commander`-based interface that parses CLI input and invokes shared logic from `packages/commands`.
+- `apps/desktop`: Electron + React application that delivers feature UI and calls shared commands/query flows from `packages/commands`.
+
+### `packages/commands` Structure
+Use feature-first folders. Keep each feature self-contained and move code upward only when truly shared.
+
+```txt
+src/
+  task/
+    create/
+      create-task.command.ts
+      create-task.model.ts
+      create-task.response.ts
+      create-task.facade.ts
+      create-task.service.ts
+      create-task.repository.ts
+    find/
+      find-task.query.ts
+    task.entity.ts
+    task.repository.ts
+  repository.ts
+```
+
+Layer responsibilities:
+- Command / Query: Input contracts for mutation vs read flows.
+- Service: Validation and business rules.
+- Facade: Feature orchestration across services, repositories, and integrations.
+- Repository: Persistence concerns (DB/filesystem/API).
+- Model / Response: Internal models and external response contracts.
+
+### `apps/cli` Structure and Role
+`apps/cli` is a thin adapter around shared commands.
+
+```txt
+src/
+  task/
+    index.ts
+  index.ts
+```
+
+Responsibilities:
+- Parse arguments/options and register commands (for example `addProjects(program)`).
+- Map CLI inputs to shared command/query objects.
+- Handle CLI-only output formatting and process concerns.
+
+### `apps/desktop` Structure and Role
+`apps/desktop` is an Electron app with a React renderer and shadcn/ui components.
+
+```txt
+src/
+  components/
+    ui/
+    example-component.tsx
+  hooks/
+  lib/
+  features/
+```
+
+Guidelines:
+- `components/ui`: shadcn components only; install with `npx shadcn@latest add <component-name>` and do not manually edit generated primitives.
+- `components/`: only truly shared app components.
+- `hooks/` and `lib/`: only shared hooks/utilities.
+- `features/`: default location for feature-specific UI, hooks, and logic (vertical slices).
+
 ## Project Structure & Module Organization
 This repository is an npm workspace/Turborepo monorepo.
 
@@ -31,26 +106,22 @@ Package-level examples:
 - Language: TypeScript across apps/packages.
 - Indentation: 2 spaces; keep imports grouped and sorted logically.
 - Naming: `PascalCase` for React components, `camelCase` for functions/variables, kebab-case for filenames unless framework conventions require otherwise.
-- Use path alias `@/*` inside each workspace for local source imports.
 - Linting: `apps/desktop` uses ESLint with `@typescript-eslint` and `eslint-plugin-import`.
 - For UI components, always add them with `npx shadcn@latest add <component-name>`.
 - Always add a simple, concise comment above logical groupings of code.
 
 ## Testing Guidelines
-There is no committed automated test framework yet. For every change:
-
-- Run `npm run typecheck` and `npm run lint` before opening a PR.
-- Validate affected runtime paths manually (CLI command execution, desktop app startup).
-- When adding tests, place them beside source as `*.test.ts` or `*.test.tsx` and wire the test task into Turbo.
+There is no committed automated test framework yet.
 
 ## Commit & Pull Request Guidelines
-Git history is currently minimal (`Initial commit`), so use clear Conventional Commit style going forward:
+Use Conventional Commits for all commit messages and PR titles.
 
+- Format: `<type>(<optional-scope>): <short imperative summary>`
+- Common types: `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `build`, `ci`, `perf`, `style`, `revert`.
+- Keep summaries concise and specific to the behavior or code change.
+
+Examples:
 - `feat(cli): add hello subcommand`
 - `fix(desktop): handle missing preload bridge`
-
-PRs should include:
-- concise summary and rationale,
-- linked issue/ticket (if available),
-- verification steps/commands run,
-- screenshots or short recordings for desktop UI changes.
+- `docs(root): clarify workspace build commands`
+- `chore(commands): update tsconfig references`

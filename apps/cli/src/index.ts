@@ -1,11 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { addProjects } from "./projects";
-import {
-  CreateProjectFacade,
-  CreateProjectRepository,
-  CreateProjectService,
-} from "@zeta/commands";
 
 // Initialize the main CLI program
 const program = new Command();
