@@ -14,7 +14,8 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "build": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "lint": "eslint --ext .ts,.tsx .",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "keywords": [],
   "license": "MIT",
@@ -38,7 +39,7 @@
     "eslint": "^8.57.1",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
-    "typescript": "~4.5.4",
+    "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-tsconfig-paths": "^6.1.1"
   },

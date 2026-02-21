@@ -1,13 +1,17 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ESNext",
     "module": "commonjs",
     "allowJs": true,
-    "skipLibCheck": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
     "sourceMap": true,
     "baseUrl": ".",
+    "paths": {
+      "@zeta/commands": ["../../packages/commands/src/index.ts"],
+      "@zeta/commands/*": ["../../packages/commands/src/*"]
+    },
     "outDir": "dist",
     "moduleResolution": "node",
     "resolveJsonModule": true,

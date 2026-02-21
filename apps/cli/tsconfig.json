@@ -4,7 +4,11 @@
     "module": "CommonJS",
     "outDir": "dist",
     "types": ["node"],
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "@zeta/commands": ["../../packages/commands/src/index.ts"],
+      "@zeta/commands/*": ["../../packages/commands/src/*"]
+    }
   },
   "include": ["src/**/*"]
 }

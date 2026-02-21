@@ -1,135 +1,127 @@
-# Turborepo starter
+# Zeta
 
-This Turborepo starter is maintained by the Turborepo core team.
+Zeta is an agentic coding task management platform focused on fast planning, execution, and switching between coding tasks with minimal workflow overhead.
 
-## Using this example
+For deeper context:
+- Product vision and requirements: `PRODUCT.md`
+- Repository architecture and contributor conventions: `AGENTS.md`
 
-Run the following command:
+## Table of Contents
+- [Getting Started](#getting-started)
+- [Tech Stack](#tech-stack)
+- [Monorepo Structure](#monorepo-structure)
+- [Architecture Overview](#architecture-overview)
+- [Development Commands](#development-commands)
+- [Testing and Quality Checks](#testing-and-quality-checks)
+- [Where to Learn More](#where-to-learn-more)
 
-```sh
-npx create-turbo@latest
+## Getting Started
+
+### Prerequisites
+- Node.js `24.12.0` (managed via `.node-version` for `fnm`)
+- npm `11.6.2`
+
+### Install
+From the repository root:
+
+```bash
+npm install
 ```
 
-## What's inside?
+### Run in Development
+Run all workspace dev tasks through Turborepo:
 
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```bash
+npm run dev
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+Run only a specific workspace:
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+```bash
+npm run dev -- --filter=@zeta/cli
+npm run dev -- --filter=desktop
 ```
 
-### Develop
+## Tech Stack
+- Monorepo and task orchestration: Turborepo + npm workspaces
+- Language: TypeScript
+- Desktop app: Electron + React + Vite + Tailwind CSS + shadcn/ui
+- CLI app: Node.js + Commander
+- Shared business logic: `packages/commands` (CQRS-style command/query flows)
 
-To develop all apps and packages, run the following command:
+## Monorepo Structure
 
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+```txt
+apps/
+  cli/       # Node CLI adapter for shared commands
+  desktop/   # Electron + React desktop UI
+packages/
+  commands/  # Shared domain/business commands and queries
 ```
 
-### Remote Caching
+### Package Responsibilities
+- `packages/commands`
+  - Shared feature logic used by both desktop and CLI.
+  - Uses feature-first folders and CQRS-style separation (commands for writes, queries for reads).
+  - Current project-focused flows include project creation and project listing.
+- `apps/cli`
+  - Thin command-line adapter.
+  - Parses input with Commander and delegates execution to `@zeta/commands`.
+  - Current command shape includes `zeta projects add [folderPath]`.
+- `apps/desktop`
+  - Electron shell with React renderer.
+  - Presents feature UI (tasks, projects, agents, automations) and calls shared logic through IPC handlers backed by `@zeta/commands`.
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+## Architecture Overview
+This repo follows vertical-slice/feature-first architecture:
+- Keep feature code together; only move code to shared locations when truly shared.
+- Separate write and read flows (CQRS mindset).
+- Prefer composition over inheritance.
+- Model operations as focused units with a single `execute` path.
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+In `packages/commands`, a typical slice includes:
+- command/query contracts
+- service for validation/business rules
+- facade for orchestration
+- repository for persistence
+- model/response contracts
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+## Development Commands
+Run from repo root unless noted.
 
+```bash
+npm run dev
+npm run build
+npm run lint
+npm run typecheck
 ```
-cd my-turborepo
 
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
+Useful filtered runs:
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+```bash
+npm run dev -- --filter=@zeta/cli
+npm run dev -- --filter=desktop
+npm run build -- --filter=@zeta/commands
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+Workspace-level examples:
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+```bash
+npm --workspace apps/desktop run dev
+npm --workspace apps/cli run build
+npm --workspace apps/cli run start
 ```
 
-## Useful Links
+## Testing and Quality Checks
+- Automated tests: no committed test framework yet.
+- Use these checks today:
 
-Learn more about the power of Turborepo:
+```bash
+npm run lint
+npm run typecheck
+npm run build
+```
 
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+## Where to Learn More
+- `PRODUCT.md`: goals, requirements, non-goals, and success criteria.
+- `AGENTS.md`: architecture conventions, package responsibilities, coding style, and contribution guidance.
