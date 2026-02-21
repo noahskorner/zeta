@@ -197,30 +197,6 @@ function AutomationsPanel() {
   );
 }
 
-function getViewTitle(view: SidebarView): string {
-  if (view === "tasks") {
-    return "Tasks";
-  }
-
-  if (view === "agents") {
-    return "Agents";
-  }
-
-  return "Automations";
-}
-
-function getViewDescription(view: SidebarView): string {
-  if (view === "tasks") {
-    return "Markdown-first lifecycle tracking for coding specs.";
-  }
-
-  if (view === "agents") {
-    return "Abstracted provider runtimes for task execution.";
-  }
-
-  return "Cron-like and manual triggers for repository maintenance.";
-}
-
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message) {
     return error.message;
