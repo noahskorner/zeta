@@ -4,6 +4,10 @@ import {
   CreateTaskFacade,
   CreateTaskRepository,
   CreateTaskService,
+  ListTasksFacade,
+  ListTasksRepository,
+  ListTasksQuery,
+  ProjectsRepository,
 } from "@zeta/commands";
 
 export function addTasks(command: Command) {
@@ -50,4 +54,29 @@ export function addTasks(command: Command) {
         }
       },
     );
+
+  tasksCommand
+    .command("list <projectId>")
+    .description("List tasks for a saved project")
+    .action(async (projectId: string) => {
+      try {
+        const tasksRepository = new ListTasksRepository();
+        const projectsRepository = new ProjectsRepository();
+        const findTasksFacade = new ListTasksFacade(projectsRepository, tasksRepository);
+
+        const response = await findTasksFacade.execute({
+          projectId,
+        } satisfies ListTasksQuery);
+
+        console.log(JSON.stringify(response, null, 2));
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(error.message);
+        } else {
+          console.error("Failed to list tasks.");
+        }
+
+        process.exitCode = 1;
+      }
+    });
 }

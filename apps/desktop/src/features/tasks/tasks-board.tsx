@@ -1,21 +1,28 @@
-import { useMemo, useState } from 'react';
-import { TaskLane } from './task-lane';
-import type { TaskCard, TaskLane as TaskLaneModel, TaskLaneId } from './types';
+import { useEffect, useMemo, useState } from "react";
+import { TaskLane } from "./task-lane";
+import type { TaskCard, TaskLane as TaskLaneModel, TaskLaneId } from "./types";
 
 const lanes: TaskLaneModel[] = [
-  { id: 'backlog', title: 'Backlog', description: 'Capture and shape upcoming work.' },
-  { id: 'ready', title: 'Ready', description: 'Defined tasks ready for pickup.' },
-  { id: 'in-progress', title: 'In Progress', description: 'Actively being implemented.' },
-  { id: 'review', title: 'Review', description: 'Waiting on code or QA review.' },
-  { id: 'done', title: 'Done', description: 'Completed and verified.' },
+  { id: "backlog", title: "Backlog", description: "Capture and shape upcoming work." },
+  { id: "ready", title: "Ready", description: "Defined tasks ready for pickup." },
+  { id: "in-progress", title: "In Progress", description: "Actively being implemented." },
+  { id: "review", title: "Review", description: "Waiting on code or QA review." },
+  { id: "done", title: "Done", description: "Completed and verified." },
 ];
 
-const initialCards: TaskCard[] = [];
+type TasksBoardProps = {
+  tasks: TaskCard[];
+  isLoading: boolean;
+};
 
-export function TasksBoard() {
-  const [cards, setCards] = useState<TaskCard[]>(initialCards);
+export function TasksBoard(props: TasksBoardProps) {
+  const [cards, setCards] = useState<TaskCard[]>(props.tasks);
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const [dropTargetLaneId, setDropTargetLaneId] = useState<TaskLaneId | null>(null);
+
+  useEffect(() => {
+    setCards(props.tasks);
+  }, [props.tasks]);
 
   // Build lane buckets once per state change to keep rendering simple.
   const cardsByLane = useMemo(() => {
@@ -27,7 +34,7 @@ export function TasksBoard() {
       {
         backlog: [],
         ready: [],
-        'in-progress': [],
+        "in-progress": [],
         review: [],
         done: [],
       },
@@ -53,7 +60,7 @@ export function TasksBoard() {
     <div className="space-y-4">
       <div>
         <div className="text-sm text-muted-foreground">
-          Add cards in any lane, then drag them across swimlanes.
+          Tasks load from project metadata and can be organized by lane.
         </div>
       </div>
 
@@ -76,14 +83,8 @@ export function TasksBoard() {
           />
         ))}
       </div>
+
+      {props.isLoading ? <div className="text-sm text-muted-foreground">Loading tasks...</div> : null}
     </div>
   );
-}
-
-function createTaskId(): string {
-  if ('randomUUID' in crypto) {
-    return crypto.randomUUID();
-  }
-
-  return `task-${Date.now()}`;
 }

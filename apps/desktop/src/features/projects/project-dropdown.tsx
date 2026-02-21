@@ -9,18 +9,18 @@ import {
 
 type ProjectDropdownProps = {
   projects: FindProjectResponse[];
-  selectedProjectPath: string | null;
+  selectedProjectId: string | null;
   isLoadingProjects: boolean;
-  onSelectProject: (projectPath: string) => void;
+  onSelectProject: (projectId: string) => void;
 };
 
 export function ProjectDropdown(props: ProjectDropdownProps) {
   const hasProjects = props.projects.length > 0;
   const selectedValue =
-    props.selectedProjectPath && hasProjects
-      ? props.selectedProjectPath
+    props.selectedProjectId && hasProjects
+      ? props.selectedProjectId
       : hasProjects
-        ? props.projects[0].folderPath
+        ? props.projects[0].id
         : "";
 
   return (
@@ -38,7 +38,7 @@ export function ProjectDropdown(props: ProjectDropdownProps) {
         </SelectTrigger>
         <SelectContent>
           {props.projects.map((project) => (
-            <SelectItem key={project.folderPath} value={project.folderPath}>
+            <SelectItem key={project.id} value={project.id}>
               {project.name}
             </SelectItem>
           ))}

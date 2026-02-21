@@ -24,7 +24,7 @@ const mockedAutomations = [
 
 export default function App() {
   const [projects, setProjects] = useState<FindProjectResponse[]>([]);
-  const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const [activeView, setActiveView] = useState<SidebarView>("tasks");
@@ -38,12 +38,12 @@ export default function App() {
     setIsAddingProject(true);
 
     try {
-      const newProject = await window.zetaApi.addProject();
-      if (!newProject) {
+      const newProjectId = await window.zetaApi.addProject();
+      if (!newProjectId) {
         return;
       }
-      toast.success("Project created.", { description: newProject });
-      await loadProjects();
+      toast.success("Project created.", { description: newProjectId });
+      await loadProjects(newProjectId);
     } catch (error) {
       toast.error("Failed to create project.", {
         description: getErrorMessage(error),
@@ -53,7 +53,7 @@ export default function App() {
     }
   }
 
-  async function loadProjects(projectPathToSelect?: string) {
+  async function loadProjects(projectIdToSelect?: string) {
     setIsLoadingProjects(true);
 
     try {
@@ -64,23 +64,20 @@ export default function App() {
       setProjects(sortedProjects);
 
       if (sortedProjects.length === 0) {
-        setSelectedProjectPath(null);
+        setSelectedProjectId(null);
         return;
       }
 
-      if (projectPathToSelect) {
-        setSelectedProjectPath(projectPathToSelect);
+      if (projectIdToSelect) {
+        setSelectedProjectId(projectIdToSelect);
         return;
       }
 
-      if (
-        selectedProjectPath &&
-        sortedProjects.some((project) => project.folderPath === selectedProjectPath)
-      ) {
+      if (selectedProjectId && sortedProjects.some((project) => project.id === selectedProjectId)) {
         return;
       }
 
-      setSelectedProjectPath(sortedProjects[0].folderPath);
+      setSelectedProjectId(sortedProjects[0].id);
     } catch (error) {
       toast.error("Failed to load projects.", {
         description: getErrorMessage(error),
@@ -95,8 +92,13 @@ export default function App() {
   }
 
   function handleTaskError(message: string) {
-    toast.error("Failed to create task.", { description: message });
+    toast.error("Task operation failed.", { description: message });
   }
+
+  const selectedProject = selectedProjectId
+    ? projects.find((project) => project.id === selectedProjectId) ?? null
+    : null;
+  const selectedProjectPath = selectedProject?.folderPath ?? null;
 
   return (
     <SidebarProvider>
@@ -116,9 +118,9 @@ export default function App() {
             <Separator orientation="vertical" className="h-5" />
             <ProjectDropdown
               projects={projects}
-              selectedProjectPath={selectedProjectPath}
+              selectedProjectId={selectedProjectId}
               isLoadingProjects={isLoadingProjects}
-              onSelectProject={setSelectedProjectPath}
+              onSelectProject={setSelectedProjectId}
             />
           </div>
 
@@ -129,6 +131,7 @@ export default function App() {
         <main className="mx-auto w-full p-6">
           {activeView === "tasks" ? (
             <TasksPanel
+              selectedProjectId={selectedProjectId}
               selectedProjectPath={selectedProjectPath}
               onTaskCreated={handleTaskCreated}
               onError={handleTaskError}

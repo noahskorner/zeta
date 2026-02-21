@@ -1,7 +1,3 @@
-import { useState } from 'react';
-import { Plus } from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { TaskCard } from './task-card';
 import type { TaskCard as TaskCardModel, TaskLane as TaskLaneModel } from './types';
@@ -22,7 +18,7 @@ export function TaskLane(props: TaskLaneProps) {
   return (
     <Card
       className={[
-        'flex min-h-[520px] flex-col bg-muted/20 py-4 transition-colors',
+        'flex min-h-130 flex-col bg-muted/20 py-4 transition-colors',
         props.isDropTarget ? 'border-primary/60 bg-primary/5' : '',
       ].join(' ')}
       onDragOver={(event) => {
@@ -46,6 +42,11 @@ export function TaskLane(props: TaskLaneProps) {
 
       <CardContent className="space-y-3 px-4">
         <div className="space-y-3">
+          {props.tasks.length === 0 ? (
+            <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
+              No tasks in this lane yet.
+            </div>
+          ) : null}
           {props.tasks.map((task) => (
             <TaskCard
               key={task.id}

@@ -1,4 +1,9 @@
-import { CreateTaskCommand, FindProjectsResponse } from "@zeta/commands";
+import {
+  CreateTaskCommand,
+  FindProjectsResponse,
+  FindTasksResponse,
+  ListTasksQuery,
+} from "@zeta/commands";
 
 declare global {
   const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
@@ -9,6 +14,7 @@ declare global {
       addProject: () => Promise<string | null>;
       listProjects: () => Promise<FindProjectsResponse>;
       addTask: (command: CreateTaskCommand) => Promise<string>;
+      listTasks: (query: ListTasksQuery) => Promise<FindTasksResponse>;
     };
   }
 }

@@ -11,6 +11,9 @@ import {
   CreateProjectRepository,
   CreateProjectService,
   FindProjectsFacade,
+  ListTasksFacade,
+  ListTasksQuery,
+  ListTasksRepository,
   ProjectsRepository,
 } from "@zeta/commands";
 
@@ -111,5 +114,15 @@ function registerTaskIpcHandlers(): void {
 
     // Create the task.
     return facade.execute(command);
+  });
+
+  ipcMain.handle("tasks:list", async (_event, query: ListTasksQuery) => {
+    // Instantiate services.
+    const projectsRepository = new ProjectsRepository();
+    const tasksRepository = new ListTasksRepository();
+    const facade = new ListTasksFacade(projectsRepository, tasksRepository);
+
+    // Return project tasks.
+    return facade.execute(query);
   });
 }

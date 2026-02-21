@@ -25,6 +25,7 @@ export function TaskCard(props: TaskCardProps) {
     >
       <CardContent className="space-y-2 px-3 min-h-24">
         <div className="text-sm font-medium">{props.task.title}</div>
+        <div className="text-xs text-muted-foreground">{props.task.description}</div>
       </CardContent>
     </Card>
   );

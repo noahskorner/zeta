@@ -1,6 +1,11 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
-import { CreateTaskCommand, FindProjectsResponse } from "@zeta/commands";
+import {
+  CreateTaskCommand,
+  FindProjectsResponse,
+  FindTasksResponse,
+  ListTasksQuery,
+} from "@zeta/commands";
 import { contextBridge, ipcRenderer } from "electron";
 
 interface ProjectFileContent {
@@ -14,6 +19,8 @@ contextBridge.exposeInMainWorld("zetaApi", {
   listProjects: (): Promise<FindProjectsResponse> => ipcRenderer.invoke("projects:list"),
   addTask: (command: CreateTaskCommand): Promise<string> =>
     ipcRenderer.invoke("tasks:add", command),
+  listTasks: (query: ListTasksQuery): Promise<FindTasksResponse> =>
+    ipcRenderer.invoke("tasks:list", query),
   listProjectFiles: (projectPath: string): Promise<string[]> =>
     ipcRenderer.invoke("projects:list-files", projectPath),
   readProjectFile: (projectPath: string, relativeFilePath: string): Promise<ProjectFileContent> =>

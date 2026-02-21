@@ -9,5 +9,6 @@ export type TaskLane = {
 export type TaskCard = {
   id: string;
   title: string;
+  description: string;
   laneId: TaskLaneId;
 };
