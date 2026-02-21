@@ -30,4 +30,18 @@ contextBridge.exposeInMainWorld('zetaApi', {
     ipcRenderer.invoke('projects:list-files', projectPath),
   readProjectFile: (projectPath: string, relativeFilePath: string): Promise<ProjectFileContent> =>
     ipcRenderer.invoke('projects:read-file', projectPath, relativeFilePath),
+  // Control the native window from renderer custom titlebar buttons.
+  minimizeWindow: (): Promise<void> => ipcRenderer.invoke('window:minimize'),
+  toggleMaximizeWindow: (): Promise<boolean> => ipcRenderer.invoke('window:toggle-maximize'),
+  closeWindow: (): Promise<void> => ipcRenderer.invoke('window:close'),
+  isWindowMaximized: (): Promise<boolean> => ipcRenderer.invoke('window:is-maximized'),
+  onWindowMaximizeStateChanged: (callback: (isMaximized: boolean) => void): (() => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, isMaximized: boolean) => {
+      callback(isMaximized);
+    };
+    ipcRenderer.on('window:maximize-state-changed', listener);
+    return () => {
+      ipcRenderer.removeListener('window:maximize-state-changed', listener);
+    };
+  },
 });

@@ -1,7 +1,7 @@
-import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
-import { mkdir } from "node:fs/promises";
-import path from "node:path";
-import started from "electron-squirrel-startup";
+import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
+import { mkdir } from 'node:fs/promises';
+import path from 'node:path';
+import started from 'electron-squirrel-startup';
 import {
   CreateTaskCommand,
   CreateTaskFacade,
@@ -17,7 +17,7 @@ import {
   ListTasksRepository,
   ProjectsRepository,
   Repository,
-} from "@zeta/commands";
+} from '@zeta/commands';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -25,15 +25,26 @@ if (started) {
 }
 
 const createWindow = () => {
-  console.log("Creating main window...");
+  console.log('Creating main window...');
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1100,
+    height: 800,
+    minWidth: 900,
+    minHeight: 600,
+    frame: false,
     autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: path.join(__dirname, 'preload.js'),
     },
+  });
+
+  // Keep renderer in sync with maximize/restore state for custom titlebar controls.
+  mainWindow.on('maximize', () => {
+    mainWindow.webContents.send('window:maximize-state-changed', true);
+  });
+  mainWindow.on('unmaximize', () => {
+    mainWindow.webContents.send('window:maximize-state-changed', false);
   });
 
   // and load the index.html of the app.
@@ -50,21 +61,21 @@ const createWindow = () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on("ready", createWindow);
-app.on("ready", registerProjectIpcHandlers);
-app.on("ready", registerTaskIpcHandlers);
-app.on("ready", registerAppIpcHandlers);
+app.on('ready', createWindow);
+app.on('ready', registerProjectIpcHandlers);
+app.on('ready', registerTaskIpcHandlers);
+app.on('ready', registerAppIpcHandlers);
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
-app.on("activate", () => {
+app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
@@ -76,11 +87,11 @@ app.on("activate", () => {
 // code. You can also put them in separate files and import them here.
 
 function registerProjectIpcHandlers(): void {
-  ipcMain.handle("projects:add", async () => {
+  ipcMain.handle('projects:add', async () => {
     // Open the folder selection dialog
     const selectedFolder = await dialog.showOpenDialog({
-      properties: ["openDirectory"],
-      title: "Select Project Folder",
+      properties: ['openDirectory'],
+      title: 'Select Project Folder',
     });
 
     if (selectedFolder.canceled || selectedFolder.filePaths.length === 0) {
@@ -98,7 +109,7 @@ function registerProjectIpcHandlers(): void {
     } satisfies CreateProjectCommand);
   });
 
-  ipcMain.handle("projects:list", async () => {
+  ipcMain.handle('projects:list', async () => {
     // Insansitate services
     const repository = new ProjectsRepository();
     const facade = new FindProjectsFacade(repository);
@@ -109,7 +120,7 @@ function registerProjectIpcHandlers(): void {
 }
 
 function registerTaskIpcHandlers(): void {
-  ipcMain.handle("tasks:add", async (_event, command: CreateTaskCommand) => {
+  ipcMain.handle('tasks:add', async (_event, command: CreateTaskCommand) => {
     // Instantiate services.
     const service = new CreateTaskService();
     const repository = new CreateTaskRepository();
@@ -119,7 +130,7 @@ function registerTaskIpcHandlers(): void {
     return facade.execute(command);
   });
 
-  ipcMain.handle("tasks:list", async (_event, query: ListTasksQuery) => {
+  ipcMain.handle('tasks:list', async (_event, query: ListTasksQuery) => {
     // Instantiate services.
     const projectsRepository = new ProjectsRepository();
     const tasksRepository = new ListTasksRepository();
@@ -131,7 +142,7 @@ function registerTaskIpcHandlers(): void {
 }
 
 function registerAppIpcHandlers(): void {
-  ipcMain.handle("app:open-data-folder", async () => {
+  ipcMain.handle('app:open-data-folder', async () => {
     // Resolve and ensure the zeta app data path exists before opening it.
     const appDataFolderPath = Repository.getStoragePath();
     await mkdir(appDataFolderPath, { recursive: true });
@@ -142,5 +153,32 @@ function registerAppIpcHandlers(): void {
     }
 
     return appDataFolderPath;
+  });
+
+  ipcMain.handle('window:minimize', (event) => {
+    BrowserWindow.fromWebContents(event.sender)?.minimize();
+  });
+
+  ipcMain.handle('window:toggle-maximize', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    if (!window) {
+      return false;
+    }
+
+    if (window.isMaximized()) {
+      window.unmaximize();
+      return false;
+    }
+
+    window.maximize();
+    return true;
+  });
+
+  ipcMain.handle('window:close', (event) => {
+    BrowserWindow.fromWebContents(event.sender)?.close();
+  });
+
+  ipcMain.handle('window:is-maximized', (event) => {
+    return BrowserWindow.fromWebContents(event.sender)?.isMaximized() ?? false;
   });
 }

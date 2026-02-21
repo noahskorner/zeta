@@ -31,6 +31,12 @@ declare global {
         projectPath: string,
         relativeFilePath: string,
       ) => Promise<ProjectFileContent>;
+      // Control window actions from a custom desktop titlebar.
+      minimizeWindow: () => Promise<void>;
+      toggleMaximizeWindow: () => Promise<boolean>;
+      closeWindow: () => Promise<void>;
+      isWindowMaximized: () => Promise<boolean>;
+      onWindowMaximizeStateChanged: (callback: (isMaximized: boolean) => void) => () => void;
     };
   }
 }

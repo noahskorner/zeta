@@ -3,11 +3,9 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "../components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Separator } from "../components/ui/separator";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "../components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "../components/ui/sidebar";
 import { AppSidebar, type SidebarView } from "./app-sidebar";
-import { ThemeSelector } from "./theme-selector";
-import { ProjectDropdown } from "./projects/project-dropdown";
+import { AppHeader } from "./app-header";
 import { TasksPanel } from "./tasks/tasks-panel";
 
 const mockedAgentRuntimes = [
@@ -28,10 +26,18 @@ export default function App() {
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const [activeView, setActiveView] = useState<SidebarView>("tasks");
+  const [isWindowMaximized, setIsWindowMaximized] = useState(false);
 
   // Load projects when the app opens.
   useEffect(() => {
     void loadProjects();
+  }, []);
+
+  // Sync maximize/restore state so the button icon always reflects current window state.
+  useEffect(() => {
+    const unsubscribe = window.zetaApi.onWindowMaximizeStateChanged(setIsWindowMaximized);
+    void window.zetaApi.isWindowMaximized().then(setIsWindowMaximized);
+    return unsubscribe;
   }, []);
 
   async function handleAddProject() {
@@ -95,6 +101,19 @@ export default function App() {
     toast.error("Task operation failed.", { description: message });
   }
 
+  async function handleMinimizeWindow() {
+    await window.zetaApi.minimizeWindow();
+  }
+
+  async function handleToggleMaximizeWindow() {
+    const isMaximized = await window.zetaApi.toggleMaximizeWindow();
+    setIsWindowMaximized(isMaximized);
+  }
+
+  async function handleCloseWindow() {
+    await window.zetaApi.closeWindow();
+  }
+
   const selectedProject = selectedProjectId
     ? projects.find((project) => project.id === selectedProjectId) ?? null
     : null;
@@ -111,22 +130,16 @@ export default function App() {
       />
 
       <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background px-4">
-          {/* Left side */}
-          <div className="flex items-center gap-3">
-            <SidebarTrigger />
-            <Separator orientation="vertical" className="h-5" />
-            <ProjectDropdown
-              projects={projects}
-              selectedProjectId={selectedProjectId}
-              isLoadingProjects={isLoadingProjects}
-              onSelectProject={setSelectedProjectId}
-            />
-          </div>
-
-          {/* Right side */}
-          <ThemeSelector />
-        </header>
+        <AppHeader
+          projects={projects}
+          selectedProjectId={selectedProjectId}
+          isLoadingProjects={isLoadingProjects}
+          isWindowMaximized={isWindowMaximized}
+          onSelectProject={setSelectedProjectId}
+          onMinimizeWindow={handleMinimizeWindow}
+          onToggleMaximizeWindow={handleToggleMaximizeWindow}
+          onCloseWindow={handleCloseWindow}
+        />
 
         <main className="mx-auto w-full p-6">
           {activeView === "tasks" ? (
