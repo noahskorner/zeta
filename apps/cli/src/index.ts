@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { addProjects } from "./projects";
+import { addTasks } from "./tasks";
 
 // Initialize the main CLI program
 const program = new Command();
@@ -11,6 +12,7 @@ program
 
   // Add subcommands
 addProjects(program);
+addTasks(program);
 
 // Parse and execute commands
 void program.parseAsync().catch((error: unknown) => {

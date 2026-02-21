@@ -1,5 +1,6 @@
 import { FindProjectResponse } from "@zeta/commands";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "../components/ui/badge";
 import {
   Card,
@@ -17,7 +18,7 @@ import {
 import { AppSidebar, type SidebarView } from "./app-sidebar";
 import { ThemeSelector } from "./theme-selector";
 import { ProjectDropdown } from "./projects/project-dropdown";
-import { TasksBoard } from "./tasks/tasks-board";
+import { TasksPanel } from "./tasks/tasks-panel";
 
 const mockedAgentRuntimes = [
   { label: "Codex", status: "healthy", latency: "220ms" },
@@ -36,7 +37,6 @@ export default function App() {
   const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(
     null,
   );
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const [activeView, setActiveView] = useState<SidebarView>("tasks");
@@ -47,7 +47,6 @@ export default function App() {
   }, []);
 
   async function handleAddProject() {
-    setErrorMessage(null);
     setIsAddingProject(true);
 
     try {
@@ -55,9 +54,12 @@ export default function App() {
       if (!newProject) {
         return;
       }
+      toast.success("Project created.", { description: newProject });
       await loadProjects();
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      toast.error("Failed to create project.", {
+        description: getErrorMessage(error),
+      });
     } finally {
       setIsAddingProject(false);
     }
@@ -94,10 +96,20 @@ export default function App() {
 
       setSelectedProjectPath(sortedProjects[0].folderPath);
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      toast.error("Failed to load projects.", {
+        description: getErrorMessage(error),
+      });
     } finally {
       setIsLoadingProjects(false);
     }
+  }
+
+  function handleTaskCreated(taskId: string) {
+    toast.success("Task created.", { description: taskId });
+  }
+
+  function handleTaskError(message: string) {
+    toast.error("Failed to create task.", { description: message });
   }
 
   return (
@@ -129,23 +141,19 @@ export default function App() {
         </header>
 
         <main className="mx-auto w-full p-6">
-          {activeView === "tasks" ? <TasksPanel /> : null}
+          {activeView === "tasks" ? (
+            <TasksPanel
+              selectedProjectPath={selectedProjectPath}
+              onTaskCreated={handleTaskCreated}
+              onError={handleTaskError}
+            />
+          ) : null}
           {activeView === "agents" ? <AgentsPanel /> : null}
           {activeView === "automations" ? <AutomationsPanel /> : null}
-
-          {errorMessage ? (
-            <div className="mt-6 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-              {errorMessage}
-            </div>
-          ) : null}
         </main>
       </SidebarInset>
     </SidebarProvider>
   );
-}
-
-function TasksPanel() {
-  return <TasksBoard />;
 }
 
 function AgentsPanel() {

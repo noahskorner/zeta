@@ -25,5 +25,8 @@
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "simple-git": "^3.28.0"
   }
 }

@@ -2,6 +2,10 @@ import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
 import {
+  CreateTaskCommand,
+  CreateTaskFacade,
+  CreateTaskRepository,
+  CreateTaskService,
   CreateProjectCommand,
   CreateProjectFacade,
   CreateProjectRepository,
@@ -45,6 +49,7 @@ const createWindow = () => {
 // Some APIs can only be used after this event occurs.
 app.on("ready", createWindow);
 app.on("ready", registerProjectIpcHandlers);
+app.on("ready", registerTaskIpcHandlers);
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -96,5 +101,17 @@ function registerProjectIpcHandlers(): void {
 
     // Return the projects
     return facade.execute();
+  });
+}
+
+function registerTaskIpcHandlers(): void {
+  ipcMain.handle("tasks:add", async (_event, command: CreateTaskCommand) => {
+    // Instantiate services.
+    const service = new CreateTaskService();
+    const repository = new CreateTaskRepository();
+    const facade = new CreateTaskFacade(service, repository);
+
+    // Create the task.
+    return facade.execute(command);
   });
 }

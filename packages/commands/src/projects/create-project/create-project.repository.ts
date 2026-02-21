@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { CreateProjectModel } from "./create-project.model";
 import { ProjectsRepository } from "../projects.repository";
 import { ProjectEntity } from "../project.entity";
@@ -16,6 +17,7 @@ export class CreateProjectRepository extends ProjectsRepository {
     // TODO: We could probably move this to a central place, so we don't have to worry about it.
     // Create the initial storage directory if it doesn't exist
     await mkdir(this.STORAGE_PATH, { recursive: true });
+    await mkdir(path.join(model.folderPath, ".zeta"), { recursive: true });
 
     // Load the existing projects
     const projects = await this.findAll();

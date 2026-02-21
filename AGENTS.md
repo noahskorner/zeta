@@ -43,6 +43,7 @@ Layer responsibilities:
 - Facade: Feature orchestration across services, repositories, and integrations.
 - Repository: Persistence concerns (DB/filesystem/API).
 - Model / Response: Internal models and external response contracts.
+- All git operations must use `simple-git`.
 
 ### `apps/cli` Structure and Role
 `apps/cli` is a thin adapter around shared commands.
@@ -77,6 +78,7 @@ Guidelines:
 - `components/`: only truly shared app components.
 - `hooks/` and `lib/`: only shared hooks/utilities.
 - `features/`: default location for feature-specific UI, hooks, and logic (vertical slices).
+- Use shadcn `sonner` for user-facing status messages in the desktop app: success states must use a success toast, and failures must use an error/danger toast.
 
 ## Project Structure & Module Organization
 This repository is an npm workspace/Turborepo monorepo.
