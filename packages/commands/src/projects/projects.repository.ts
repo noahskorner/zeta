@@ -4,10 +4,7 @@ import { readFile } from "node:fs/promises";
 import { Repository } from "../repository";
 
 export class ProjectsRepository extends Repository {
-  protected readonly PROJECTS_FILE_PATH = path.join(
-    this.STORAGE_PATH,
-    "projects.json",
-  );
+  protected readonly PROJECTS_FILE_PATH = path.join(this.STORAGE_PATH, "projects.json");
 
   public async findAll(): Promise<ProjectEntity[]> {
     try {
@@ -26,12 +23,7 @@ export class ProjectsRepository extends Repository {
         );
       });
     } catch (error) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "code" in error &&
-        error.code === "ENOENT"
-      ) {
+      if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
         return [];
       }
 

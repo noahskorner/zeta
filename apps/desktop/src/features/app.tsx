@@ -2,19 +2,9 @@ import { FindProjectResponse } from "@zeta/commands";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "../components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Separator } from "../components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "../components/ui/sidebar";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "../components/ui/sidebar";
 import { AppSidebar, type SidebarView } from "./app-sidebar";
 import { ThemeSelector } from "./theme-selector";
 import { ProjectDropdown } from "./projects/project-dropdown";
@@ -34,9 +24,7 @@ const mockedAutomations = [
 
 export default function App() {
   const [projects, setProjects] = useState<FindProjectResponse[]>([]);
-  const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(
-    null,
-  );
+  const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const [activeView, setActiveView] = useState<SidebarView>("tasks");
@@ -87,9 +75,7 @@ export default function App() {
 
       if (
         selectedProjectPath &&
-        sortedProjects.some(
-          (project) => project.folderPath === selectedProjectPath,
-        )
+        sortedProjects.some((project) => project.folderPath === selectedProjectPath)
       ) {
         return;
       }
@@ -166,14 +152,10 @@ function AgentsPanel() {
             <CardDescription>Pluggable execution runtime.</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
-            <Badge
-              variant={agent.status === "healthy" ? "secondary" : "destructive"}
-            >
+            <Badge variant={agent.status === "healthy" ? "secondary" : "destructive"}>
               {agent.status}
             </Badge>
-            <div className="font-mono text-xs text-muted-foreground">
-              {agent.latency}
-            </div>
+            <div className="font-mono text-xs text-muted-foreground">{agent.latency}</div>
           </CardContent>
         </Card>
       ))}
@@ -186,9 +168,7 @@ function AutomationsPanel() {
     <Card>
       <CardHeader>
         <CardTitle>Scheduled Automation Queue</CardTitle>
-        <CardDescription>
-          Mocked jobs that keep specs and repo state synchronized.
-        </CardDescription>
+        <CardDescription>Mocked jobs that keep specs and repo state synchronized.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         {mockedAutomations.map((automationName) => (

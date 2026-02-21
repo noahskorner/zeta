@@ -27,7 +27,10 @@ const createTaskSchema = z.object({
     .string()
     .trim()
     .min(1, "Task name is required.")
-    .refine((value) => isValidTaskName(value), "Task name must be a valid git branch/worktree name."),
+    .refine(
+      (value) => isValidTaskName(value),
+      "Task name must be a valid git branch/worktree name.",
+    ),
   friendlyName: z.string().trim().min(1, "Friendly name is required."),
   description: z.string().trim().min(1, "Description is required."),
 });
@@ -45,7 +48,7 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
 
   // Disable task creation until a project has been selected.
   const hasProject = useMemo(() => Boolean(props.selectedProjectPath), [props.selectedProjectPath]);
-  
+
   // Keep form state and validation colocated in the dialog.
   const form = useForm<CreateTaskValues>({
     resolver: zodResolver(createTaskSchema),

@@ -16,12 +16,7 @@ export abstract class Repository {
 
     // If the platform is macOS, use the Library/Application Support directory
     if (process.platform === "darwin") {
-      return path.join(
-        os.homedir(),
-        "Library",
-        "Application Support",
-        this.ROOT_DIR,
-      );
+      return path.join(os.homedir(), "Library", "Application Support", this.ROOT_DIR);
     }
 
     // For Linux and other platforms, use the XDG_CONFIG_HOME environment variable or default to ~/.config

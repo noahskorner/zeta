@@ -33,11 +33,7 @@ export function ProjectDropdown(props: ProjectDropdownProps) {
       >
         <SelectTrigger className="h-10 w-full">
           <SelectValue
-            placeholder={
-              props.isLoadingProjects
-                ? "Loading projects..."
-                : "No projects available"
-            }
+            placeholder={props.isLoadingProjects ? "Loading projects..." : "No projects available"}
           />
         </SelectTrigger>
         <SelectContent>

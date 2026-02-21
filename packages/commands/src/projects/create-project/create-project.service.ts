@@ -4,9 +4,7 @@ import { CreateProjectCommand } from "./create-project.command";
 import { CreateProjectModel } from "./create-project.model";
 
 export class CreateProjectService {
-  public async execute(
-    command: CreateProjectCommand,
-  ): Promise<CreateProjectModel> {
+  public async execute(command: CreateProjectCommand): Promise<CreateProjectModel> {
     const absoluteFolderPath = path.resolve(command.folderPath);
     const folderStats = await stat(absoluteFolderPath);
     if (!folderStats.isDirectory()) {

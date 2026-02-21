@@ -6,7 +6,8 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "format": "prettier --write \"**/*.{js,cjs,mjs,ts,tsx,json,md,yml,yaml}\""
   },
   "devDependencies": {
     "turbo": "^2.8.9",

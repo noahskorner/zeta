@@ -5,12 +5,9 @@ import { addTasks } from "./tasks";
 
 // Initialize the main CLI program
 const program = new Command();
-program
-  .name("zeta")
-  .description("CLI wrapper around shared commands")
-  .version("1.0.0");
+program.name("zeta").description("CLI wrapper around shared commands").version("1.0.0");
 
-  // Add subcommands
+// Add subcommands
 addProjects(program);
 addTasks(program);
 

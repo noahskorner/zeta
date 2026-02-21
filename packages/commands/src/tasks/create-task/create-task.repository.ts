@@ -64,12 +64,7 @@ export class CreateTaskRepository {
         );
       });
     } catch (error) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "code" in error &&
-        error.code === "ENOENT"
-      ) {
+      if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
         return [];
       }
 
@@ -82,12 +77,7 @@ export class CreateTaskRepository {
       await access(targetPath);
       throw new Error(`Worktree path already exists: ${targetPath}`);
     } catch (error) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "code" in error &&
-        error.code === "ENOENT"
-      ) {
+      if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
         return;
       }
 

@@ -1,12 +1,4 @@
-import {
-  Bot,
-  GitBranch,
-  ListTodo,
-  PlayCircle,
-  RefreshCw,
-  Sparkles,
-  Workflow,
-} from "lucide-react";
+import { Bot, GitBranch, ListTodo, PlayCircle, RefreshCw, Sparkles, Workflow } from "lucide-react";
 import { type ComponentType } from "react";
 import { AvatarFooter } from "./avatar";
 import {
@@ -59,9 +51,7 @@ export function AppSidebar(props: AppSidebarProps) {
           {/* Hide branding text when the sidebar is collapsed to icon mode. */}
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
             <div className="text-sm font-semibold">Zeta</div>
-            <div className="truncate text-xs text-muted-foreground">
-              Agentic task manager
-            </div>
+            <div className="truncate text-xs text-muted-foreground">Agentic task manager</div>
           </div>
           <Sparkles className="size-4 text-muted-foreground shrink-0" />
         </div>
@@ -117,7 +107,7 @@ export function AppSidebar(props: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarSeparator className="mx-0"/>
+      <SidebarSeparator className="mx-0" />
       <AvatarFooter />
 
       <SidebarRail />

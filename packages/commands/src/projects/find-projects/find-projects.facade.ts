@@ -1,8 +1,5 @@
 import { ProjectsRepository } from "../projects.repository";
-import {
-  FindProjectResponse,
-  FindProjectsResponse,
-} from "./find-projects.response";
+import { FindProjectResponse, FindProjectsResponse } from "./find-projects.response";
 
 export class FindProjectsFacade {
   constructor(private _repository: ProjectsRepository) {}

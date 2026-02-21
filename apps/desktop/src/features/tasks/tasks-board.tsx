@@ -10,12 +10,7 @@ const lanes: TaskLaneModel[] = [
   { id: "done", title: "Done", description: "Completed and verified." },
 ];
 
-const initialCards: TaskCard[] = [
-  { id: "task-1", title: "Scaffold task feature module", laneId: "backlog" },
-  { id: "task-2", title: "Wire board into sidebar tasks view", laneId: "ready" },
-  { id: "task-3", title: "Implement drag and drop between lanes", laneId: "in-progress" },
-  { id: "task-4", title: "Validate desktop layout behavior", laneId: "review" },
-];
+const initialCards: TaskCard[] = [];
 
 export function TasksBoard() {
   const [cards, setCards] = useState<TaskCard[]>(initialCards);
