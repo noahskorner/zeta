@@ -1,13 +1,13 @@
-import { useMemo, useState } from "react";
-import { TaskLane } from "./task-lane";
-import type { TaskCard, TaskLane as TaskLaneModel, TaskLaneId } from "./types";
+import { useMemo, useState } from 'react';
+import { TaskLane } from './task-lane';
+import type { TaskCard, TaskLane as TaskLaneModel, TaskLaneId } from './types';
 
 const lanes: TaskLaneModel[] = [
-  { id: "backlog", title: "Backlog", description: "Capture and shape upcoming work." },
-  { id: "ready", title: "Ready", description: "Defined tasks ready for pickup." },
-  { id: "in-progress", title: "In Progress", description: "Actively being implemented." },
-  { id: "review", title: "Review", description: "Waiting on code or QA review." },
-  { id: "done", title: "Done", description: "Completed and verified." },
+  { id: 'backlog', title: 'Backlog', description: 'Capture and shape upcoming work.' },
+  { id: 'ready', title: 'Ready', description: 'Defined tasks ready for pickup.' },
+  { id: 'in-progress', title: 'In Progress', description: 'Actively being implemented.' },
+  { id: 'review', title: 'Review', description: 'Waiting on code or QA review.' },
+  { id: 'done', title: 'Done', description: 'Completed and verified.' },
 ];
 
 const initialCards: TaskCard[] = [];
@@ -27,7 +27,7 @@ export function TasksBoard() {
       {
         backlog: [],
         ready: [],
-        "in-progress": [],
+        'in-progress': [],
         review: [],
         done: [],
       },
@@ -49,16 +49,6 @@ export function TasksBoard() {
     setDropTargetLaneId(null);
   }
 
-  function addTask(laneId: TaskLaneId, title: string) {
-    const nextTask: TaskCard = {
-      id: createTaskId(),
-      title,
-      laneId,
-    };
-
-    setCards((currentCards) => [nextTask, ...currentCards]);
-  }
-
   return (
     <div className="space-y-4">
       <div>
@@ -75,7 +65,6 @@ export function TasksBoard() {
             tasks={cardsByLane[lane.id]}
             draggingTaskId={draggingTaskId}
             isDropTarget={dropTargetLaneId === lane.id}
-            onAddTask={addTask}
             onDropTask={moveTaskToLane}
             onDragStart={setDraggingTaskId}
             onDragEnd={() => {
@@ -92,7 +81,7 @@ export function TasksBoard() {
 }
 
 function createTaskId(): string {
-  if ("randomUUID" in crypto) {
+  if ('randomUUID' in crypto) {
     return crypto.randomUUID();
   }
 
