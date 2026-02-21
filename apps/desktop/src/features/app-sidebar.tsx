@@ -117,7 +117,7 @@ export function AppSidebar(props: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarSeparator />
+      <SidebarSeparator className="mx-0"/>
       <AvatarFooter />
 
       <SidebarRail />

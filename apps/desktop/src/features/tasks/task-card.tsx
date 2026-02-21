@@ -1,4 +1,3 @@
-import { Badge } from "../../components/ui/badge";
 import { Card, CardContent } from "../../components/ui/card";
 import type { TaskCard as TaskCardModel } from "./types";
 
@@ -24,11 +23,8 @@ export function TaskCard(props: TaskCardProps) {
       }}
       onDragEnd={props.onDragEnd}
     >
-      <CardContent className="space-y-2 px-3">
+      <CardContent className="space-y-2 px-3 min-h-24">
         <div className="text-sm font-medium">{props.task.title}</div>
-        <Badge variant="outline" className="text-[11px] uppercase">
-          Drag to move
-        </Badge>
       </CardContent>
     </Card>
   );
