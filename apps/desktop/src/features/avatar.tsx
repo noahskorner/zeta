@@ -1,7 +1,11 @@
 import { Settings } from "lucide-react";
+import { useState } from "react";
 import { SidebarFooter } from "../components/ui/sidebar";
+import { SettingsDialog } from "./settings-dialog";
 
 export function AvatarFooter() {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
   return (
     <SidebarFooter>
       <div className="flex items-center gap-2 rounded-md border p-2">
@@ -16,10 +20,13 @@ export function AvatarFooter() {
           type="button"
           className="ml-auto rounded-md p-1 text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:hidden"
           aria-label="Open settings"
+          onClick={() => setIsSettingsOpen(true)}
         >
           <Settings className="size-4" />
         </button>
       </div>
+
+      <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
     </SidebarFooter>
   );
 }
