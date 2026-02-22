@@ -30,6 +30,8 @@ declare global {
       listTasks: (query: ListTasksQuery) => Promise<FindTasksResponse>;
       // Open the shared zeta app data folder in the OS file explorer.
       openAppDataFolder: () => Promise<string>;
+      // Open a URL using the operating system default external handler.
+      openExternalUrl: (url: string) => Promise<void>;
       // Read files from a selected project for renderer views.
       listProjectFiles: (projectPath: string) => Promise<string[]>;
       readProjectFile: (

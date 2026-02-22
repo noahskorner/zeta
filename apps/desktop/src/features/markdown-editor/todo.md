@@ -1,25 +1,3 @@
-## Links & Images
-
-### Links
-
-- [Inline link](https://example.com)
-- [Link with title](https://example.com 'Example Title')
-- <https://example.com> (auto-link)
-
-### Reference Links
-
-This is a [reference link][ref].
-
-[ref]: https://example.com 'Reference Example'
-
-### Images
-
-![Alt text](https://via.placeholder.com/150)
-
-![Alt text with title](https://via.placeholder.com/150 'Image Title')
-
----
-
 ## Table of Contents
 
 - [Headings](#headings)
@@ -36,48 +14,6 @@ This is a [reference link][ref].
 - [Escaping Characters](#escaping-characters)
 - [Emoji](#emoji)
 - [Math (Optional)](#math-optional)
-
----
-
-## Code
-
-### Inline Code
-
-Use the `console.log()` function.
-
-### Code Block (No Language)
-
-```
-
-function hello() {
-return "Hello, world!";
-}
-
-```
-
-### Code Block (JavaScript)
-
-```js
-const sum = (a, b) => a + b;
-console.log(sum(2, 3));
-```
-
-### Code Block (JSON)
-
-```json
-{
-  "name": "Markdown Test",
-  "version": 1,
-  "features": ["headings", "tables", "code"]
-}
-```
-
-### Code Block (Bash)
-
-```bash
-npm install
-npm run dev
-```
 
 ---
 
@@ -98,16 +34,6 @@ npm run dev
 
 ---
 
-## Task Lists
-
-- [x] Completed task
-- [ ] Incomplete task
-- [ ] Another task
-  - [x] Nested completed
-  - [ ] Nested incomplete
-
----
-
 ## Footnotes
 
 Here is a sentence with a footnote.[^1]
@@ -116,21 +42,21 @@ Here is a sentence with a footnote.[^1]
 
 ---
 
-## Horizontal Rules
-
----
-
----
-
----
-
----
-
 ## HTML
 
 <div style="padding:10px; border:1px solid #ccc;">
   <strong>Inline HTML</strong> inside Markdown.
 </div>
+
+---
+
+## Task Lists
+
+- [x] Completed task
+- [ ] Incomplete task
+- [ ] Another task
+  - [x] Nested completed
+  - [ ] Nested incomplete
 
 ---
 

@@ -69,3 +69,73 @@ Subscript: H~2~O
 - [x] Task 2 (completed)
 
 ---
+
+## Links & Images
+
+### Links
+
+- [Inline link](https://example.com)
+- [Link with title](https://example.com 'Example Title')
+- <https://example.com> (auto-link)
+
+### Reference Links
+
+This is a [reference link][ref].
+
+[ref]: https://example.com 'Reference Example'
+
+### Images
+
+![Alt text](https://placehold.co/150x150)
+
+![Alt text with title](https://placehold.co/150x150 'Image Title')
+
+---
+
+## Horizontal Rules
+
+---
+
+---
+
+## Code
+
+### Inline Code
+
+Use the `console.log()` function.
+
+### Code Block (No Language)
+
+```
+
+function hello() {
+return "Hello, world!";
+}
+
+```
+
+### Code Block (JavaScript)
+
+```js
+const sum = (a, b) => a + b;
+console.log(sum(2, 3));
+```
+
+### Code Block (JSON)
+
+```json
+{
+  "name": "Markdown Test",
+  "version": 1,
+  "features": ["headings", "tables", "code"]
+}
+```
+
+### Code Block (Bash)
+
+```bash
+npm install
+npm run dev
+```
+
+---

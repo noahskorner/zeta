@@ -26,6 +26,8 @@ contextBridge.exposeInMainWorld('zetaApi', {
     ipcRenderer.invoke('tasks:list', query),
   // Open the shared zeta app data folder in the OS file explorer.
   openAppDataFolder: (): Promise<string> => ipcRenderer.invoke('app:open-data-folder'),
+  // Open a URL in the user's OS default browser/email client.
+  openExternalUrl: (url: string): Promise<void> => ipcRenderer.invoke('app:open-external-url', url),
   listProjectFiles: (projectPath: string): Promise<string[]> =>
     ipcRenderer.invoke('projects:list-files', projectPath),
   readProjectFile: (projectPath: string, relativeFilePath: string): Promise<ProjectFileContent> =>

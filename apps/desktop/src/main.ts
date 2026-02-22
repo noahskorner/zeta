@@ -46,6 +46,14 @@ const createWindow = () => {
   mainWindow.on('unmaximize', () => {
     mainWindow.webContents.send('window:maximize-state-changed', false);
   });
+  // Route renderer popup attempts to the OS default browser instead of new Electron windows.
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (isSafeExternalUrl(url)) {
+      void shell.openExternal(url);
+    }
+
+    return { action: 'deny' };
+  });
 
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -154,6 +162,14 @@ function registerAppIpcHandlers(): void {
 
     return appDataFolderPath;
   });
+  // Open trusted external URLs using the OS default browser/email client.
+  ipcMain.handle('app:open-external-url', async (_event, url: string) => {
+    if (!isSafeExternalUrl(url)) {
+      throw new Error(`Unsupported external URL protocol: ${url}`);
+    }
+
+    await shell.openExternal(url);
+  });
 
   ipcMain.handle('window:minimize', (event) => {
     BrowserWindow.fromWebContents(event.sender)?.minimize();
@@ -181,4 +197,13 @@ function registerAppIpcHandlers(): void {
   ipcMain.handle('window:is-maximized', (event) => {
     return BrowserWindow.fromWebContents(event.sender)?.isMaximized() ?? false;
   });
+}
+
+function isSafeExternalUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' || parsed.protocol === 'mailto:';
+  } catch {
+    return false;
+  }
 }
