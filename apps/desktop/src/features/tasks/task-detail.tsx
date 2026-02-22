@@ -8,6 +8,8 @@ import { Label } from '../../components/ui/label';
 import { Separator } from '../../components/ui/separator';
 
 export type TaskDetailProps = {
+  taskId?: string;
+  createdAt?: string;
   friendlyName: string;
   taskName: string;
   description: string;
@@ -26,9 +28,11 @@ export type TaskDetailProps = {
 };
 
 export function TaskDetail({
+  taskId,
   friendlyName,
   taskName,
   description,
+  createdAt,
   onFriendlyNameChange,
   onTaskNameChange,
   onDescriptionChange,
@@ -45,6 +49,8 @@ export function TaskDetail({
   return (
     <SidebarProvider defaultOpen={defaultSidebarOpen} className="h-full min-h-0">
       <TaskDetailLayout
+        taskId={taskId}
+        createdAt={createdAt}
         friendlyName={friendlyName}
         taskName={taskName}
         description={description}
@@ -65,6 +71,8 @@ export function TaskDetail({
 }
 
 function TaskDetailLayout({
+  taskId,
+  createdAt,
   friendlyName,
   taskName,
   description,
@@ -115,7 +123,9 @@ function TaskDetailLayout({
                 placeholder={taskNamePlaceholder}
                 disabled={!editable}
               />
-              {taskNameError ? <div className="text-sm text-destructive">{taskNameError}</div> : null}
+              {taskNameError ? (
+                <div className="text-sm text-destructive">{taskNameError}</div>
+              ) : null}
             </div>
 
             <div className="space-y-2">
@@ -127,7 +137,9 @@ function TaskDetailLayout({
                 onContentChange={(content) => onDescriptionChange?.(content)}
                 editable={editable}
               />
-              {descriptionError ? <div className="text-sm text-destructive">{descriptionError}</div> : null}
+              {descriptionError ? (
+                <div className="text-sm text-destructive">{descriptionError}</div>
+              ) : null}
             </div>
 
             {/* Keep validation and status messaging colocated with editor content. */}
@@ -137,7 +149,14 @@ function TaskDetailLayout({
       </div>
 
       {/* Right side (sidebar) */}
-      <TaskDetailSidebar actions={isSidebarVisible ? actions : undefined} />
+      <TaskDetailSidebar
+        actions={actions}
+        taskId={taskId}
+        taskName={taskName}
+        friendlyName={friendlyName}
+        description={description}
+        createdAt={createdAt}
+      />
     </div>
   );
 }

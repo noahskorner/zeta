@@ -1,7 +1,13 @@
 import { ListToolResponse } from '@zeta/commands';
 import { useEffect, useState } from 'react';
 import { AddToolDialog } from './add-tool-dialog';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../components/ui/card';
 
 type ToolsPanelProps = {
   onToolCreated: (toolId: string) => void;
@@ -41,9 +47,9 @@ export function ToolsPanel(props: ToolsPanelProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="w-full space-y-4">
       {/* Keep tool creation in the panel and refresh list data once creation succeeds. */}
-      <div className="flex items-center justify-between gap-3 rounded-md border p-4">
+      <div className="w-full flex items-center justify-between gap-3 rounded-md border p-4">
         <div className="text-sm text-muted-foreground">
           Add a tool to persist its runnable command in app data.
         </div>
@@ -67,7 +73,7 @@ export function ToolsPanel(props: ToolsPanelProps) {
       {/* Render persisted tools as cards with core metadata. */}
       {!isLoadingTools && !errorMessage && tools.length === 0 ? (
         <Card>
-          <CardContent className="pt-6 text-sm text-muted-foreground">
+          <CardContent className="text-sm text-muted-foreground">
             No tools have been added yet.
           </CardContent>
         </Card>
