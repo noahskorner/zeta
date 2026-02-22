@@ -25,6 +25,7 @@ import { horizontalRules } from './horizontal-rules';
 import { blockquotes } from './blockquotes';
 import { inlineCode } from './inline-code';
 import { strikethroughs } from './strikethroughs';
+import { collectReferenceDefinitions, linksAndImages } from './links-and-images';
 
 const mdExtension = markdown({
   codeLanguages: languages,
@@ -127,6 +128,7 @@ const markdownPlugin = ViewPlugin.fromClass(
 
     buildDecorations(view: EditorView) {
       const builder = new RangeSetBuilder<Decoration>();
+      const referenceDefinitions = collectReferenceDefinitions(view.state.doc.toString());
 
       const decorations: Array<DecorationRange> = [];
       for (const { from: initialFrom, to: initialTo } of view.visibleRanges) {
@@ -182,6 +184,9 @@ const markdownPlugin = ViewPlugin.fromClass(
 
           // Code
           decorations.push(...inlineCode(lineText, cursorPosition, from));
+
+          // Links and Images
+          decorations.push(...linksAndImages(lineText, isActive, from, referenceDefinitions));
 
           // Increment the position
           position += lineText.length + 1;

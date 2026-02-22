@@ -192,3 +192,27 @@
   font-size: 0.75em;
   vertical-align: super;
 }
+
+.cm-link-preview {
+  color: var(--color-primary);
+  text-decoration: underline !important;
+  text-underline-offset: 0.15em;
+}
+
+.cm-image-wrapper {
+  display: inline-block;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.cm-image-preview {
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  max-height: 18rem;
+  max-width: min(100%, 32rem);
+}
+
+.cm-image-fallback {
+  color: var(--muted-foreground);
+  font-size: 0.875em;
+}
