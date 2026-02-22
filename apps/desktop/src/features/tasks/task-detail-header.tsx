@@ -8,7 +8,7 @@ export type TaskDetailHeaderProps = {
 
 export function TaskDetailHeader({ actions: actions, className }: TaskDetailHeaderProps) {
   return (
-    <div className={cn('flex h-12 items-center gap-2 border-b px-3 w-full', className)}>
+    <div className={cn('flex h-12 items-center gap-2 border-b px-2 w-full', className)}>
       <div className="min-w-0 flex-1" />
 
       {/* SidebarTrigger all the way on the right */}

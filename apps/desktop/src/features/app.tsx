@@ -144,7 +144,7 @@ export default function App() {
             onRefreshProjects={loadProjects}
           />
 
-          <SidebarInset>
+          <SidebarInset className="min-h-0">
             <AppHeader
               projects={projects}
               selectedProjectId={selectedProjectId}
@@ -152,7 +152,7 @@ export default function App() {
               onSelectProject={setSelectedProjectId}
             />
 
-            <main className="mx-auto w-full p-6">
+            <main className="mx-auto flex min-h-0 w-full flex-1 overflow-y-auto p-6">
               {activeView === 'tasks' ? (
                 <TasksPanel
                   selectedProjectId={selectedProjectId}

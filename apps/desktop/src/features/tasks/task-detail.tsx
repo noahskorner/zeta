@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { SidebarProvider } from '../../components/ui/sidebar';
+import { SidebarProvider, useSidebar } from '../../components/ui/sidebar';
 import { TaskDetailHeader } from './task-detail-header';
 import { TaskDetailSidebar } from './task-detail-sidebar';
 import { MarkdownEditor } from '../../components/markdown-editor/markdown-editor';
@@ -44,65 +44,100 @@ export function TaskDetail({
 }: TaskDetailProps) {
   return (
     <SidebarProvider defaultOpen={defaultSidebarOpen} className="h-full min-h-0">
-      <div className="flex h-full w-full overflow-hidden">
-        {/* Left side (main content) */}
-        <div className="flex min-h-0 flex-1 flex-col">
-          <TaskDetailHeader actions={actions} />
+      <TaskDetailLayout
+        friendlyName={friendlyName}
+        taskName={taskName}
+        description={description}
+        onFriendlyNameChange={onFriendlyNameChange}
+        onTaskNameChange={onTaskNameChange}
+        onDescriptionChange={onDescriptionChange}
+        friendlyNamePlaceholder={friendlyNamePlaceholder}
+        taskNamePlaceholder={taskNamePlaceholder}
+        editable={editable}
+        friendlyNameError={friendlyNameError}
+        taskNameError={taskNameError}
+        descriptionError={descriptionError}
+        footerContent={footerContent}
+        actions={actions}
+      />
+    </SidebarProvider>
+  );
+}
 
-          <div className="min-h-0 flex-1 overflow-y-auto p-4">
-            <div className="mx-auto w-full max-w-4xl space-y-4">
-              {/* Keep shared task identity fields consistent across create and detail modes. */}
-              <div className="space-y-2">
-                <Label htmlFor="task-friendly-name">Name</Label>
-                <Input
-                  id="task-friendly-name"
-                  value={friendlyName}
-                  onChange={(event) => onFriendlyNameChange?.(event.target.value)}
-                  placeholder={friendlyNamePlaceholder}
-                  disabled={!editable}
-                />
-                {friendlyNameError ? (
-                  <div className="text-sm text-destructive">{friendlyNameError}</div>
-                ) : null}
-              </div>
+function TaskDetailLayout({
+  friendlyName,
+  taskName,
+  description,
+  onFriendlyNameChange,
+  onTaskNameChange,
+  onDescriptionChange,
+  friendlyNamePlaceholder = 'Create new task',
+  taskNamePlaceholder = 'feat-add-create-task',
+  editable = false,
+  friendlyNameError,
+  taskNameError,
+  descriptionError,
+  footerContent,
+  actions,
+}: Omit<TaskDetailProps, 'defaultSidebarOpen'>) {
+  const { isMobile, open, openMobile } = useSidebar();
+  const isSidebarVisible = isMobile ? openMobile : open;
 
-              <div className="space-y-2">
-                <Label htmlFor="task-name">Worktree</Label>
-                <Input
-                  id="task-name"
-                  value={taskName}
-                  onChange={(event) => onTaskNameChange?.(event.target.value)}
-                  placeholder={taskNamePlaceholder}
-                  disabled={!editable}
-                />
-                {taskNameError ? (
-                  <div className="text-sm text-destructive">{taskNameError}</div>
-                ) : null}
-              </div>
+  return (
+    <div className="flex h-full w-full overflow-hidden">
+      {/* Left side (main content) */}
+      <div className="flex min-h-0 flex-1 flex-col">
+        <TaskDetailHeader actions={isSidebarVisible ? undefined : actions} />
 
-              <div className="space-y-2">
-                <Label>Description</Label>
-                <Separator className="my-4" />
-                {/* Keep description in markdown editor for both create and detail modes. */}
-                <MarkdownEditor
-                  content={description}
-                  onContentChange={(content) => onDescriptionChange?.(content)}
-                  editable={editable}
-                />
-                {descriptionError ? (
-                  <div className="text-sm text-destructive">{descriptionError}</div>
-                ) : null}
-              </div>
-
-              {/* Keep validation and status messaging colocated with editor content. */}
-              {footerContent}
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          <div className="mx-auto w-full max-w-4xl space-y-4">
+            {/* Keep shared task identity fields consistent across create and detail modes. */}
+            <div className="space-y-2">
+              <Label htmlFor="task-friendly-name">Name</Label>
+              <Input
+                id="task-friendly-name"
+                value={friendlyName}
+                onChange={(event) => onFriendlyNameChange?.(event.target.value)}
+                placeholder={friendlyNamePlaceholder}
+                disabled={!editable}
+              />
+              {friendlyNameError ? (
+                <div className="text-sm text-destructive">{friendlyNameError}</div>
+              ) : null}
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="task-name">Worktree</Label>
+              <Input
+                id="task-name"
+                value={taskName}
+                onChange={(event) => onTaskNameChange?.(event.target.value)}
+                placeholder={taskNamePlaceholder}
+                disabled={!editable}
+              />
+              {taskNameError ? <div className="text-sm text-destructive">{taskNameError}</div> : null}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Separator className="my-4" />
+              {/* Keep description in markdown editor for both create and detail modes. */}
+              <MarkdownEditor
+                content={description}
+                onContentChange={(content) => onDescriptionChange?.(content)}
+                editable={editable}
+              />
+              {descriptionError ? <div className="text-sm text-destructive">{descriptionError}</div> : null}
+            </div>
+
+            {/* Keep validation and status messaging colocated with editor content. */}
+            {footerContent}
           </div>
         </div>
-
-        {/* Right side (sidebar) */}
-        <TaskDetailSidebar />
       </div>
-    </SidebarProvider>
+
+      {/* Right side (sidebar) */}
+      <TaskDetailSidebar actions={isSidebarVisible ? actions : undefined} />
+    </div>
   );
 }

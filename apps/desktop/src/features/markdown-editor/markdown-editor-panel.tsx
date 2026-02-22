@@ -7,9 +7,13 @@ export function MarkdownEditorPanel() {
   const [content, setContent] = useState(initialMarkdown);
 
   return (
-    <div className="w-full flex items-center justify-center">
+    <div className="flex w-full justify-center">
       <div className="w-full max-w-3xl">
-        <MarkdownEditor content={content} onContentChange={setContent} height="70vh" autoFocus />
+        <MarkdownEditor
+          content={content}
+          onContentChange={setContent}
+          autoFocus
+        />
       </div>
     </div>
   );

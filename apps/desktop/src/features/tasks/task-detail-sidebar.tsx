@@ -1,16 +1,18 @@
+import * as React from 'react';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '../../components/ui/sidebar';
 import { Separator } from '../../components/ui/separator';
 import { Button } from '../../components/ui/button';
 
-export function TaskDetailSidebar() {
+export type TaskDetailSidebarProps = {
+  actions?: React.ReactNode;
+};
+
+export function TaskDetailSidebar({ actions }: TaskDetailSidebarProps) {
   return (
     <Sidebar side="right" collapsible="offcanvas" className="h-full">
-      <SidebarHeader className="border-b">
-        <div className="flex items-center justify-between">
-          <div className="text-sm font-medium">Sidebar</div>
-          <Button variant="outline" size="sm">
-            Action
-          </Button>
+      <SidebarHeader className="border-b h-12 flex items-center justify-center">
+        <div className="w-full flex items-center justify-end">
+          {actions && <div className="flex items-center gap-2">{actions}</div>}
         </div>
       </SidebarHeader>
 
