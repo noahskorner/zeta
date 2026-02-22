@@ -14,7 +14,7 @@ export function WindowHeader({
   onCloseWindow,
 }: WindowHeaderProps) {
   return (
-    <header className="fixed top-0 left-0 w-full flex h-8 items-center justify-between border-b bg-background/95 pl-3 backdrop-blur-sm [-webkit-app-region:drag]">
+    <header className="fixed top-0 left-0 z-60 flex h-8 w-full items-center justify-between border-b bg-background/95 pl-3 backdrop-blur-sm [-webkit-app-region:drag]">
       {/* Keep a subtle brand marker on the left while preserving drag area. */}
       <div className="text-xs font-medium text-muted-foreground">Zeta</div>
 

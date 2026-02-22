@@ -36,8 +36,8 @@ export function TaskDialog({
         className={[
           // Almost full screen
           'max-w-none',
-          'w-[calc(100vw-2rem)]',
-          'h-[calc(100vh-2rem)]',
+          'w-[calc(100%-2rem)]',
+          'h-[calc(100%-2rem)]',
           'p-0',
           'gap-0',
           'sm:rounded-lg',

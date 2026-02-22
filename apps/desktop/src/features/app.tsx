@@ -129,7 +129,7 @@ export default function App() {
         onToggleMaximizeWindow={handleToggleMaximizeWindow}
         onCloseWindow={handleCloseWindow}
       />
-      <div className="pt-18">
+      <div id="window-body-portal" className="relative mt-8 flex min-h-0 flex-1 pt-12">
         <SidebarProvider className="min-h-0 flex-1">
           <AppSidebar
             activeView={activeView}
