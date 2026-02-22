@@ -26,7 +26,7 @@ export function AppHeader({
   onCloseWindow,
 }: AppHeaderProps) {
   return (
-    <header className="sticky top-0 z-10 flex h-10 items-center justify-between border-b bg-background pl-4 [-webkit-app-region:drag]">
+    <header className="sticky top-0 z-10 flex h-12 items-center justify-between border-b bg-background pl-4 [-webkit-app-region:drag]">
       {/* Left side controls */}
       <div className="flex items-center gap-3 [-webkit-app-region:no-drag]">
         <SidebarTrigger />
