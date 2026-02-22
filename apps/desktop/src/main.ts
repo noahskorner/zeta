@@ -24,6 +24,11 @@ if (started) {
   app.quit();
 }
 
+const MIN_ZOOM_FACTOR = 0.5;
+const MAX_ZOOM_FACTOR = 3;
+const ZOOM_STEP = 0.1;
+const DEFAULT_ZOOM_FACTOR = 1;
+
 const createWindow = () => {
   console.log('Creating main window...');
   // Create the browser window.
@@ -53,6 +58,30 @@ const createWindow = () => {
     }
 
     return { action: 'deny' };
+  });
+  // Support browser-like zoom keyboard shortcuts for frameless windows.
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    const isZoomModifierPressed = process.platform === 'darwin' ? input.meta : input.control;
+    if (!isZoomModifierPressed || input.type !== 'keyDown') {
+      return;
+    }
+
+    if (isZoomInShortcut(input)) {
+      event.preventDefault();
+      setWindowZoomFactor(mainWindow, ZOOM_STEP);
+      return;
+    }
+
+    if (isZoomOutShortcut(input)) {
+      event.preventDefault();
+      setWindowZoomFactor(mainWindow, -ZOOM_STEP);
+      return;
+    }
+
+    if (isResetZoomShortcut(input)) {
+      event.preventDefault();
+      mainWindow.webContents.setZoomFactor(DEFAULT_ZOOM_FACTOR);
+    }
   });
 
   // and load the index.html of the app.
@@ -206,4 +235,31 @@ function isSafeExternalUrl(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+function setWindowZoomFactor(window: BrowserWindow, delta: number): void {
+  // Clamp zoom factor to keep rendering predictable and readable.
+  const next = clamp(window.webContents.getZoomFactor() + delta, MIN_ZOOM_FACTOR, MAX_ZOOM_FACTOR);
+  window.webContents.setZoomFactor(next);
+}
+
+function isZoomInShortcut(input: Electron.Input): boolean {
+  return (
+    input.key === '=' ||
+    input.key === '+' ||
+    input.code === 'Equal' ||
+    input.code === 'NumpadAdd'
+  );
+}
+
+function isZoomOutShortcut(input: Electron.Input): boolean {
+  return input.key === '-' || input.code === 'Minus' || input.code === 'NumpadSubtract';
+}
+
+function isResetZoomShortcut(input: Electron.Input): boolean {
+  return input.key === '0' || input.code === 'Digit0' || input.code === 'Numpad0';
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
 }
