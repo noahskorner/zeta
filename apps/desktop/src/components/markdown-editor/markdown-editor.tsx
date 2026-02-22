@@ -17,7 +17,6 @@ import { languages } from '@codemirror/language-data';
 import { DecorationRange } from './decoration-range';
 import { headings } from './headings';
 import { italics } from './italics';
-import { lists } from './lists';
 import { strongs } from './strongs';
 import { superscripts } from './superscripts';
 import { subscripts } from './subscripts';
@@ -137,7 +136,6 @@ const markdownPlugin = ViewPlugin.fromClass(
         const cursorLine = view.state.doc.lineAt(cursorPosition).number;
 
         let position = initialFrom;
-        let listCount = 0;
         let tableCount = 0;
         for (let lineNumber = 1; lineNumber <= lines.length; lineNumber++) {
           const line = view.state.doc.line(lineNumber);
@@ -167,18 +165,6 @@ const markdownPlugin = ViewPlugin.fromClass(
           // Headings
           decorations.push(...headings(line, lineText, isActive, from, to));
 
-          // Lists
-          const { count: updatedListCount, decorations: listDecorations } = lists(
-            line,
-            lineText,
-            isActive,
-            from,
-            to,
-            listCount
-          );
-          listCount = updatedListCount;
-          decorations.push(...listDecorations);
-
           // Tables
           const { count: updatedTableCount, decorations: tableDecorations } = tables(
             line,
@@ -186,7 +172,7 @@ const markdownPlugin = ViewPlugin.fromClass(
             isActive,
             from,
             to,
-            tableCount
+            tableCount,
           );
           tableCount = updatedTableCount;
           decorations.push(...tableDecorations);
@@ -205,7 +191,8 @@ const markdownPlugin = ViewPlugin.fromClass(
       // Apply the decorations
       decorations.sort(
         (a, b) =>
-          a.from - b.from || (a.decoration.spec.startSide ?? 0) - (b.decoration.spec.startSide ?? 0)
+          a.from - b.from ||
+          (a.decoration.spec.startSide ?? 0) - (b.decoration.spec.startSide ?? 0),
       );
       for (const range of decorations) {
         builder.add(range.from, range.to, range.decoration);
@@ -216,5 +203,5 @@ const markdownPlugin = ViewPlugin.fromClass(
   },
   {
     decorations: (v) => v.decorations,
-  }
+  },
 );

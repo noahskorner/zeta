@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { MarkdownEditor } from '../../components/markdown-editor';
 import initialMarkdown from './markdown.md?raw';
+import { MarkdownEditor } from '../../components/markdown-editor/markdown-editor';
 
 export function MarkdownEditorPanel() {
   // Keep local editor state isolated from tasks and other app features.
