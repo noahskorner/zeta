@@ -1,0 +1,195 @@
+* {
+  text-decoration: none !important;
+}
+
+.cm-editor,
+.cm-editor .cm-scroller,
+.cm-editor .cm-content {
+  background-color: transparent !important;
+}
+
+.cm-editor {
+  height: auto;
+}
+
+.cm-editor .cm-scroller {
+  overflow: visible !important;
+}
+
+.cm-editor .cm-content,
+.cm-editor .cm-line {
+  color: hsl(var(--color-foreground)) !important;
+}
+
+.cm-line {
+  font-family: var(--font-sans), sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.25em !important;
+}
+
+.cm-focused {
+  outline: none !important; /* Remove the outline */
+}
+
+.cm-activeLine {
+  color: var(--color-foreground) !important;
+  background: transparent !important; /* Remove the active line background */
+}
+
+.cm-gutters {
+  display: none !important; /* Remove the line numbers */
+}
+
+.cm-selectionBackground {
+  /* background-color: oklch(81.1% 0.111 293.571) !important; Selection background */
+  opacity: 0.5;
+}
+
+.cm-selectionMatch {
+  /* background-color: oklch(81.1% 0.111 293.571) !important; Change the matched selections color */
+  opacity: 0.5;
+}
+
+.dark .cm-selectionBackground {
+  /* background-color: oklch(43.2% 0.232 292.759) !important; Selection background */
+  opacity: 0.5;
+}
+
+.dark .cm-selectionMatch {
+  /* background-color: oklch(43.2% 0.232 292.759) !important; Change the matched selections color */
+  opacity: 0.5;
+}
+
+.cm-heading-1 {
+  color: var(--color-foreground) !important;
+  font-size: 2.25em;
+  font-weight: 800;
+  line-height: 1.11111em;
+}
+
+.cm-heading-1 * {
+  color: var(--color-foreground) !important;
+}
+
+.cm-heading-2 {
+  color: var(--color-foreground) !important;
+  font-size: 1.5em;
+  font-weight: 700;
+  line-height: 1.33333;
+}
+
+.cm-heading-2 * {
+  color: var(--color-foreground) !important;
+}
+
+.cm-heading-3 {
+  color: var(--color-foreground) !important;
+  font-size: 1.25em;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.cm-heading-3 * {
+  color: var(--color-foreground) !important;
+}
+
+.cm-heading-4 {
+  color: var(--color-foreground) !important;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.cm-heading-4 * {
+  color: var(--color-foreground) !important;
+}
+
+.cm-heading-5 {
+  color: var(--color-foreground) !important;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.cm-heading-5 * {
+  color: var(--color-foreground) !important;
+}
+
+.cm-heading-6 {
+  color: var(--color-foreground) !important;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.cm-heading-6 * {
+  color: var(--color-foreground) !important;
+}
+
+.cm-table-row {
+  display: flex;
+  width: 100%;
+  font-size: 0.875em;
+  line-height: 1.71429;
+  padding-top: 0.571429em;
+  padding-inline-end: 0.571429em;
+  padding-bottom: 0.571429em;
+  border-bottom: 1px solid var(--border);
+}
+
+.cm-table-row[data-row-number='1'] {
+  font-weight: 600;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.cm-table-cell {
+  display: block;
+  width: 100%;
+}
+
+.cm-table-separator {
+  display: block;
+  width: 100%;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0.571429em;
+}
+
+.cm-blockquote {
+  border-inline-start-width: 0.25rem;
+  border-inline-start-color: var(--color-secondary);
+  padding-inline-start: 1em;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.cm-hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.cm-inline-code {
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 0.25em;
+  color: var(--foreground) !important;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.95em;
+  padding: 0.1em 0.25em;
+}
+
+.cm-strikethrough {
+  text-decoration: line-through !important;
+}
+
+.cm-markdown {
+  color: var(--muted-foreground);
+  display: none;
+}
+
+.cm-markdown[data-active='true'] {
+  display: inline;
+}
+
+.cm-superscript {
+  font-size: 0.75em;
+  vertical-align: super;
+}

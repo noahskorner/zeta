@@ -1,8 +1,8 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo, useState, type KeyboardEvent } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Button } from "../../components/ui/button";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMemo, useState, type KeyboardEvent } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { Button } from '../../components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,8 +10,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../components/ui/form";
-import { Input } from "../../components/ui/input";
+} from '../../components/ui/form';
+import { Input } from '../../components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -20,19 +20,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../../components/ui/dialog";
+} from '../../components/ui/dialog';
 
 const createTaskSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, "Task name is required.")
+    .min(1, 'Task name is required.')
     .refine(
       (value) => isValidTaskName(value),
-      "Task name must be a valid git branch/worktree name.",
+      'Task name must be a valid git branch/worktree name.',
     ),
-  friendlyName: z.string().trim().min(1, "Friendly name is required."),
-  description: z.string().trim().min(1, "Description is required."),
+  friendlyName: z.string().trim().min(1, 'Friendly name is required.'),
+  description: z.string().trim().min(1, 'Description is required.'),
 });
 
 type CreateTaskValues = z.infer<typeof createTaskSchema>;
@@ -53,16 +53,16 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
   const form = useForm<CreateTaskValues>({
     resolver: zodResolver(createTaskSchema),
     defaultValues: {
-      name: "",
-      friendlyName: "",
-      description: "",
+      name: '',
+      friendlyName: '',
+      description: '',
     },
   });
 
   // Submit task creation request through the desktop bridge API.
   async function handleSubmit(values: CreateTaskValues) {
     if (!props.selectedProjectPath) {
-      form.setError("root", { message: "Select a project before creating a task." });
+      form.setError('root', { message: 'Select a project before creating a task.' });
       return;
     }
 
@@ -84,7 +84,7 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
 
   // Submit on Enter for standard fields while preserving multiline input behavior.
   function handleFormKeyDown(event: KeyboardEvent<HTMLFormElement>) {
-    if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) {
+    if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) {
       return;
     }
 
@@ -111,14 +111,13 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
           Create Task
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-5xl">
         <DialogHeader>
           <DialogTitle>Create Task</DialogTitle>
           <DialogDescription>
             Create a task and provision a matching git worktree.
           </DialogDescription>
         </DialogHeader>
-
         <Form {...form}>
           <form
             className="flex flex-col gap-4"
@@ -188,7 +187,7 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
 
             <DialogFooter>
               <Button type="submit" disabled={form.formState.isSubmitting || !hasProject}>
-                {form.formState.isSubmitting ? "Creating..." : "Create Task"}
+                {form.formState.isSubmitting ? 'Creating...' : 'Create Task'}
               </Button>
             </DialogFooter>
           </form>
@@ -199,13 +198,13 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
 }
 
 function isValidTaskName(name: string): boolean {
-  if (name.includes("..")) {
+  if (name.includes('..')) {
     return false;
   }
-  if (name.endsWith("/") || name.startsWith("/") || name.startsWith("-")) {
+  if (name.endsWith('/') || name.startsWith('/') || name.startsWith('-')) {
     return false;
   }
-  if (name.includes("@{") || name.endsWith(".lock")) {
+  if (name.includes('@{') || name.endsWith('.lock')) {
     return false;
   }
 
@@ -217,5 +216,5 @@ function getErrorMessage(error: unknown): string {
     return error.message;
   }
 
-  return "Unknown error";
+  return 'Unknown error';
 }
