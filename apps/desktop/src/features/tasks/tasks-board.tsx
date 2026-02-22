@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
-import { TaskLane } from "./task-lane";
-import type { TaskCard, TaskLane as TaskLaneModel, TaskLaneId } from "./types";
+import { useEffect, useMemo, useState } from 'react';
+import { TaskLane } from './task-lane';
+import type { TaskCard, TaskLane as TaskLaneModel, TaskLaneId } from './types';
 
 const lanes: TaskLaneModel[] = [
-  { id: "backlog", title: "Backlog", description: "Capture and shape upcoming work." },
-  { id: "ready", title: "Ready", description: "Defined tasks ready for pickup." },
-  { id: "in-progress", title: "In Progress", description: "Actively being implemented." },
-  { id: "review", title: "Review", description: "Waiting on code or QA review." },
-  { id: "done", title: "Done", description: "Completed and verified." },
+  { id: 'backlog', title: 'Backlog', description: 'Capture and shape upcoming work.' },
+  { id: 'ready', title: 'Ready', description: 'Defined tasks ready for pickup.' },
+  { id: 'in-progress', title: 'In Progress', description: 'Actively being implemented.' },
+  { id: 'review', title: 'Review', description: 'Waiting on code or QA review.' },
+  { id: 'done', title: 'Done', description: 'Completed and verified.' },
 ];
 
 type TasksBoardProps = {
@@ -34,7 +34,7 @@ export function TasksBoard(props: TasksBoardProps) {
       {
         backlog: [],
         ready: [],
-        "in-progress": [],
+        'in-progress': [],
         review: [],
         done: [],
       },
@@ -58,12 +58,6 @@ export function TasksBoard(props: TasksBoardProps) {
 
   return (
     <div className="space-y-4">
-      <div>
-        <div className="text-sm text-muted-foreground">
-          Tasks load from project metadata and can be organized by lane.
-        </div>
-      </div>
-
       <div className="grid gap-4 xl:grid-cols-5">
         {lanes.map((lane) => (
           <TaskLane
@@ -84,7 +78,9 @@ export function TasksBoard(props: TasksBoardProps) {
         ))}
       </div>
 
-      {props.isLoading ? <div className="text-sm text-muted-foreground">Loading tasks...</div> : null}
+      {props.isLoading ? (
+        <div className="text-sm text-muted-foreground">Loading tasks...</div>
+      ) : null}
     </div>
   );
 }

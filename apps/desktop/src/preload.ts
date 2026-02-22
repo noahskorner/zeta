@@ -5,6 +5,7 @@ import {
   AddToolResponse,
   CreateTaskCommand,
   FindProjectsResponse,
+  ListToolsResponse,
   ListTasksResponse,
   ListTasksQuery,
 } from '@zeta/commands';
@@ -29,6 +30,7 @@ contextBridge.exposeInMainWorld('zetaApi', {
   // Manage tools from the desktop renderer.
   addTool: (command: AddToolCommand): Promise<AddToolResponse> =>
     ipcRenderer.invoke('tools:add', command),
+  listTools: (): Promise<ListToolsResponse> => ipcRenderer.invoke('tools:list'),
   // Open the shared zeta app data folder in the OS file explorer.
   openAppDataFolder: (): Promise<string> => ipcRenderer.invoke('app:open-data-folder'),
   // Open a URL in the user's OS default browser/email client.

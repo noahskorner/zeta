@@ -1,5 +1,13 @@
 import { Command } from 'commander';
-import { AddToolCommand, AddToolFacade, AddToolRepository, AddToolService } from '@zeta/commands';
+import {
+  AddToolCommand,
+  AddToolFacade,
+  AddToolRepository,
+  AddToolService,
+  ListToolResponse,
+  ListToolsFacade,
+  ListToolsRepository,
+} from '@zeta/commands';
 
 type AddToolOptions = {
   name: string;
@@ -11,8 +19,10 @@ type AddToolOptions = {
 export function addTools(command: Command) {
   // Instantiate services.
   const service = new AddToolService();
-  const repository = new AddToolRepository();
-  const facade = new AddToolFacade(service, repository);
+  const addToolRepository = new AddToolRepository();
+  const addToolFacade = new AddToolFacade(service, addToolRepository);
+  const listToolsRepository = new ListToolsRepository();
+  const listToolsFacade = new ListToolsFacade(listToolsRepository);
 
   // Add the command.
   const toolsCommand = command.command('tools').description('Manage saved tools');
@@ -29,7 +39,7 @@ export function addTools(command: Command) {
         // Normalize args provided via --args or repeated --arg options.
         const parsedArgs = parseArgs(options.args, options.arg);
 
-        const createdTool = await facade.execute({
+        const createdTool = await addToolFacade.execute({
           name: options.name,
           command: options.command,
           args: parsedArgs.length > 0 ? parsedArgs : undefined,
@@ -41,6 +51,25 @@ export function addTools(command: Command) {
           console.error(error.message);
         } else {
           console.error('Failed to add tool.');
+        }
+
+        process.exitCode = 1;
+      }
+    });
+
+  toolsCommand
+    .command('list')
+    .description('List saved tools')
+    .action(async () => {
+      try {
+        // Read all persisted tools and print a simple table-like list.
+        const { tools } = await listToolsFacade.execute();
+        printTools(tools);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(error.message);
+        } else {
+          console.error('Failed to list tools.');
         }
 
         process.exitCode = 1;
@@ -64,4 +93,22 @@ function parseArgs(commaSeparatedArgs: string | undefined, repeatedArgs: string[
     .filter((arg) => arg.length > 0);
 
   return [...argsFromCsv, ...argsFromRepeatedOptions];
+}
+
+function printTools(tools: ListToolResponse[]): void {
+  if (tools.length === 0) {
+    console.log('No tools found.');
+    return;
+  }
+
+  const sortedTools = [...tools].sort((first, second) => second.createdAt.localeCompare(first.createdAt));
+
+  sortedTools.forEach((tool) => {
+    const args = tool.args && tool.args.length > 0 ? ` ${tool.args.join(' ')}` : '';
+    console.log(`${tool.name}`);
+    console.log(`  id: ${tool.id}`);
+    console.log(`  command: ${tool.command}${args}`);
+    console.log(`  created: ${tool.createdAt}`);
+    console.log('');
+  });
 }

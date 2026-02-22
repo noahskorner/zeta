@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import { CreateTaskDialog } from "./create-task-dialog";
-import { TasksBoard } from "./tasks-board";
-import type { TaskCard } from "./types";
+import { useEffect, useMemo, useState } from 'react';
+import { CreateTaskDialog } from './create-task-dialog';
+import { TasksBoard } from './tasks-board';
+import type { TaskCard } from './types';
 
 type TasksPanelProps = {
   selectedProjectId: string | null;
@@ -15,7 +15,10 @@ export function TasksPanel(props: TasksPanelProps) {
   const [isLoadingTasks, setIsLoadingTasks] = useState(false);
   const [refreshCount, setRefreshCount] = useState(0);
 
-  const hasSelectedProject = useMemo(() => Boolean(props.selectedProjectId), [props.selectedProjectId]);
+  const hasSelectedProject = useMemo(
+    () => Boolean(props.selectedProjectId),
+    [props.selectedProjectId],
+  );
 
   useEffect(() => {
     void loadTasks();
@@ -39,7 +42,7 @@ export function TasksPanel(props: TasksPanelProps) {
           id: task.id,
           title: task.friendlyName,
           description: task.description,
-          laneId: "backlog",
+          laneId: 'backlog',
         })),
       );
     } catch (error) {
@@ -57,7 +60,7 @@ export function TasksPanel(props: TasksPanelProps) {
   return (
     <div className="space-y-4">
       {/* Keep task creation near the board and scoped to the selected project. */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 rounded-md border p-4">
         <div className="text-sm text-muted-foreground">
           Create a task to persist metadata and create a git worktree.
         </div>
@@ -67,7 +70,6 @@ export function TasksPanel(props: TasksPanelProps) {
           onError={props.onError}
         />
       </div>
-
       {!hasSelectedProject ? (
         <div className="rounded-md border p-3 text-sm text-muted-foreground">
           Select a project to load tasks.
@@ -84,5 +86,5 @@ function getErrorMessage(error: unknown): string {
     return error.message;
   }
 
-  return "Unknown error";
+  return 'Unknown error';
 }

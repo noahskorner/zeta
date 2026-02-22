@@ -19,6 +19,8 @@ import {
   ListTasksFacade,
   ListTasksQuery,
   ListTasksRepository,
+  ListToolsFacade,
+  ListToolsRepository,
   ProjectsRepository,
   Repository,
 } from '@zeta/commands';
@@ -192,6 +194,15 @@ function registerToolIpcHandlers(): void {
 
     // Persist the tool.
     return facade.execute(command);
+  });
+
+  ipcMain.handle('tools:list', async () => {
+    // Instantiate services.
+    const repository = new ListToolsRepository();
+    const facade = new ListToolsFacade(repository);
+
+    // Return persisted tools.
+    return facade.execute();
   });
 }
 

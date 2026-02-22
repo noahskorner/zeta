@@ -3,6 +3,7 @@ import {
   AddToolResponse,
   CreateTaskCommand,
   FindProjectsResponse,
+  ListToolsResponse,
   FindTasksResponse,
   ListTasksQuery,
 } from '@zeta/commands';
@@ -32,6 +33,7 @@ declare global {
       listTasks: (query: ListTasksQuery) => Promise<FindTasksResponse>;
       // Manage tools from the desktop renderer.
       addTool: (command: AddToolCommand) => Promise<AddToolResponse>;
+      listTools: () => Promise<ListToolsResponse>;
       // Open the shared zeta app data folder in the OS file explorer.
       openAppDataFolder: () => Promise<string>;
       // Open a URL using the operating system default external handler.
