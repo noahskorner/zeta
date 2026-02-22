@@ -14,6 +14,25 @@ export function italics(
   const decorations: Array<DecorationRange> = [];
   for (const match of matches) {
     if (match.index === undefined) continue;
+    if (!match[1]) continue;
+
+    const delimiter = match[1];
+    const matchStart = match.index;
+    const matchEnd = match.index + match[0].length - 1;
+    const charBeforeStart = lineText[matchStart - 1];
+    const charAfterStart = lineText[matchStart + 1];
+    const charBeforeEnd = lineText[matchEnd - 1];
+    const charAfterEnd = lineText[matchEnd + 1];
+
+    // Skip matches that are part of repeated delimiters (e.g. **bold**).
+    if (
+      charBeforeStart === delimiter ||
+      charAfterStart === delimiter ||
+      charBeforeEnd === delimiter ||
+      charAfterEnd === delimiter
+    ) {
+      continue;
+    }
 
     const matchFrom = from + match.index;
     const matchTo = matchFrom + match[0].length;
