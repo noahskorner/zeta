@@ -8,9 +8,11 @@ import { Label } from '../../components/ui/label';
 import { Separator } from '../../components/ui/separator';
 
 export type TaskDetailProps = {
+  taskId?: string;
   friendlyName: string;
   taskName: string;
   description: string;
+  createdAt?: string;
   onFriendlyNameChange?: (friendlyName: string) => void;
   onTaskNameChange?: (taskName: string) => void;
   onDescriptionChange?: (description: string) => void;
@@ -26,9 +28,11 @@ export type TaskDetailProps = {
 };
 
 export function TaskDetail({
+  taskId,
   friendlyName,
   taskName,
   description,
+  createdAt,
   onFriendlyNameChange,
   onTaskNameChange,
   onDescriptionChange,
@@ -101,7 +105,13 @@ export function TaskDetail({
         </div>
 
         {/* Right side (sidebar) */}
-        <TaskDetailSidebar />
+        <TaskDetailSidebar
+          taskId={taskId}
+          taskName={taskName}
+          friendlyName={friendlyName}
+          description={description}
+          createdAt={createdAt}
+        />
       </div>
     </SidebarProvider>
   );

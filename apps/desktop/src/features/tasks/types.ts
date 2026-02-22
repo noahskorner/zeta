@@ -8,7 +8,9 @@ export type TaskLane = {
 
 export type TaskCard = {
   id: string;
+  taskName: string;
   title: string;
   description: string;
+  createdAt: string;
   laneId: TaskLaneId;
 };
