@@ -60,6 +60,7 @@ export function TaskDialog({
 
         <TaskDetail
           taskId={taskId || ''}
+          title={title || ''}
           description={description || ''}
           actions={
             <Button

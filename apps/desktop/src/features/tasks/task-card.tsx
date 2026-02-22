@@ -56,6 +56,7 @@ export function TaskCard(props: TaskCardProps) {
 
       <TaskDialog
         taskId={props.task.id}
+        title={props.task.title}
         description={props.task.description}
         open={isExpanded}
         onOpenChange={setIsExpanded}
