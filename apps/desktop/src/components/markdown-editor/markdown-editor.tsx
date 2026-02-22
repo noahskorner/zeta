@@ -10,6 +10,7 @@ import CodeMirror, {
   ViewPlugin,
   ViewUpdate,
 } from '@uiw/react-codemirror';
+import { StateEffect } from '@codemirror/state';
 import { vscodeDark, vscodeLight } from '@uiw/codemirror-theme-vscode';
 import './markdown-editor.css';
 import { markdown } from '@codemirror/lang-markdown';
@@ -25,10 +26,29 @@ import { horizontalRules } from './horizontal-rules';
 import { blockquotes } from './blockquotes';
 import { inlineCode } from './inline-code';
 import { strikethroughs } from './strikethroughs';
+import { lists, MarkdownLine } from './lists';
 
 const mdExtension = markdown({
   codeLanguages: languages,
 });
+const refreshDecorationsEffect = StateEffect.define<null>();
+
+function getDecorationStartSide(decoration: Decoration): number {
+  const sideFromDecoration = (decoration as Decoration & { startSide?: number }).startSide;
+  if (typeof sideFromDecoration === 'number') {
+    return sideFromDecoration;
+  }
+
+  const spec = decoration.spec as { startSide?: number; side?: number };
+  if (typeof spec.startSide === 'number') {
+    return spec.startSide;
+  }
+  if (typeof spec.side === 'number') {
+    return spec.side;
+  }
+
+  return 0;
+}
 
 export interface MarkdownEditorProps {
   content: string;
@@ -113,14 +133,22 @@ export const MarkdownEditor = ({
 
 const markdownPlugin = ViewPlugin.fromClass(
   class {
+    view: EditorView;
     decorations: DecorationSet;
+    collapsedListKeys: Set<string>;
 
     constructor(view: EditorView) {
+      this.view = view;
+      this.collapsedListKeys = new Set<string>();
       this.decorations = this.buildDecorations(view);
     }
 
     update(update: ViewUpdate) {
-      if (update.docChanged || update.viewportChanged || update.selectionSet) {
+      const hasRefreshEffect = update.transactions.some((transaction) =>
+        transaction.effects.some((effect) => effect.is(refreshDecorationsEffect)),
+      );
+
+      if (update.docChanged || update.viewportChanged || update.selectionSet || hasRefreshEffect) {
         this.decorations = this.buildDecorations(update.view);
       }
     }
@@ -129,70 +157,92 @@ const markdownPlugin = ViewPlugin.fromClass(
       const builder = new RangeSetBuilder<Decoration>();
 
       const decorations: Array<DecorationRange> = [];
-      for (const { from: initialFrom, to: initialTo } of view.visibleRanges) {
-        const content = view.state.doc.sliceString(initialFrom, initialTo);
-        const lines = content.split('\n');
-        const cursorPosition = view.state.selection.main.head;
-        const cursorLine = view.state.doc.lineAt(cursorPosition).number;
+      const lines: Array<MarkdownLine> = [];
+      const cursorPosition = view.state.selection.main.head;
+      const cursorLine = view.state.doc.lineAt(cursorPosition).number;
 
-        let position = initialFrom;
-        let tableCount = 0;
-        for (let lineNumber = 1; lineNumber <= lines.length; lineNumber++) {
-          const line = view.state.doc.line(lineNumber);
-          const lineText = lines[lineNumber - 1];
-          const isActive = lineNumber == cursorLine;
-          const from = position;
-          const to = position + lineText.length;
+      let tableCount = 0;
+      for (let lineNumber = 1; lineNumber <= view.state.doc.lines; lineNumber++) {
+        const line = view.state.doc.line(lineNumber);
+        const lineText = line.text;
+        const isActive = lineNumber === cursorLine;
+        const from = line.from;
+        const to = line.to;
 
-          // Strongs
-          decorations.push(...strongs(lineText, cursorPosition, from));
+        lines.push({
+          number: lineNumber,
+          from,
+          to,
+          text: lineText,
+        });
 
-          // Italics
-          decorations.push(...italics(lineText, cursorPosition, from));
+        // Strongs
+        decorations.push(...strongs(lineText, cursorPosition, from));
 
-          // Superscripts
-          decorations.push(...superscripts(lineText, cursorPosition, from));
+        // Italics
+        decorations.push(...italics(lineText, cursorPosition, from));
 
-          // Strikethroughs
-          decorations.push(...strikethroughs(lineText, cursorPosition, from));
+        // Superscripts
+        decorations.push(...superscripts(lineText, cursorPosition, from));
 
-          // Subscripts
-          decorations.push(...subscripts(lineText, cursorPosition, from));
+        // Strikethroughs
+        decorations.push(...strikethroughs(lineText, cursorPosition, from));
 
-          // Quotes
-          decorations.push(...blockquotes(lineText, isActive, from, to));
+        // Subscripts
+        decorations.push(...subscripts(lineText, cursorPosition, from));
 
-          // Headings
-          decorations.push(...headings(line, lineText, isActive, from, to));
+        // Quotes
+        decorations.push(...blockquotes(lineText, isActive, from, to));
 
-          // Tables
-          const { count: updatedTableCount, decorations: tableDecorations } = tables(
-            line,
-            lineText,
-            isActive,
-            from,
-            to,
-            tableCount,
-          );
-          tableCount = updatedTableCount;
-          decorations.push(...tableDecorations);
+        // Headings
+        decorations.push(...headings(line, lineText, isActive, from, to));
 
-          // Horizontal Rules
-          decorations.push(...horizontalRules(lineText, isActive, from, to));
+        // Tables
+        const { count: updatedTableCount, decorations: tableDecorations } = tables(
+          line,
+          lineText,
+          isActive,
+          from,
+          to,
+          tableCount,
+        );
+        tableCount = updatedTableCount;
+        decorations.push(...tableDecorations);
 
-          // Code
-          decorations.push(...inlineCode(lineText, cursorPosition, from));
+        // Horizontal Rules
+        decorations.push(...horizontalRules(lineText, isActive, from, to));
 
-          // Increment the position
-          position += lineText.length + 1;
-        }
+        // Code
+        decorations.push(...inlineCode(lineText, cursorPosition, from));
       }
+
+      // Lists
+      decorations.push(
+        ...lists({
+          lines,
+          cursorPosition,
+          collapsedKeys: this.collapsedListKeys,
+          onToggleCollapse: (key: string) => {
+            if (this.collapsedListKeys.has(key)) {
+              this.collapsedListKeys.delete(key);
+            } else {
+              this.collapsedListKeys.add(key);
+            }
+          },
+          onRequestRefresh: () => {
+            this.view.dispatch({
+              effects: refreshDecorationsEffect.of(null),
+            });
+          },
+        }),
+      );
 
       // Apply the decorations
       decorations.sort(
         (a, b) =>
           a.from - b.from ||
-          (a.decoration.spec.startSide ?? 0) - (b.decoration.spec.startSide ?? 0),
+          getDecorationStartSide(a.decoration) - getDecorationStartSide(b.decoration) ||
+          a.to - b.to,
       );
       for (const range of decorations) {
         builder.add(range.from, range.to, range.decoration);

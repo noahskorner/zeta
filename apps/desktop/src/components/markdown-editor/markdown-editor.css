@@ -192,3 +192,69 @@
   font-size: 0.75em;
   vertical-align: super;
 }
+
+.cm-list-marker-slot {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  margin-inline-end: 0.35rem;
+  min-width: 1.5ch;
+  position: relative;
+  vertical-align: middle;
+}
+
+.cm-list-toggle {
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  display: inline-flex;
+  height: 0.75rem;
+  inset: 0;
+  justify-content: center;
+  opacity: 0;
+  padding: 0;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+}
+
+.cm-list-marker-slot:hover .cm-list-toggle {
+  color: var(--foreground);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cm-list-marker-rendered {
+  color: var(--muted-foreground);
+  display: inline-flex;
+  justify-content: center;
+  min-width: 1.5ch;
+}
+
+.cm-list-marker-slot:hover .cm-list-marker-rendered {
+  opacity: 0;
+}
+
+.cm-list-bullet-dot {
+  background: currentColor;
+  border-radius: 9999px;
+  display: inline-block;
+  height: 0.22rem;
+  width: 0.22rem;
+}
+
+.cm-checklist-widget {
+  display: inline-flex;
+  margin-inline-end: 0.35rem;
+  transform: translateY(0.08em);
+}
+
+.cm-checklist-checkbox {
+  margin: 0;
+}
+
+.cm-line[data-list-hidden='true'] {
+  display: none !important;
+}
