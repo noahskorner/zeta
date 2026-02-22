@@ -10,7 +10,6 @@ import CodeMirror, {
   ViewPlugin,
   ViewUpdate,
 } from '@uiw/react-codemirror';
-import { StateEffect } from '@codemirror/state';
 import { vscodeDark, vscodeLight } from '@uiw/codemirror-theme-vscode';
 import './markdown-editor.css';
 import { markdown } from '@codemirror/lang-markdown';
@@ -31,7 +30,6 @@ import { lists, MarkdownLine } from './lists';
 const mdExtension = markdown({
   codeLanguages: languages,
 });
-const refreshDecorationsEffect = StateEffect.define<null>();
 
 function getDecorationStartSide(decoration: Decoration): number {
   const sideFromDecoration = (decoration as Decoration & { startSide?: number }).startSide;
@@ -135,20 +133,14 @@ const markdownPlugin = ViewPlugin.fromClass(
   class {
     view: EditorView;
     decorations: DecorationSet;
-    collapsedListKeys: Set<string>;
 
     constructor(view: EditorView) {
       this.view = view;
-      this.collapsedListKeys = new Set<string>();
       this.decorations = this.buildDecorations(view);
     }
 
     update(update: ViewUpdate) {
-      const hasRefreshEffect = update.transactions.some((transaction) =>
-        transaction.effects.some((effect) => effect.is(refreshDecorationsEffect)),
-      );
-
-      if (update.docChanged || update.viewportChanged || update.selectionSet || hasRefreshEffect) {
+      if (update.docChanged || update.viewportChanged || update.selectionSet) {
         this.decorations = this.buildDecorations(update.view);
       }
     }
@@ -221,19 +213,6 @@ const markdownPlugin = ViewPlugin.fromClass(
         ...lists({
           lines,
           cursorPosition,
-          collapsedKeys: this.collapsedListKeys,
-          onToggleCollapse: (key: string) => {
-            if (this.collapsedListKeys.has(key)) {
-              this.collapsedListKeys.delete(key);
-            } else {
-              this.collapsedListKeys.add(key);
-            }
-          },
-          onRequestRefresh: () => {
-            this.view.dispatch({
-              effects: refreshDecorationsEffect.of(null),
-            });
-          },
         }),
       );
 

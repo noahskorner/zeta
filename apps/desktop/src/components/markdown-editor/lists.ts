@@ -1,7 +1,6 @@
 import { Decoration, EditorView, WidgetType } from '@uiw/react-codemirror';
 import { createElement } from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Checkbox } from '../ui/checkbox';
 import { DecorationRange } from './decoration-range';
 
@@ -16,9 +15,6 @@ export interface MarkdownLine {
 }
 
 interface ParsedListItem {
-  key: string;
-  lineNumber: number;
-  indent: number;
   marker: string;
   markerFrom: number;
   markerTo: number;
@@ -26,62 +22,25 @@ interface ParsedListItem {
   checklistFrom: number | null;
   checklistTo: number | null;
   checked: boolean;
-  hasChildren: boolean;
-  collapsed: boolean;
 }
 
 interface ListsOptions {
   lines: Array<MarkdownLine>;
   cursorPosition: number;
-  collapsedKeys: Set<string>;
-  onToggleCollapse: (key: string) => void;
-  onRequestRefresh: () => void;
 }
 
 class ListMarkerWidget extends WidgetType {
-  private root: Root | null = null;
-
-  constructor(
-    private readonly marker: string,
-    private readonly isChecklist: boolean,
-    private readonly hasChildren: boolean,
-    private readonly collapsed: boolean,
-    private readonly onToggle: (() => void) | null,
-  ) {
+  constructor(private readonly marker: string, private readonly isChecklist: boolean) {
     super();
   }
 
   eq(other: ListMarkerWidget): boolean {
-    return (
-      other.marker === this.marker &&
-      other.isChecklist === this.isChecklist &&
-      other.hasChildren === this.hasChildren &&
-      other.collapsed === this.collapsed
-    );
+    return other.marker === this.marker && other.isChecklist === this.isChecklist;
   }
 
   toDOM(): HTMLElement {
     const container = document.createElement('span');
     container.className = 'cm-list-marker-slot';
-
-    if (this.hasChildren && this.onToggle) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'cm-list-toggle';
-      button.setAttribute('aria-label', this.collapsed ? 'Expand list' : 'Collapse list');
-      button.addEventListener('mousedown', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        this.onToggle?.();
-      });
-      this.root = createRoot(button);
-      this.root.render(
-        createElement(this.collapsed ? ChevronRight : ChevronDown, {
-          className: 'size-2',
-        }),
-      );
-      container.appendChild(button);
-    }
 
     if (!this.isChecklist) {
       const marker = document.createElement('span');
@@ -99,11 +58,6 @@ class ListMarkerWidget extends WidgetType {
     }
 
     return container;
-  }
-
-  destroy(): void {
-    this.root?.unmount();
-    this.root = null;
   }
 
   ignoreEvent(): boolean {
@@ -169,16 +123,9 @@ class ChecklistWidget extends WidgetType {
   }
 }
 
-function indentWidth(whitespace: string): number {
-  return whitespace.replace(/\t/g, '    ').length;
-}
-
 export function lists({
   lines,
   cursorPosition,
-  collapsedKeys,
-  onToggleCollapse,
-  onRequestRefresh,
 }: ListsOptions): Array<DecorationRange> {
   const decorations: Array<DecorationRange> = [];
   const parsedItems: Array<ParsedListItem> = [];
@@ -201,12 +148,8 @@ export function lists({
     const checklistTo = checklistFrom !== null ? checklistFrom + 3 : null;
     const checked = checklistMatch ? checklistMatch[1].toLowerCase() === 'x' : false;
     const isChecklist = checklistMatch !== null;
-    const key = `${line.number}:${line.text.trim()}`;
 
     parsedItems.push({
-      key,
-      lineNumber: line.number,
-      indent: indentWidth(leadingWhitespace),
       marker,
       markerFrom,
       markerTo,
@@ -214,41 +157,10 @@ export function lists({
       checklistFrom,
       checklistTo,
       checked,
-      hasChildren: false,
-      collapsed: false,
     });
   }
 
-  const hiddenLineNumbers = new Set<number>();
-
-  // Determine parent/child boundaries and gather hidden descendant lines for collapsed items.
-  for (let index = 0; index < parsedItems.length; index++) {
-    const current = parsedItems[index];
-    const next = parsedItems[index + 1];
-    current.hasChildren = Boolean(next && next.indent > current.indent);
-    current.collapsed = collapsedKeys.has(current.key);
-
-    if (!current.hasChildren || !current.collapsed) {
-      continue;
-    }
-
-    let nextPeerIndex = -1;
-    for (let inner = index + 1; inner < parsedItems.length; inner++) {
-      if (parsedItems[inner].indent <= current.indent) {
-        nextPeerIndex = inner;
-        break;
-      }
-    }
-
-    const endLine =
-      nextPeerIndex === -1 ? lines.length : parsedItems[nextPeerIndex].lineNumber - 1;
-
-    for (let lineNumber = current.lineNumber + 1; lineNumber <= endLine; lineNumber++) {
-      hiddenLineNumbers.add(lineNumber);
-    }
-  }
-
-  // Add list marker/checklist/toggle widgets and marker hiding behavior.
+  // Add list marker/checklist widgets and marker hiding behavior.
   for (const item of parsedItems) {
     const markerActive = !item.isChecklist && cursorPosition === item.markerTo;
 
@@ -270,18 +182,7 @@ export function lists({
         to: item.markerFrom,
         decoration: Decoration.widget({
           side: -1,
-          widget: new ListMarkerWidget(
-            item.marker,
-            item.isChecklist,
-            item.hasChildren,
-            item.collapsed,
-            item.hasChildren
-              ? () => {
-                  onToggleCollapse(item.key);
-                  onRequestRefresh();
-                }
-              : null,
-          ),
+          widget: new ListMarkerWidget(item.marker, item.isChecklist),
         }),
       });
     }
@@ -295,24 +196,6 @@ export function lists({
         }),
       });
     }
-  }
-
-  // Hide descendants for collapsed list items.
-  for (const lineNumber of hiddenLineNumbers) {
-    const line = lines[lineNumber - 1];
-    if (!line) {
-      continue;
-    }
-
-    decorations.push({
-      from: line.from,
-      to: line.from,
-      decoration: Decoration.line({
-        attributes: {
-          'data-list-hidden': 'true',
-        },
-      }),
-    });
   }
 
   return decorations;
