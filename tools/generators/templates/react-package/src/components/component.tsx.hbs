@@ -1,0 +1,8 @@
+import type { {{properCase componentName}}Props } from "../types";
+{{#if includeStyles}}import "../styles.css";
+{{/if}}
+
+// Render the generated package component with a predictable API.
+export function {{properCase componentName}}({ className, children }: {{properCase componentName}}Props) {
+  return <div className={className}>{children ?? "{{properCase componentName}}"}</div>;
+}

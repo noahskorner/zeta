@@ -14,6 +14,7 @@ For deeper context:
 - [Monorepo Structure](#monorepo-structure)
 - [Architecture Overview](#architecture-overview)
 - [Development Commands](#development-commands)
+- [Package Generation](#package-generation)
 - [Testing and Quality Checks](#testing-and-quality-checks)
 - [Where to Learn More](#where-to-learn-more)
 
@@ -122,6 +123,27 @@ npm --workspace apps/desktop run dev
 npm --workspace apps/cli run build
 npm --workspace apps/cli run start
 ```
+
+## Package Generation
+
+Use Turborepo generators to scaffold new workspaces and React component packages.
+
+```bash
+# Interactive built-in workspace generator
+npm run gen:workspace
+
+# Workspace templates backed by local template packages
+npm run gen:workspace:ts-lib
+npm run gen:workspace:react-ui
+
+# Custom React component package generator
+npm run gen:react-package
+```
+
+Template workspaces used by `turbo generate workspace --copy ...`:
+
+- `@zeta/template-ts-lib`
+- `@zeta/template-react-ui`
 
 ## Testing and Quality Checks
 

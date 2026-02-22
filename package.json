@@ -7,7 +7,12 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
-    "format": "prettier --write \"**/*.{js,cjs,mjs,ts,tsx,json,md,yml,yaml}\""
+    "format": "prettier --write \"**/*.{js,cjs,mjs,ts,tsx,json,md,yml,yaml}\"",
+    "gen:workspace": "turbo generate workspace",
+    "gen:workspace:ts-lib": "turbo generate workspace --type package --copy @zeta/template-ts-lib --destination packages",
+    "gen:workspace:react-ui": "turbo generate workspace --type package --copy @zeta/template-react-ui --destination packages",
+    "gen:react-package": "turbo generate run react-package --config tools/generators/config.ts",
+    "worktrees:clean": "bash ./tools/clean-worktrees.sh"
   },
   "devDependencies": {
     "turbo": "^2.8.9",
