@@ -12,6 +12,7 @@ const makeCompat = (dir) =>
   });
 
 const commandsCompat = makeCompat(path.join(__dirname, "packages/commands"));
+const packagesCompat = makeCompat(path.join(__dirname, "packages/template-ts-lib"));
 const cliCompat = makeCompat(path.join(__dirname, "apps/cli"));
 const desktopCompat = makeCompat(path.join(__dirname, "apps/desktop"));
 
@@ -51,6 +52,33 @@ module.exports = [
     .map((config) => ({
       ...config,
       files: ["packages/commands/src/**/*.ts"],
+    })),
+  ...packagesCompat
+    .config({
+      env: {
+        es6: true,
+        node: true,
+      },
+      extends: [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:import/recommended",
+        "plugin:import/typescript",
+      ],
+      parser: "@typescript-eslint/parser",
+      settings: {
+        "import/resolver": {
+          typescript: {
+            project: ["../*/tsconfig.json"],
+          },
+        },
+      },
+    })
+    .map((config) => ({
+      ...config,
+      files: ["packages/*/src/**/*.{ts,tsx}"],
+      ignores: ["packages/commands/src/**/*.ts"],
     })),
   ...cliCompat
     .config({
