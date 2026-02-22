@@ -18,7 +18,7 @@
 
 .cm-editor .cm-content,
 .cm-editor .cm-line {
-  color: hsl(var(--color-foreground)) !important;
+  color: var(--color-foreground) !important;
 }
 
 .cm-line {
@@ -32,7 +32,6 @@
 }
 
 .cm-activeLine {
-  color: var(--color-foreground) !important;
   background: transparent !important; /* Remove the active line background */
 }
 

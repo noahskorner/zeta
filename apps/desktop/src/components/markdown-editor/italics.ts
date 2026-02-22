@@ -2,7 +2,11 @@ import { Decoration } from '@uiw/react-codemirror';
 import { replaceMarkdown } from './replace-markdown';
 import { DecorationRange } from './decoration-range';
 
-export function italics(lineText: string, isActive: boolean, from: number): Array<DecorationRange> {
+export function italics(
+  lineText: string,
+  cursorPosition: number,
+  from: number
+): Array<DecorationRange> {
   const italicPattern = /(\*|_)(.*?)\1/g;
   const matches = [...lineText.matchAll(italicPattern)];
   if (matches.length === 0) return [];
@@ -13,6 +17,7 @@ export function italics(lineText: string, isActive: boolean, from: number): Arra
 
     const matchFrom = from + match.index;
     const matchTo = matchFrom + match[0].length;
+    const isMatchActive = cursorPosition >= matchFrom && cursorPosition <= matchTo;
 
     decorations.push({
       from: matchFrom,
@@ -24,7 +29,7 @@ export function italics(lineText: string, isActive: boolean, from: number): Arra
     });
 
     // Replace the markers (* or _)
-    decorations.push(...replaceMarkdown(matchFrom, match[0], /(\*|_)/g, isActive));
+    decorations.push(...replaceMarkdown(matchFrom, match[0], /(\*|_)/g, isMatchActive));
   }
 
   return decorations;

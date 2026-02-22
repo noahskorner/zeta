@@ -2,7 +2,11 @@ import { Decoration } from '@uiw/react-codemirror';
 import { replaceMarkdown } from './replace-markdown';
 import { DecorationRange } from './decoration-range';
 
-export function strongs(lineText: string, isActive: boolean, from: number): Array<DecorationRange> {
+export function strongs(
+  lineText: string,
+  cursorPosition: number,
+  from: number
+): Array<DecorationRange> {
   const boldPattern = /\*\*(.*?)\*\*/g;
   const matches = [...lineText.matchAll(boldPattern)];
   if (matches.length === 0) return [];
@@ -10,10 +14,11 @@ export function strongs(lineText: string, isActive: boolean, from: number): Arra
   const decorations: Array<DecorationRange> = [];
 
   for (const match of matches) {
-    if (!match.index) continue;
+    if (match.index === undefined) continue;
 
     const matchFrom = from + match.index;
     const matchTo = matchFrom + match[0].length;
+    const isMatchActive = cursorPosition >= matchFrom && cursorPosition <= matchTo;
 
     decorations.push({
       from: matchFrom,
@@ -25,7 +30,7 @@ export function strongs(lineText: string, isActive: boolean, from: number): Arra
     });
 
     // Optionally replace the markdown markers (the **)
-    decorations.push(...replaceMarkdown(matchFrom, match[0], /\*\*/g, isActive));
+    decorations.push(...replaceMarkdown(matchFrom, match[0], /\*\*/g, isMatchActive));
   }
 
   return decorations;

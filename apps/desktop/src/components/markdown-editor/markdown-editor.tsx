@@ -147,19 +147,19 @@ const markdownPlugin = ViewPlugin.fromClass(
           const to = position + lineText.length;
 
           // Strongs
-          decorations.push(...strongs(lineText, isActive, from));
+          decorations.push(...strongs(lineText, cursorPosition, from));
 
           // Italics
-          decorations.push(...italics(lineText, isActive, from));
+          decorations.push(...italics(lineText, cursorPosition, from));
 
           // Superscripts
-          decorations.push(...superscripts(lineText, isActive, from));
+          decorations.push(...superscripts(lineText, cursorPosition, from));
 
           // Strikethroughs
-          decorations.push(...strikethroughs(lineText, isActive, from));
+          decorations.push(...strikethroughs(lineText, cursorPosition, from));
 
           // Subscripts
-          decorations.push(...subscripts(lineText, isActive, from));
+          decorations.push(...subscripts(lineText, cursorPosition, from));
 
           // Quotes
           decorations.push(...blockquotes(lineText, isActive, from, to));
@@ -195,7 +195,7 @@ const markdownPlugin = ViewPlugin.fromClass(
           decorations.push(...horizontalRules(lineText, isActive, from, to));
 
           // Code
-          decorations.push(...inlineCode(lineText, isActive, from));
+          decorations.push(...inlineCode(lineText, cursorPosition, from));
 
           // Increment the position
           position += lineText.length + 1;

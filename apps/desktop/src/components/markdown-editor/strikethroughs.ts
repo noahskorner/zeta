@@ -4,7 +4,7 @@ import { replaceMarkdown } from './replace-markdown';
 
 export function strikethroughs(
   lineText: string,
-  isActive: boolean,
+  cursorPosition: number,
   from: number
 ): Array<DecorationRange> {
   const strikePattern = /~~([^~]+)~~/g;
@@ -17,6 +17,7 @@ export function strikethroughs(
 
     const matchFrom = from + match.index;
     const matchTo = matchFrom + match[0].length;
+    const isMatchActive = cursorPosition >= matchFrom && cursorPosition <= matchTo;
 
     decorations.push({
       from: matchFrom,
@@ -27,7 +28,7 @@ export function strikethroughs(
       }),
     });
 
-    decorations.push(...replaceMarkdown(matchFrom, match[0], /~~/g, isActive));
+    decorations.push(...replaceMarkdown(matchFrom, match[0], /~~/g, isMatchActive));
   }
 
   return decorations;
