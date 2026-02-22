@@ -1,7 +1,4 @@
 import { Decoration, EditorView, WidgetType } from '@uiw/react-codemirror';
-import { createElement } from 'react';
-import { createRoot, Root } from 'react-dom/client';
-import { Checkbox } from '../ui/checkbox';
 import { DecorationRange } from './decoration-range';
 
 const LIST_PATTERN = /^(\s*)([-*]|\d+\.)\s+(.*)$/;
@@ -71,8 +68,6 @@ class ListMarkerWidget extends WidgetType {
 }
 
 class ChecklistWidget extends WidgetType {
-  private root: Root | null = null;
-
   constructor(
     private readonly checked: boolean,
     private readonly from: number,
@@ -88,35 +83,35 @@ class ChecklistWidget extends WidgetType {
   toDOM(view: EditorView): HTMLElement {
     const container = document.createElement('span');
     container.className = 'cm-checklist-widget';
-    this.root = createRoot(container);
 
-    this.root.render(
-      createElement(Checkbox, {
-        checked: this.checked,
-        className: 'cm-checklist-checkbox rounded-sm',
-        onMouseDown: (event) => {
-          event.preventDefault();
-          event.stopPropagation();
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = this.checked;
+    checkbox.className = 'cm-checklist-checkbox rounded-sm';
+    checkbox.setAttribute('aria-label', 'Toggle checklist item');
+
+    checkbox.addEventListener('mousedown', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
+
+    checkbox.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const isChecked = !this.checked;
+      view.dispatch({
+        changes: {
+          from: this.from,
+          to: this.to,
+          insert: isChecked ? '[x]' : '[ ]',
         },
-        onCheckedChange: (value: boolean | 'indeterminate') => {
-          const isChecked = value === true;
-          view.dispatch({
-            changes: {
-              from: this.from,
-              to: this.to,
-              insert: isChecked ? '[x]' : '[ ]',
-            },
-          });
-        },
-      }),
-    );
+      });
+      view.focus();
+    });
+
+    container.appendChild(checkbox);
 
     return container;
-  }
-
-  destroy(): void {
-    this.root?.unmount();
-    this.root = null;
   }
 
   ignoreEvent(): boolean {
