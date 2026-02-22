@@ -13,12 +13,19 @@
 }
 
 .cm-editor .cm-scroller {
-  overflow: visible !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
 }
 
 .cm-editor .cm-content,
 .cm-editor .cm-line {
   color: var(--color-foreground) !important;
+}
+
+.cm-editor .cm-content {
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .cm-line {

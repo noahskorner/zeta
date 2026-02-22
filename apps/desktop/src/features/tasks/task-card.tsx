@@ -49,9 +49,8 @@ export function TaskCard(props: TaskCardProps) {
           }, 0);
         }}
       >
-        <CardContent className="min-h-24 space-y-2 px-3">
+        <CardContent className="space-y-2 px-3">
           <div className="text-sm font-medium">{props.task.title}</div>
-          <div className="text-xs text-muted-foreground">{props.task.description}</div>
         </CardContent>
       </Card>
 

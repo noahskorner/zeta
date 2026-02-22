@@ -34,10 +34,19 @@ export function TaskDialog({
       <DialogContent
         showCloseButton={false}
         className={[
+          // Fill available window body space without center-transform clipping.
+          'inset-x-4',
+          'bottom-4',
+          'top-10',
+          'translate-x-0',
+          'translate-y-0',
           // Almost full screen
           'max-w-none',
-          'w-[calc(100%-2rem)]',
-          'h-[calc(100%-2rem)]',
+          'w-auto',
+          'h-auto',
+          'min-h-0',
+          'flex',
+          'flex-col',
           'p-0',
           'gap-0',
           'sm:rounded-lg',

@@ -118,7 +118,7 @@ export const MarkdownEditor = ({
       value={value}
       height={height}
       theme={resolvedTheme === 'dark' ? vscodeDark : vscodeLight}
-      extensions={[mdExtension, markdownPlugin]}
+      extensions={[mdExtension, markdownPlugin, EditorView.lineWrapping]}
       onChange={onChange}
       onCreateEditor={(view) => {
         editorViewRef.current = view;

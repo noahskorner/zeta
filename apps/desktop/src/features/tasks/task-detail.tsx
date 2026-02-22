@@ -13,13 +13,13 @@ export type TaskDetailProps = {
 
 export function TaskDetail({ description, actions, defaultSidebarOpen = true }: TaskDetailProps) {
   return (
-    <SidebarProvider defaultOpen={defaultSidebarOpen}>
+    <SidebarProvider defaultOpen={defaultSidebarOpen} className="h-full min-h-0">
       <div className="flex h-full w-full overflow-hidden">
         {/* Left side (main content) */}
-        <div className="w-full">
+        <div className="flex min-h-0 flex-1 flex-col">
           <TaskDetailHeader actions={actions} />
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4">
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
             <div className="mx-auto w-full max-w-4xl space-y-4">
               <MarkdownEditor content={description} onContentChange={() => {}} />
             </div>
