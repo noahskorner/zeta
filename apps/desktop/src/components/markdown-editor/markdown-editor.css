@@ -197,10 +197,10 @@
   align-items: center;
   display: inline-flex;
   justify-content: center;
-  margin-inline-end: 0.35rem;
-  min-width: 1.5ch;
+  margin-inline-end: 0.2rem;
+  min-width: 1ch;
   position: relative;
-  vertical-align: middle;
+  vertical-align: baseline;
 }
 
 .cm-list-toggle {
@@ -230,7 +230,8 @@
   color: var(--muted-foreground);
   display: inline-flex;
   justify-content: center;
-  min-width: 1.5ch;
+  min-width: 0;
+  vertical-align: baseline;
 }
 
 .cm-list-marker-slot:hover .cm-list-marker-rendered {
@@ -247,8 +248,8 @@
 
 .cm-checklist-widget {
   display: inline-flex;
-  margin-inline-end: 0.35rem;
-  transform: translateY(0.08em);
+  margin-inline-end: 0.2rem;
+  transform: translateY(0.04em);
 }
 
 .cm-checklist-checkbox {

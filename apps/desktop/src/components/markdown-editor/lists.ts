@@ -15,6 +15,8 @@ export interface MarkdownLine {
 }
 
 interface ParsedListItem {
+  lineFrom: number;
+  lineTo: number;
   marker: string;
   markerFrom: number;
   markerTo: number;
@@ -30,7 +32,10 @@ interface ListsOptions {
 }
 
 class ListMarkerWidget extends WidgetType {
-  constructor(private readonly marker: string, private readonly isChecklist: boolean) {
+  constructor(
+    private readonly marker: string,
+    private readonly isChecklist: boolean,
+  ) {
     super();
   }
 
@@ -77,11 +82,7 @@ class ChecklistWidget extends WidgetType {
   }
 
   eq(other: ChecklistWidget): boolean {
-    return (
-      other.checked === this.checked &&
-      other.from === this.from &&
-      other.to === this.to
-    );
+    return other.checked === this.checked && other.from === this.from && other.to === this.to;
   }
 
   toDOM(view: EditorView): HTMLElement {
@@ -92,7 +93,7 @@ class ChecklistWidget extends WidgetType {
     this.root.render(
       createElement(Checkbox, {
         checked: this.checked,
-        className: 'cm-checklist-checkbox',
+        className: 'cm-checklist-checkbox rounded-sm',
         onMouseDown: (event) => {
           event.preventDefault();
           event.stopPropagation();
@@ -123,10 +124,7 @@ class ChecklistWidget extends WidgetType {
   }
 }
 
-export function lists({
-  lines,
-  cursorPosition,
-}: ListsOptions): Array<DecorationRange> {
+export function lists({ lines, cursorPosition }: ListsOptions): Array<DecorationRange> {
   const decorations: Array<DecorationRange> = [];
   const parsedItems: Array<ParsedListItem> = [];
 
@@ -150,6 +148,8 @@ export function lists({
     const isChecklist = checklistMatch !== null;
 
     parsedItems.push({
+      lineFrom: line.from,
+      lineTo: line.to,
       marker,
       markerFrom,
       markerTo,
@@ -162,7 +162,15 @@ export function lists({
 
   // Add list marker/checklist widgets and marker hiding behavior.
   for (const item of parsedItems) {
-    const markerActive = !item.isChecklist && cursorPosition === item.markerTo;
+    const lineActive = cursorPosition >= item.lineFrom && cursorPosition <= item.lineTo;
+    const checklistRawActive =
+      item.isChecklist &&
+      item.checklistTo !== null &&
+      cursorPosition >= item.lineFrom &&
+      cursorPosition <= item.checklistTo + 1;
+    const markerActive = item.isChecklist
+      ? checklistRawActive
+      : lineActive && cursorPosition >= item.markerFrom && cursorPosition <= item.markerTo;
 
     decorations.push({
       from: item.markerFrom,
@@ -176,7 +184,7 @@ export function lists({
       }),
     });
 
-    if (!markerActive) {
+    if (!markerActive && !item.isChecklist) {
       decorations.push({
         from: item.markerFrom,
         to: item.markerFrom,
@@ -188,6 +196,24 @@ export function lists({
     }
 
     if (item.checklistFrom !== null && item.checklistTo !== null) {
+      const checklistActive = checklistRawActive;
+
+      decorations.push({
+        from: item.checklistFrom,
+        to: item.checklistTo,
+        decoration: Decoration.mark({
+          tagName: 'span',
+          class: 'cm-markdown',
+          attributes: {
+            'data-active': `${checklistActive}`,
+          },
+        }),
+      });
+
+      if (checklistActive) {
+        continue;
+      }
+
       decorations.push({
         from: item.checklistFrom,
         to: item.checklistTo,
