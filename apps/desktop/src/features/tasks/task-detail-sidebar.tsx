@@ -1,54 +1,264 @@
-import * as React from 'react';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '../../components/ui/sidebar';
-import { Separator } from '../../components/ui/separator';
+import type { ListToolResponse } from '@zeta/commands';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select';
+import { Separator } from '../../components/ui/separator';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '../../components/ui/sidebar';
 
-export type TaskDetailSidebarProps = {
+type TaskDetailSidebarProps = {
   actions?: React.ReactNode;
+  taskId?: string;
+  taskName: string;
+  friendlyName: string;
+  description: string;
+  createdAt?: string;
 };
 
-export function TaskDetailSidebar({ actions }: TaskDetailSidebarProps) {
+type TaskFieldKey = 'friendlyName' | 'description' | 'taskName' | 'taskId' | 'createdAt';
+
+type TaskFieldOption = {
+  key: TaskFieldKey;
+  label: string;
+};
+
+const TASK_FIELD_OPTIONS: TaskFieldOption[] = [
+  { key: 'friendlyName', label: 'Title' },
+  { key: 'description', label: 'Description' },
+  { key: 'taskName', label: 'Task Name' },
+  { key: 'taskId', label: 'Task ID' },
+  { key: 'createdAt', label: 'Created At' },
+];
+
+export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
+  const [tools, setTools] = useState<ListToolResponse[]>([]);
+  const [isLoadingTools, setIsLoadingTools] = useState(false);
+  const [selectedToolId, setSelectedToolId] = useState<string>('');
+  const [slotMappings, setSlotMappings] = useState<Record<number, TaskFieldKey | null>>({});
+  const [isExecuting, setIsExecuting] = useState(false);
+
+  useEffect(() => {
+    void loadTools();
+  }, []);
+
+  const selectedTool = useMemo(
+    () => tools.find((tool) => tool.id === selectedToolId) ?? null,
+    [selectedToolId, tools],
+  );
+
+  const argumentSlots = selectedTool?.args ?? [];
+  const hasTaskContext = Boolean(
+    props.taskId || props.taskName || props.friendlyName || props.description,
+  );
+
+  async function loadTools(): Promise<void> {
+    setIsLoadingTools(true);
+
+    try {
+      const response = await window.zetaApi.listTools();
+      const sortedTools = [...response.tools].sort((first, second) =>
+        second.createdAt.localeCompare(first.createdAt),
+      );
+      setTools(sortedTools);
+
+      if (sortedTools.length > 0) {
+        setSelectedToolId(sortedTools[0].id);
+      }
+    } catch (error) {
+      toast.error('Failed to load tools.', { description: getErrorMessage(error) });
+    } finally {
+      setIsLoadingTools(false);
+    }
+  }
+
+  function handleToolChange(nextToolId: string): void {
+    setSelectedToolId(nextToolId);
+    setSlotMappings({});
+  }
+
+  function updateSlotMapping(slotIndex: number, fieldName: TaskFieldKey | null): void {
+    setSlotMappings((currentValue) => ({
+      ...currentValue,
+      [slotIndex]: fieldName,
+    }));
+  }
+
+  async function handleExecuteTool(): Promise<void> {
+    if (!selectedTool) {
+      toast.error('Select a tool before executing.');
+      return;
+    }
+
+    setIsExecuting(true);
+
+    try {
+      const argv = argumentSlots
+        .map((_, index) => {
+          const fieldName = slotMappings[index];
+          if (!fieldName) {
+            return null;
+          }
+
+          const value = getTaskFieldValue(props, fieldName);
+          if (value === undefined || value === null) {
+            return null;
+          }
+
+          return String(value);
+        })
+        .filter((value): value is string => value !== null);
+
+      const receipt = await window.zetaApi.executeTool({
+        toolId: selectedTool.id,
+        argv,
+      });
+
+      toast.success('Tool started.', {
+        description:
+          typeof receipt.pid === 'number'
+            ? `PID ${receipt.pid}`
+            : `Started at ${receipt.startedAt}`,
+      });
+    } catch (error) {
+      toast.error('Failed to start tool.', { description: getErrorMessage(error) });
+    } finally {
+      setIsExecuting(false);
+    }
+  }
+
   return (
     <Sidebar side="right" collapsible="offcanvas" className="h-full">
       <SidebarHeader className="border-b h-12 flex items-center justify-center">
         <div className="w-full flex items-center justify-end">
-          {actions && <div className="flex items-center gap-2">{actions}</div>}
+          {props.actions && <div className="flex items-center gap-2">{props.actions}</div>}
         </div>
       </SidebarHeader>
 
       <SidebarContent className="p-3">
-        <div className="space-y-3">
-          <div className="space-y-1">
-            <div className="text-xs text-muted-foreground">Status</div>
-            <div className="text-sm">In Progress</div>
-          </div>
-
-          <div className="space-y-1">
-            <div className="text-xs text-muted-foreground">Assignee</div>
-            <div className="text-sm">—</div>
-          </div>
-
-          <div className="space-y-1">
-            <div className="text-xs text-muted-foreground">Due</div>
-            <div className="text-sm">—</div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="text-xs text-muted-foreground">Tool</div>
+            <Select
+              value={selectedToolId || undefined}
+              disabled={isLoadingTools || tools.length === 0}
+              onValueChange={handleToolChange}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue
+                  placeholder={
+                    isLoadingTools
+                      ? 'Loading tools...'
+                      : tools.length === 0
+                        ? 'No tools available'
+                        : 'Select a tool'
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {tools.map((tool) => (
+                  <SelectItem key={tool.id} value={tool.id}>
+                    {tool.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedTool ? (
+              <div className="text-xs text-muted-foreground">
+                {selectedTool.command}
+                {selectedTool.args && selectedTool.args.length > 0
+                  ? ` ${selectedTool.args.join(' ')}`
+                  : ''}
+              </div>
+            ) : null}
           </div>
 
           <Separator />
 
-          <div className="space-y-2">
-            <div className="text-xs text-muted-foreground">Notes</div>
-            <div className="text-sm text-muted-foreground">
-              Put quick actions, metadata, links, or commands here.
-            </div>
+          <div className="space-y-3">
+            <div className="text-xs text-muted-foreground">Argument Mapping</div>
+            {argumentSlots.length === 0 ? (
+              <div className="text-xs text-muted-foreground">
+                This tool has no registered argument slots.
+              </div>
+            ) : null}
+            {argumentSlots.map((slot, index) => {
+              const selectedField = slotMappings[index] ?? null;
+
+              return (
+                <div key={`${slot}-${index}`} className="space-y-1">
+                  <div className="font-mono text-xs text-muted-foreground">{slot}</div>
+                  <Select
+                    value={selectedField ?? 'none'}
+                    disabled={!hasTaskContext}
+                    onValueChange={(value) =>
+                      updateSlotMapping(index, value === 'none' ? null : (value as TaskFieldKey))
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Map to task field" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No mapping</SelectItem>
+                      {TASK_FIELD_OPTIONS.map((fieldOption) => (
+                        <SelectItem key={fieldOption.key} value={fieldOption.key}>
+                          {fieldOption.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              );
+            })}
           </div>
         </div>
       </SidebarContent>
 
       <SidebarFooter className="border-t p-3">
-        <Button className="w-full" variant="secondary">
-          Secondary action
+        <Button
+          className="w-full"
+          disabled={!selectedTool || isExecuting || !hasTaskContext}
+          onClick={() => void handleExecuteTool()}
+        >
+          {isExecuting ? 'Starting...' : 'Execute tool'}
         </Button>
       </SidebarFooter>
     </Sidebar>
   );
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return 'Unknown error';
+}
+
+function getTaskFieldValue(
+  props: TaskDetailSidebarProps,
+  fieldName: TaskFieldKey,
+): string | undefined {
+  if (fieldName === 'friendlyName') {
+    return props.friendlyName;
+  }
+
+  if (fieldName === 'description') {
+    return props.description;
+  }
+
+  if (fieldName === 'taskName') {
+    return props.taskName;
+  }
+
+  if (fieldName === 'taskId') {
+    return props.taskId;
+  }
+
+  return props.createdAt;
 }

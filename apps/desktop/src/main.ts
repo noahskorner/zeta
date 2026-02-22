@@ -11,6 +11,9 @@ import {
   CreateTaskFacade,
   CreateTaskRepository,
   CreateTaskService,
+  ExecuteToolCommand,
+  ExecuteToolFacade,
+  ExecuteToolRepository,
   CreateProjectCommand,
   CreateProjectFacade,
   CreateProjectRepository,
@@ -203,6 +206,14 @@ function registerToolIpcHandlers(): void {
 
     // Return persisted tools.
     return facade.execute();
+  });
+
+  ipcMain.handle('tools:execute', async (_event, command: ExecuteToolCommand) => {
+    // Start a tool process under PTY and return immediately with a start receipt.
+    const repository = new ExecuteToolRepository();
+    const facade = new ExecuteToolFacade(repository);
+
+    return facade.execute(command);
   });
 }
 

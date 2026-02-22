@@ -7,8 +7,10 @@ export type TaskDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   taskId?: string;
+  taskName?: string;
   title?: string;
   description?: string;
+  createdAt?: string;
   trigger?: React.ReactNode;
 };
 
@@ -16,8 +18,10 @@ export function TaskDialog({
   open,
   onOpenChange,
   taskId,
+  taskName,
   title = 'Task',
   description,
+  createdAt,
   trigger,
 }: TaskDialogProps) {
   return (
@@ -29,8 +33,10 @@ export function TaskDialog({
       description={description}
     >
       <TaskDetail
+        taskId={taskId || ''}
+        createdAt={createdAt || ''}
         friendlyName={title || ''}
-        taskName={taskId || ''}
+        taskName={taskName || ''}
         description={description || ''}
         editable={false}
         actions={

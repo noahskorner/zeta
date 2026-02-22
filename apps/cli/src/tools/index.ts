@@ -4,6 +4,9 @@ import {
   AddToolFacade,
   AddToolRepository,
   AddToolService,
+  ExecuteToolCommand,
+  ExecuteToolFacade,
+  ExecuteToolRepository,
   ListToolResponse,
   ListToolsFacade,
   ListToolsRepository,
@@ -16,6 +19,12 @@ type AddToolOptions = {
   arg?: string[];
 };
 
+type ExecuteToolOptions = {
+  tool: string;
+  arg?: string[];
+  cwd?: string;
+};
+
 export function addTools(command: Command) {
   // Instantiate services.
   const service = new AddToolService();
@@ -23,6 +32,8 @@ export function addTools(command: Command) {
   const addToolFacade = new AddToolFacade(service, addToolRepository);
   const listToolsRepository = new ListToolsRepository();
   const listToolsFacade = new ListToolsFacade(listToolsRepository);
+  const executeToolRepository = new ExecuteToolRepository();
+  const executeToolFacade = new ExecuteToolFacade(executeToolRepository);
 
   // Add the command.
   const toolsCommand = command.command('tools').description('Manage saved tools');
@@ -70,6 +81,36 @@ export function addTools(command: Command) {
           console.error(error.message);
         } else {
           console.error('Failed to list tools.');
+        }
+
+        process.exitCode = 1;
+      }
+    });
+
+  toolsCommand
+    .command('execute')
+    .description('Execute a saved tool command')
+    .requiredOption('--tool <toolId>', 'Tool id')
+    .option('--arg <value>', 'Single argv value to append (repeatable)', collectOptionValue, [])
+    .option('--cwd <path>', 'Working directory for tool execution')
+    .action(async (options: ExecuteToolOptions) => {
+      try {
+        const argv = (options.arg ?? []).map((arg) => arg.trim()).filter((arg) => arg.length > 0);
+        const receipt = await executeToolFacade.execute({
+          toolId: options.tool,
+          argv,
+          cwd: options.cwd,
+        } satisfies ExecuteToolCommand);
+
+        const pidText = typeof receipt.pid === 'number' ? String(receipt.pid) : 'n/a';
+        console.log(
+          `Started tool ${options.tool} (pid: ${pidText}) at ${receipt.startedAt}`,
+        );
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(error.message);
+        } else {
+          console.error('Failed to execute tool.');
         }
 
         process.exitCode = 1;
