@@ -3,6 +3,10 @@ import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import {
+  AddToolCommand,
+  AddToolFacade,
+  AddToolRepository,
+  AddToolService,
   CreateTaskCommand,
   CreateTaskFacade,
   CreateTaskRepository,
@@ -101,6 +105,7 @@ const createWindow = () => {
 app.on('ready', createWindow);
 app.on('ready', registerProjectIpcHandlers);
 app.on('ready', registerTaskIpcHandlers);
+app.on('ready', registerToolIpcHandlers);
 app.on('ready', registerAppIpcHandlers);
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -175,6 +180,18 @@ function registerTaskIpcHandlers(): void {
 
     // Return project tasks.
     return facade.execute(query);
+  });
+}
+
+function registerToolIpcHandlers(): void {
+  ipcMain.handle('tools:add', async (_event, command: AddToolCommand) => {
+    // Instantiate services.
+    const service = new AddToolService();
+    const repository = new AddToolRepository();
+    const facade = new AddToolFacade(service, repository);
+
+    // Persist the tool.
+    return facade.execute(command);
   });
 }
 

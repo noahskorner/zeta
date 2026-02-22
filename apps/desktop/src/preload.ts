@@ -1,6 +1,8 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 import {
+  AddToolCommand,
+  AddToolResponse,
   CreateTaskCommand,
   FindProjectsResponse,
   ListTasksResponse,
@@ -24,6 +26,9 @@ contextBridge.exposeInMainWorld('zetaApi', {
   // List tasks for a specific project.
   listTasks: (query: ListTasksQuery): Promise<ListTasksResponse> =>
     ipcRenderer.invoke('tasks:list', query),
+  // Manage tools from the desktop renderer.
+  addTool: (command: AddToolCommand): Promise<AddToolResponse> =>
+    ipcRenderer.invoke('tools:add', command),
   // Open the shared zeta app data folder in the OS file explorer.
   openAppDataFolder: (): Promise<string> => ipcRenderer.invoke('app:open-data-folder'),
   // Open a URL in the user's OS default browser/email client.

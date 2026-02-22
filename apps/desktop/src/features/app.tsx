@@ -8,6 +8,7 @@ import { AppSidebar, type SidebarView } from './app-sidebar';
 import { AppHeader } from './app-header';
 import { MarkdownEditorPanel } from './markdown-editor/markdown-editor-panel';
 import { TasksPanel } from './tasks/tasks-panel';
+import { ToolsPanel } from './tools/tools-panel';
 import { WindowHeader } from './window-header';
 
 const mockedAgentRuntimes = [
@@ -103,6 +104,10 @@ export default function App() {
     toast.error('Task operation failed.', { description: message });
   }
 
+  function handleToolCreated(toolId: string) {
+    toast.success('Tool created.', { description: toolId });
+  }
+
   async function handleMinimizeWindow() {
     await window.zetaApi.minimizeWindow();
   }
@@ -156,6 +161,7 @@ export default function App() {
                   onError={handleTaskError}
                 />
               ) : null}
+              {activeView === 'tools' ? <ToolsPanel onToolCreated={handleToolCreated} /> : null}
               {activeView === 'markdownEditor' ? <MarkdownEditorPanel /> : null}
               {activeView === 'agents' ? <AgentsPanel /> : null}
               {activeView === 'automations' ? <AutomationsPanel /> : null}

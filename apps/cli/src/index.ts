@@ -2,6 +2,7 @@
 import { Command } from "commander";
 import { addProjects } from "./projects";
 import { addTasks } from "./tasks";
+import { addTools } from "./tools";
 
 // Initialize the main CLI program
 const program = new Command();
@@ -10,6 +11,7 @@ program.name("zeta").description("CLI wrapper around shared commands").version("
 // Add subcommands
 addProjects(program);
 addTasks(program);
+addTools(program);
 
 // Parse and execute commands
 void program.parseAsync().catch((error: unknown) => {

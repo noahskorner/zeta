@@ -1,0 +1,67 @@
+import { Command } from 'commander';
+import { AddToolCommand, AddToolFacade, AddToolRepository, AddToolService } from '@zeta/commands';
+
+type AddToolOptions = {
+  name: string;
+  command: string;
+  args?: string;
+  arg?: string[];
+};
+
+export function addTools(command: Command) {
+  // Instantiate services.
+  const service = new AddToolService();
+  const repository = new AddToolRepository();
+  const facade = new AddToolFacade(service, repository);
+
+  // Add the command.
+  const toolsCommand = command.command('tools').description('Manage saved tools');
+
+  toolsCommand
+    .command('add')
+    .description('Add a runnable tool command')
+    .requiredOption('--name <string>', 'Tool name')
+    .requiredOption('--command <string>', 'Executable command')
+    .option('--args <arg1,arg2>', 'Comma-separated tool args')
+    .option('--arg <value>', 'Single tool arg (repeatable)', collectOptionValue, [])
+    .action(async (options: AddToolOptions) => {
+      try {
+        // Normalize args provided via --args or repeated --arg options.
+        const parsedArgs = parseArgs(options.args, options.arg);
+
+        const createdTool = await facade.execute({
+          name: options.name,
+          command: options.command,
+          args: parsedArgs.length > 0 ? parsedArgs : undefined,
+        } satisfies AddToolCommand);
+
+        console.log(`Created tool: ${createdTool.id} (${createdTool.name})`);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(error.message);
+        } else {
+          console.error('Failed to add tool.');
+        }
+
+        process.exitCode = 1;
+      }
+    });
+}
+
+function collectOptionValue(value: string, previous: string[]): string[] {
+  return [...previous, value];
+}
+
+function parseArgs(commaSeparatedArgs: string | undefined, repeatedArgs: string[] | undefined): string[] {
+  const argsFromCsv = commaSeparatedArgs
+    ? commaSeparatedArgs
+        .split(',')
+        .map((arg) => arg.trim())
+        .filter((arg) => arg.length > 0)
+    : [];
+  const argsFromRepeatedOptions = (repeatedArgs ?? [])
+    .map((arg) => arg.trim())
+    .filter((arg) => arg.length > 0);
+
+  return [...argsFromCsv, ...argsFromRepeatedOptions];
+}

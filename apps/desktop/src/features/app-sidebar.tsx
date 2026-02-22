@@ -2,6 +2,7 @@ import {
   Bot,
   FilePenLine,
   GitBranch,
+  Hammer,
   ListTodo,
   PlayCircle,
   RefreshCw,
@@ -25,7 +26,7 @@ import {
   SidebarSeparator,
 } from '../components/ui/sidebar';
 
-export type SidebarView = 'tasks' | 'agents' | 'automations' | 'markdownEditor';
+export type SidebarView = 'tasks' | 'tools' | 'agents' | 'automations' | 'markdownEditor';
 
 type AppSidebarProps = {
   activeView: SidebarView;
@@ -44,6 +45,7 @@ export function AppSidebar(props: AppSidebarProps) {
     badge?: string;
   }> = [
     { view: 'tasks', label: 'Tasks', icon: ListTodo, badge: '14' },
+    { view: 'tools', label: 'Tools', icon: Hammer },
     { view: 'markdownEditor', label: 'Markdown', icon: FilePenLine },
     { view: 'agents', label: 'Agents', icon: Bot, badge: '3' },
     {
