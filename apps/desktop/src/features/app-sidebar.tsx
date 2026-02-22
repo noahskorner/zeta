@@ -7,9 +7,9 @@ import {
   RefreshCw,
   Sparkles,
   Workflow,
-} from "lucide-react";
-import { type ComponentType } from "react";
-import { AvatarFooter } from "./avatar";
+} from 'lucide-react';
+import { type ComponentType } from 'react';
+import { AvatarFooter } from './avatar';
 import {
   Sidebar,
   SidebarContent,
@@ -23,9 +23,9 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarSeparator,
-} from "../components/ui/sidebar";
+} from '../components/ui/sidebar';
 
-export type SidebarView = "tasks" | "agents" | "automations" | "markdownEditor";
+export type SidebarView = 'tasks' | 'agents' | 'automations' | 'markdownEditor';
 
 type AppSidebarProps = {
   activeView: SidebarView;
@@ -43,19 +43,19 @@ export function AppSidebar(props: AppSidebarProps) {
     icon: ComponentType<{ className?: string }>;
     badge?: string;
   }> = [
-    { view: "tasks", label: "Tasks", icon: ListTodo, badge: "14" },
-    { view: "markdownEditor", label: "Markdown", icon: FilePenLine },
-    { view: "agents", label: "Agents", icon: Bot, badge: "3" },
+    { view: 'tasks', label: 'Tasks', icon: ListTodo, badge: '14' },
+    { view: 'markdownEditor', label: 'Markdown', icon: FilePenLine },
+    { view: 'agents', label: 'Agents', icon: Bot, badge: '3' },
     {
-      view: "automations",
-      label: "Automations",
+      view: 'automations',
+      label: 'Automations',
       icon: Workflow,
-      badge: "3",
+      badge: '3',
     },
   ];
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="h-[calc(100%-2rem)] top-auto">
       <SidebarHeader>
         <div className="flex items-center justify-between gap-2 rounded-md border p-2">
           {/* Hide branding text when the sidebar is collapsed to icon mode. */}
@@ -97,7 +97,7 @@ export function AppSidebar(props: AppSidebarProps) {
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={props.onAddProject}>
                   <GitBranch className="size-4" />
-                  <span>{props.isAddingProject ? "Adding..." : "Add Project"}</span>
+                  <span>{props.isAddingProject ? 'Adding...' : 'Add Project'}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>

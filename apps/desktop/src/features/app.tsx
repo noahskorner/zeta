@@ -1,24 +1,25 @@
-import { FindProjectResponse } from "@zeta/commands";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Badge } from "../components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { SidebarInset, SidebarProvider } from "../components/ui/sidebar";
-import { AppSidebar, type SidebarView } from "./app-sidebar";
-import { AppHeader } from "./app-header";
-import { MarkdownEditorPanel } from "./markdown-editor/markdown-editor-panel";
-import { TasksPanel } from "./tasks/tasks-panel";
+import { FindProjectResponse } from '@zeta/commands';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { Badge } from '../components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { SidebarInset, SidebarProvider } from '../components/ui/sidebar';
+import { AppSidebar, type SidebarView } from './app-sidebar';
+import { AppHeader } from './app-header';
+import { MarkdownEditorPanel } from './markdown-editor/markdown-editor-panel';
+import { TasksPanel } from './tasks/tasks-panel';
+import { WindowHeader } from './window-header';
 
 const mockedAgentRuntimes = [
-  { label: "Codex", status: "healthy", latency: "220ms" },
-  { label: "Claude Code", status: "healthy", latency: "260ms" },
-  { label: "GitHub Copilot", status: "degraded", latency: "480ms" },
+  { label: 'Codex', status: 'healthy', latency: '220ms' },
+  { label: 'Claude Code', status: 'healthy', latency: '260ms' },
+  { label: 'GitHub Copilot', status: 'degraded', latency: '480ms' },
 ];
 
 const mockedAutomations = [
-  "Nightly repo review",
-  "Spec sync for PRODUCT.md",
-  "Task cleanup and normalization",
+  'Nightly repo review',
+  'Spec sync for PRODUCT.md',
+  'Task cleanup and normalization',
 ];
 
 export default function App() {
@@ -26,7 +27,7 @@ export default function App() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
-  const [activeView, setActiveView] = useState<SidebarView>("tasks");
+  const [activeView, setActiveView] = useState<SidebarView>('tasks');
   const [isWindowMaximized, setIsWindowMaximized] = useState(false);
 
   // Load projects when the app opens.
@@ -49,10 +50,10 @@ export default function App() {
       if (!newProjectId) {
         return;
       }
-      toast.success("Project created.", { description: newProjectId });
+      toast.success('Project created.', { description: newProjectId });
       await loadProjects(newProjectId);
     } catch (error) {
-      toast.error("Failed to create project.", {
+      toast.error('Failed to create project.', {
         description: getErrorMessage(error),
       });
     } finally {
@@ -86,7 +87,7 @@ export default function App() {
 
       setSelectedProjectId(sortedProjects[0].id);
     } catch (error) {
-      toast.error("Failed to load projects.", {
+      toast.error('Failed to load projects.', {
         description: getErrorMessage(error),
       });
     } finally {
@@ -95,11 +96,11 @@ export default function App() {
   }
 
   function handleTaskCreated(taskId: string) {
-    toast.success("Task created.", { description: taskId });
+    toast.success('Task created.', { description: taskId });
   }
 
   function handleTaskError(message: string) {
-    toast.error("Task operation failed.", { description: message });
+    toast.error('Task operation failed.', { description: message });
   }
 
   async function handleMinimizeWindow() {
@@ -116,47 +117,53 @@ export default function App() {
   }
 
   const selectedProject = selectedProjectId
-    ? projects.find((project) => project.id === selectedProjectId) ?? null
+    ? (projects.find((project) => project.id === selectedProjectId) ?? null)
     : null;
   const selectedProjectPath = selectedProject?.folderPath ?? null;
 
   return (
-    <SidebarProvider>
-      <AppSidebar
-        activeView={activeView}
-        setActiveView={setActiveView}
-        isAddingProject={isAddingProject}
-        onAddProject={handleAddProject}
-        onRefreshProjects={loadProjects}
+    <div className="flex h-svh flex-col overflow-hidden">
+      <WindowHeader
+        isWindowMaximized={isWindowMaximized}
+        onMinimizeWindow={handleMinimizeWindow}
+        onToggleMaximizeWindow={handleToggleMaximizeWindow}
+        onCloseWindow={handleCloseWindow}
       />
+      <div className="pt-18">
+        <SidebarProvider className="min-h-0 flex-1">
+          <AppSidebar
+            activeView={activeView}
+            setActiveView={setActiveView}
+            isAddingProject={isAddingProject}
+            onAddProject={handleAddProject}
+            onRefreshProjects={loadProjects}
+          />
 
-      <SidebarInset>
-        <AppHeader
-          projects={projects}
-          selectedProjectId={selectedProjectId}
-          isLoadingProjects={isLoadingProjects}
-          isWindowMaximized={isWindowMaximized}
-          onSelectProject={setSelectedProjectId}
-          onMinimizeWindow={handleMinimizeWindow}
-          onToggleMaximizeWindow={handleToggleMaximizeWindow}
-          onCloseWindow={handleCloseWindow}
-        />
-
-        <main className="mx-auto w-full p-6">
-          {activeView === "tasks" ? (
-            <TasksPanel
+          <SidebarInset>
+            <AppHeader
+              projects={projects}
               selectedProjectId={selectedProjectId}
-              selectedProjectPath={selectedProjectPath}
-              onTaskCreated={handleTaskCreated}
-              onError={handleTaskError}
+              isLoadingProjects={isLoadingProjects}
+              onSelectProject={setSelectedProjectId}
             />
-          ) : null}
-          {activeView === "markdownEditor" ? <MarkdownEditorPanel /> : null}
-          {activeView === "agents" ? <AgentsPanel /> : null}
-          {activeView === "automations" ? <AutomationsPanel /> : null}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+
+            <main className="mx-auto w-full p-6">
+              {activeView === 'tasks' ? (
+                <TasksPanel
+                  selectedProjectId={selectedProjectId}
+                  selectedProjectPath={selectedProjectPath}
+                  onTaskCreated={handleTaskCreated}
+                  onError={handleTaskError}
+                />
+              ) : null}
+              {activeView === 'markdownEditor' ? <MarkdownEditorPanel /> : null}
+              {activeView === 'agents' ? <AgentsPanel /> : null}
+              {activeView === 'automations' ? <AutomationsPanel /> : null}
+            </main>
+          </SidebarInset>
+        </SidebarProvider>
+      </div>
+    </div>
   );
 }
 
@@ -170,7 +177,7 @@ function AgentsPanel() {
             <CardDescription>Pluggable execution runtime.</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
-            <Badge variant={agent.status === "healthy" ? "secondary" : "destructive"}>
+            <Badge variant={agent.status === 'healthy' ? 'secondary' : 'destructive'}>
               {agent.status}
             </Badge>
             <div className="font-mono text-xs text-muted-foreground">{agent.latency}</div>
@@ -208,5 +215,5 @@ function getErrorMessage(error: unknown): string {
     return error.message;
   }
 
-  return "Unknown error";
+  return 'Unknown error';
 }
