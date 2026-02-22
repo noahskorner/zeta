@@ -150,6 +150,23 @@ npm run dev
 
 ---
 
+## Tables
+
+| Column A | Column B | Column C |
+| -------- | -------- | -------- |
+| Left     | Center   | Right    |
+| Text     | **Bold** | `Code`   |
+| 123      | 456      | 789      |
+
+### Alignment
+
+| Left Aligned | Center Aligned | Right Aligned |
+| :----------- | :------------: | ------------: |
+| A            |       B        |             C |
+| 1            |       2        |             3 |
+
+---
+
 ## End
 
 If all of the above renders correctly, your Markdown editor is in great shape. 🎉

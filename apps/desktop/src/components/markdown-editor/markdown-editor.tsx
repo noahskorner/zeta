@@ -20,13 +20,13 @@ import { italics } from './italics';
 import { strongs } from './strongs';
 import { superscripts } from './superscripts';
 import { subscripts } from './subscripts';
-import { tables } from './tables';
 import { horizontalRules } from './horizontal-rules';
 import { blockquotes } from './blockquotes';
 import { inlineCode } from './inline-code';
 import { strikethroughs } from './strikethroughs';
 import { lists, MarkdownLine } from './lists';
 import { collectReferenceDefinitions, linksAndImages } from './links-and-images';
+import { tables } from './tables';
 
 const mdExtension = markdown({
   codeLanguages: languages,
@@ -154,21 +154,38 @@ const markdownPlugin = ViewPlugin.fromClass(
       const lines: Array<MarkdownLine> = [];
       const cursorPosition = view.state.selection.main.head;
       const cursorLine = view.state.doc.lineAt(cursorPosition).number;
+      const selection = view.state.selection.main;
+      const selectionFrom = Math.min(selection.anchor, selection.head);
+      const selectionTo = Math.max(selection.anchor, selection.head);
 
-      let tableCount = 0;
+      // Collect line metadata once so feature renderers can process shared line state.
       for (let lineNumber = 1; lineNumber <= view.state.doc.lines; lineNumber++) {
         const line = view.state.doc.line(lineNumber);
-        const lineText = line.text;
-        const isActive = lineNumber === cursorLine;
-        const from = line.from;
-        const to = line.to;
-
         lines.push({
           number: lineNumber,
-          from,
-          to,
-          text: lineText,
+          from: line.from,
+          to: line.to,
+          text: line.text,
         });
+      }
+
+      // Render tables first so table rows can bypass other inline formatting.
+      const { decorations: tableDecorations, tableLineNumbers } = tables({
+        lines,
+        selectionFrom,
+        selectionTo,
+      });
+      decorations.push(...tableDecorations);
+
+      for (const line of lines) {
+        if (tableLineNumbers.has(line.number)) {
+          continue;
+        }
+
+        const lineText = line.text;
+        const isActive = line.number === cursorLine;
+        const from = line.from;
+        const to = line.to;
 
         // Strongs
         decorations.push(...strongs(lineText, cursorPosition, from));
@@ -191,18 +208,6 @@ const markdownPlugin = ViewPlugin.fromClass(
         // Headings
         decorations.push(...headings(line, lineText, isActive, from, to));
 
-        // Tables
-        const { count: updatedTableCount, decorations: tableDecorations } = tables(
-          line,
-          lineText,
-          isActive,
-          from,
-          to,
-          tableCount,
-        );
-        tableCount = updatedTableCount;
-        decorations.push(...tableDecorations);
-
         // Horizontal Rules
         decorations.push(...horizontalRules(lineText, isActive, from, to));
 
@@ -216,7 +221,7 @@ const markdownPlugin = ViewPlugin.fromClass(
       // Lists
       decorations.push(
         ...lists({
-          lines,
+          lines: lines.filter((line) => !tableLineNumbers.has(line.number)),
           cursorPosition,
         }),
       );

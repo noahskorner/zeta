@@ -1,13 +1,13 @@
-import { Decoration, Line } from '@uiw/react-codemirror';
+import { Decoration } from '@uiw/react-codemirror';
 import { replaceMarkdown } from './replace-markdown';
 import { DecorationRange } from './decoration-range';
 
 export function headings(
-  line: Line,
+  line: { from: number },
   lineText: string,
   isActive: boolean,
   from: number,
-  to: number
+  to: number,
 ): Array<DecorationRange> {
   const isHeading = lineText.match(/^(#{1,6})\s+/);
   if (!isHeading) return [];

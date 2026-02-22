@@ -17,23 +17,6 @@
 
 ---
 
-## Tables
-
-| Column A | Column B | Column C |
-| -------- | -------- | -------- |
-| Left     | Center   | Right    |
-| Text     | **Bold** | `Code`   |
-| 123      | 456      | 789      |
-
-### Alignment
-
-| Left Aligned | Center Aligned | Right Aligned |
-| :----------- | :------------: | ------------: |
-| A            |       B        |             C |
-| 1            |       2        |             3 |
-
----
-
 ## Footnotes
 
 Here is a sentence with a footnote.[^1]
