@@ -139,3 +139,17 @@ npm run dev
 ```
 
 ---
+
+## Task Lists
+
+- [x] Completed task
+- [ ] Incomplete task
+- [ ] Another task
+  - [x] Nested completed
+  - [ ] Nested incomplete
+
+---
+
+## End
+
+If all of the above renders correctly, your Markdown editor is in great shape. 🎉

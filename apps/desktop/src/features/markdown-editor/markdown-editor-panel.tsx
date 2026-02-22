@@ -8,7 +8,7 @@ export function MarkdownEditorPanel() {
 
   return (
     <div className="w-full flex items-center justify-center">
-      <div className="max-w-7xl">
+      <div className="w-full max-w-3xl">
         <MarkdownEditor content={content} onContentChange={setContent} height="70vh" autoFocus />
       </div>
     </div>
