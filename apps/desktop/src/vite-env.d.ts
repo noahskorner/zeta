@@ -5,6 +5,11 @@ import {
   ListTasksQuery,
 } from '@zeta/commands';
 
+declare module '*.md?raw' {
+  const content: string;
+  export default content;
+}
+
 interface ProjectFileContent {
   content: string;
   isBinary: boolean;

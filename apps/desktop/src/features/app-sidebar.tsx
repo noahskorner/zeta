@@ -1,4 +1,13 @@
-import { Bot, GitBranch, ListTodo, PlayCircle, RefreshCw, Sparkles, Workflow } from "lucide-react";
+import {
+  Bot,
+  FilePenLine,
+  GitBranch,
+  ListTodo,
+  PlayCircle,
+  RefreshCw,
+  Sparkles,
+  Workflow,
+} from "lucide-react";
 import { type ComponentType } from "react";
 import { AvatarFooter } from "./avatar";
 import {
@@ -16,7 +25,7 @@ import {
   SidebarSeparator,
 } from "../components/ui/sidebar";
 
-export type SidebarView = "tasks" | "agents" | "automations";
+export type SidebarView = "tasks" | "agents" | "automations" | "markdownEditor";
 
 type AppSidebarProps = {
   activeView: SidebarView;
@@ -35,6 +44,7 @@ export function AppSidebar(props: AppSidebarProps) {
     badge?: string;
   }> = [
     { view: "tasks", label: "Tasks", icon: ListTodo, badge: "14" },
+    { view: "markdownEditor", label: "Markdown", icon: FilePenLine },
     { view: "agents", label: "Agents", icon: Bot, badge: "3" },
     {
       view: "automations",

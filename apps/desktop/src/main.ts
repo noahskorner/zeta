@@ -28,8 +28,8 @@ const createWindow = () => {
   console.log('Creating main window...');
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1100,
-    height: 800,
+    width: 1800,
+    height: 1200,
     minWidth: 900,
     minHeight: 600,
     frame: false,

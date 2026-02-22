@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { SidebarInset, SidebarProvider } from "../components/ui/sidebar";
 import { AppSidebar, type SidebarView } from "./app-sidebar";
 import { AppHeader } from "./app-header";
+import { MarkdownEditorPanel } from "./markdown-editor/markdown-editor-panel";
 import { TasksPanel } from "./tasks/tasks-panel";
 
 const mockedAgentRuntimes = [
@@ -150,6 +151,7 @@ export default function App() {
               onError={handleTaskError}
             />
           ) : null}
+          {activeView === "markdownEditor" ? <MarkdownEditorPanel /> : null}
           {activeView === "agents" ? <AgentsPanel /> : null}
           {activeView === "automations" ? <AutomationsPanel /> : null}
         </main>
