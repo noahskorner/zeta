@@ -1,6 +1,22 @@
 ## Goal
 
-Create a simple, extensible agentic coding task management platform that enables rapid planning, execution, and switching between agent-driven coding tasks. The system should prioritize speed, clarity, and minimal friction.
+Create a simple, extensible agentic task management platform that enables rapid planning, execution, and switching between tool-driven tasks. The system should prioritize speed, clarity, and minimal friction.
+
+---
+
+## Vision
+
+While the MVP focuses on **developer workflows**, the architecture is designed to be role-agnostic. The abstraction layer for tools, adapters, and workflows should support any discipline:
+
+- **Developers**: Codex, Claude Code, GitHub Copilot, terminal commands
+- **Designers**: Figma, Sketch, Adobe Creative Suite
+- **Business/Product**: PowerPoint, Google Slides, documentation tools
+- **QA/Testing**: Test runners, automation frameworks
+- **Operations**: Deployment pipelines, monitoring tools
+
+The core concepts (tasks, swimlanes, workflows, tools, adapters) remain consistent across all roles. This enables cross-functional teams to collaborate within a single platform, each using their domain-specific tools while sharing the same task management structure.
+
+**MVP scope**: Developer-focused workflows with coding tools and agents.
 
 ---
 
@@ -9,7 +25,7 @@ Create a simple, extensible agentic coding task management platform that enables
 - Minimal UI and workflow overhead
 - Markdown-first for all specs and tasks
 - Git-native (worktrees, branches, commits)
-- Agent-agnostic (supports multiple coding agents)
+- Tool-agnostic (supports multiple coding tools and agents)
 - Extensible architecture for future automation and integrations
 
 ---
@@ -47,7 +63,7 @@ Create a simple, extensible agentic coding task management platform that enables
 - Core task capabilities:
   - Create, edit, refine, and delete tasks
   - Refine tasks via AI ("improve this spec")
-  - Organize tasks via simple swimlanes or status columns
+  - Organize tasks via swimlanes with configurable tool/adapter/human assignees
   - Link tasks to branches and worktrees
 
 ---
@@ -58,18 +74,14 @@ Create a simple, extensible agentic coding task management platform that enables
   - Creates a Git worktree
   - Creates or associates a branch
   - Associates the task with the worktree
-- Agent dispatch:
-  - Sends the task spec to a configured agent
-  - Agent interface must be abstract and pluggable:
-    - Codex
-    - Claude Code
-    - GitHub Copilot
-    - VSCode
-    - Other local or remote agents
+- Tool dispatch:
+  - Sends the task spec to the tool assigned in the current swimlane
+  - Tool executes in PTY/interactive terminal visible to the user
+  - Adapter provides notifications and integration hooks
 - Task workspace management:
   - Open worktree in editor
   - Switch between active tasks instantly
-  - Track task status (idle, running, ready for review)
+  - Track task status (idle, running, awaiting input, ready for review)
 
 ---
 
@@ -102,15 +114,82 @@ Create a simple, extensible agentic coding task management platform that enables
 
 ## Architecture Requirements
 
-### Agent Abstraction Layer
+### Tools
 
-Must support:
+Tools are the execution layer for tasks. The abstraction supports any executable tool, not just coding agents.
 
-- Sending task spec to agent
-- Receiving results
-- Tracking execution state
+- First-party tools:
+  - Built-in tools provided by the platform
+  - Pre-configured for common use cases
+  - MVP: Coding-focused (Codex, Claude Code, etc.)
+  - Future: Design tools, presentation tools, etc.
 
-Must be extensible for future agents.
+- User-configurable tools:
+  - Any command the user wants to run
+  - Fully customizable arguments and behavior
+  - Displayed in PTY/interactive terminal for visibility
+  - Could invoke CLI tools, scripts, or GUI applications
+
+---
+
+### Adapters
+
+Adapters hook into tools to provide enhanced integration and user experience. The adapter interface is generic to support tools across any domain.
+
+- First-party adapters (MVP - developer tools):
+  - Codex
+  - Claude Code
+  - GitHub Copilot
+  - VSCode
+  - Other local or remote agents
+
+- Future adapters (post-MVP):
+  - Figma (design sync, export notifications)
+  - Google Slides / PowerPoint (presentation generation)
+  - Notion / Confluence (documentation)
+  - Custom enterprise tools
+
+- Adapter capabilities:
+  - Notifications when user input is requested
+  - Notifications when task is complete
+  - Status tracking and progress reporting
+  - Parsing tool output for structured data
+
+Must be extensible for future tools and adapters across all disciplines.
+
+---
+
+### Swimlanes
+
+Swimlanes represent stages in a workflow where tasks can be assigned to tools, adapters, or humans.
+
+- Each swimlane can have:
+  - One or more tools/adapters assigned
+  - Human assignees for human-in-the-loop review
+  - Custom rules for task transitions
+
+- Swimlane types:
+  - Automated (tool/adapter executes tasks)
+  - Manual (human review and action)
+  - Hybrid (tool executes, human approves)
+
+---
+
+### Workflows
+
+Workflows define how tasks move through swimlanes in a project.
+
+- Each project can have multiple workflows
+- A workflow is a combination of swimlanes, each with its own:
+  - Tool/adapter assignee(s)
+  - Human assignee(s)
+  - Transition rules
+
+- Example workflows:
+  - Simple: Backlog → In Progress (Claude Code) → Review (Human) → Complete
+  - Parallel: Backlog → [Codex | Claude Code] → Human Review → QA (Human) → Complete
+  - Full automation: Backlog → Draft (Claude Code) → Refine (Codex) → Auto-merge
+  - Cross-functional (future): Design (Figma) → Implement (Claude Code) → Review (Human) → Ship
 
 ---
 
@@ -148,10 +227,23 @@ Avoid complex external databases.
 
 ---
 
+## MVP Scope
+
+The initial release focuses on developer workflows:
+
+- Coding tools and agents (Codex, Claude Code, etc.)
+- Git-based task management with worktrees
+- Terminal/PTY-based tool execution
+- Developer-centric swimlanes and workflows
+
+The architecture remains abstract to support future expansion to other roles and tools.
+
+---
+
 ## Success Criteria
 
 - Can create and refine a task in under 30 seconds
 - Can start a task and open its workspace in under 5 seconds
 - Can switch between tasks instantly
-- Agent integration is seamless and requires minimal configuration
+- Tool and adapter integration is seamless and requires minimal configuration
 - System remains simple, transparent, and file-based
