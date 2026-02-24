@@ -28,6 +28,7 @@ import {
   ProjectsRepository,
   Repository,
   PtyService,
+  ToolExecutionStream,
 } from '@zeta/commands';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -39,6 +40,21 @@ const MIN_ZOOM_FACTOR = 0.5;
 const MAX_ZOOM_FACTOR = 3;
 const ZOOM_STEP = 0.1;
 const DEFAULT_ZOOM_FACTOR = 1;
+const MIN_TERMINAL_COLS = 2;
+const MIN_TERMINAL_ROWS = 1;
+
+type ToolExecutionControlCommand = {
+  toolExecutionId: string;
+  data: string;
+};
+
+type ToolExecutionResizeCommand = {
+  toolExecutionId: string;
+  cols: number;
+  rows: number;
+};
+
+const activeToolExecutions = new Map<string, ToolExecutionStream>();
 
 const createWindow = () => {
   console.log('Creating main window...');
@@ -219,6 +235,10 @@ function registerToolIpcHandlers(): void {
 
     // Start the tool and get the stream
     const response = await facade.execute(command);
+    activeToolExecutions.set(response.toolExecutionId, response.stream);
+    void response.stream.onExit.finally(() => {
+      activeToolExecutions.delete(response.toolExecutionId);
+    });
 
     // Forward messages to the renderer that invoked this handler
     void (async () => {
@@ -235,6 +255,44 @@ function registerToolIpcHandlers(): void {
 
     // Return immediate receipt to renderer
     return { toolExecutionId: response.toolExecutionId };
+  });
+
+  ipcMain.handle(
+    'tools:execute:write',
+    (_event, command: ToolExecutionControlCommand): boolean => {
+      const stream = activeToolExecutions.get(command.toolExecutionId);
+      if (!stream) {
+        return false;
+      }
+
+      stream.write(command.data);
+      return true;
+    },
+  );
+
+  ipcMain.handle(
+    'tools:execute:resize',
+    (_event, command: ToolExecutionResizeCommand): boolean => {
+      const stream = activeToolExecutions.get(command.toolExecutionId);
+      if (!stream) {
+        return false;
+      }
+
+      const cols = Math.max(MIN_TERMINAL_COLS, Math.floor(command.cols));
+      const rows = Math.max(MIN_TERMINAL_ROWS, Math.floor(command.rows));
+      stream.resize(cols, rows);
+      return true;
+    },
+  );
+
+  ipcMain.handle('tools:execute:kill', (_event, toolExecutionId: string): boolean => {
+    const stream = activeToolExecutions.get(toolExecutionId);
+    if (!stream) {
+      return false;
+    }
+
+    stream.kill();
+    return true;
   });
 }
 

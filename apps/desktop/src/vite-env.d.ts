@@ -6,10 +6,10 @@ import {
   ExecuteToolResponse,
   FindProjectsResponse,
   ListToolsResponse,
-  FindTasksResponse,
+  ListTasksResponse,
   ListTasksQuery,
-  PtyStreamDataMessage,
-  PtyStreamExitMessage,
+  ToolExecutionStreamDataMessage,
+  ToolExecutionStreamExitMessage,
 } from '@zeta/commands';
 
 declare module '*.md?raw' {
@@ -34,13 +34,16 @@ declare global {
       listProjects: () => Promise<FindProjectsResponse>;
       // Manage tasks from the desktop renderer.
       addTask: (command: CreateTaskCommand) => Promise<string>;
-      listTasks: (query: ListTasksQuery) => Promise<FindTasksResponse>;
+      listTasks: (query: ListTasksQuery) => Promise<ListTasksResponse>;
       // Manage tools from the desktop renderer.
       addTool: (command: AddToolCommand) => Promise<AddToolResponse>;
       listTools: () => Promise<ListToolsResponse>;
       executeTool: (command: ExecuteToolCommand) => Promise<Omit<ExecuteToolResponse, 'stream'>>;
-      onToolOutput: (cb: (message: PtyStreamDataMessage) => void) => () => void;
-      onToolExit: (cb: (message: PtyStreamExitMessage) => void) => () => void;
+      writeToolInput: (toolExecutionId: string, data: string) => Promise<boolean>;
+      resizeToolTerminal: (toolExecutionId: string, cols: number, rows: number) => Promise<boolean>;
+      killToolExecution: (toolExecutionId: string) => Promise<boolean>;
+      onToolOutput: (cb: (message: ToolExecutionStreamDataMessage) => void) => () => void;
+      onToolExit: (cb: (message: ToolExecutionStreamExitMessage) => void) => () => void;
       // Open the shared zeta app data folder in the OS file explorer.
       openAppDataFolder: () => Promise<string>;
       // Open a URL using the operating system default external handler.

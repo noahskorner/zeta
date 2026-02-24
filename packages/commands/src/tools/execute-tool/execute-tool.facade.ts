@@ -40,6 +40,8 @@ export class ExecuteToolFacade {
             args,
             cwd: command.cwd,
             env: command.env,
+            cols: command.cols,
+            rows: command.rows,
           })
         : this._processService.start({
             id: toolExecutionId,

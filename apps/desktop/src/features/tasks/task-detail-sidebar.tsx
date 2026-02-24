@@ -1,5 +1,5 @@
 import type { ListToolResponse } from '@zeta/commands';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
 import {
@@ -11,7 +11,8 @@ import {
 } from '../../components/ui/select';
 import { Separator } from '../../components/ui/separator';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '../../components/ui/sidebar';
-import { ToolRunner } from './tool-runner';
+import { TerminalSize } from './execute-tool';
+import { ToolTerminalPanel } from './tool-terminal-panel';
 
 type TaskDetailSidebarProps = {
   actions?: React.ReactNode;
@@ -39,11 +40,17 @@ const TASK_FIELD_OPTIONS: TaskFieldOption[] = [
 
 export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
   const [toolExecutionId, setToolExecutionId] = useState<string | null>(null);
+  const terminalSizeRef = useRef<TerminalSize>({ cols: 120, rows: 30 });
   const [tools, setTools] = useState<ListToolResponse[]>([]);
   const [isLoadingTools, setIsLoadingTools] = useState(false);
   const [selectedToolId, setSelectedToolId] = useState<string>('');
   const [slotMappings, setSlotMappings] = useState<Record<number, TaskFieldKey | null>>({});
   const [isExecuting, setIsExecuting] = useState(false);
+
+  // Avoid render loops by updating terminal dimensions only when they actually change.
+  const handleTerminalResize = useCallback((size: TerminalSize): void => {
+    terminalSizeRef.current = size;
+  }, []);
 
   useEffect(() => {
     void loadTools();
@@ -122,6 +129,8 @@ export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
       const { toolExecutionId: executionId } = await window.zetaApi.executeTool({
         toolId: selectedTool.id,
         argv: [],
+        cols: terminalSizeRef.current.cols,
+        rows: terminalSizeRef.current.rows,
       });
       setToolExecutionId(executionId);
     } catch (error) {
@@ -144,7 +153,7 @@ export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
           <div className="space-y-2">
             <div className="text-xs text-muted-foreground">Tool</div>
             <Select
-              value={selectedToolId || undefined}
+              value={selectedToolId}
               disabled={isLoadingTools || tools.length === 0}
               onValueChange={handleToolChange}
             >
@@ -217,7 +226,10 @@ export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
             })}
           </div>
         </div>
-        {toolExecutionId && <ToolRunner toolExecutionId={toolExecutionId} />}
+        <ToolTerminalPanel
+          toolExecutionId={toolExecutionId}
+          onTerminalResize={handleTerminalResize}
+        />
       </SidebarContent>
 
       <SidebarFooter className="border-t p-3">

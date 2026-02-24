@@ -37,6 +37,12 @@ contextBridge.exposeInMainWorld('zetaApi', {
   listTools: (): Promise<ListToolsResponse> => ipcRenderer.invoke('tools:list'),
   executeTool: (command: ExecuteToolCommand): Promise<Omit<ExecuteToolResponse, 'stream'>> =>
     ipcRenderer.invoke('tools:execute', command),
+  writeToolInput: (toolExecutionId: string, data: string): Promise<boolean> =>
+    ipcRenderer.invoke('tools:execute:write', { toolExecutionId, data }),
+  resizeToolTerminal: (toolExecutionId: string, cols: number, rows: number): Promise<boolean> =>
+    ipcRenderer.invoke('tools:execute:resize', { toolExecutionId, cols, rows }),
+  killToolExecution: (toolExecutionId: string): Promise<boolean> =>
+    ipcRenderer.invoke('tools:execute:kill', toolExecutionId),
   onToolOutput: (cb: (message: ToolExecutionStreamDataMessage) => void) => {
     const handler = (_: unknown, msg: ToolExecutionStreamDataMessage) => cb(msg);
     ipcRenderer.on('tools:execute:data', handler);

@@ -3,4 +3,6 @@ export interface ExecuteToolCommand {
   argv: string[];
   cwd?: string;
   env?: Record<string, string>;
+  cols?: number;
+  rows?: number;
 }

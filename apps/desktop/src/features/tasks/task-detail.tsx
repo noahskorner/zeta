@@ -52,7 +52,7 @@ export function TaskDetail({
       className="h-full min-h-0"
       style={
         {
-          '--sidebar-width': '30rem',
+          '--sidebar-width': '40rem',
         } as React.CSSProperties
       }
     >
