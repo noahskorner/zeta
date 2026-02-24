@@ -64,9 +64,12 @@ export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
 
     try {
       const response = await window.zetaApi.listTools();
-      const sortedTools = [...response.tools].sort((first, second) =>
-        second.createdAt.localeCompare(first.createdAt),
-      );
+      const disabledToolIds = readDisabledToolIds();
+      const sortedTools = [...response.tools]
+        .filter((tool) => !disabledToolIds.includes(tool.id))
+        .sort((first, second) =>
+          second.createdAt.localeCompare(first.createdAt),
+        );
       setTools(sortedTools);
 
       if (sortedTools.length > 0) {
@@ -166,10 +169,11 @@ export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
             </Select>
             {selectedTool ? (
               <div className="text-xs text-muted-foreground">
-                {selectedTool.command}
+                {selectedTool.exec}
                 {selectedTool.args && selectedTool.args.length > 0
                   ? ` ${selectedTool.args.join(' ')}`
                   : ''}
+                {selectedTool.status === 'needsSetup' ? ' (Needs setup)' : ''}
               </div>
             ) : null}
           </div>
@@ -219,7 +223,7 @@ export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
       <SidebarFooter className="border-t p-3">
         <Button
           className="w-full"
-          disabled={!selectedTool || isExecuting || !hasTaskContext}
+          disabled={!selectedTool || isExecuting || !hasTaskContext || selectedTool.status !== 'ready'}
           onClick={() => void handleExecuteTool()}
         >
           {isExecuting ? 'Starting...' : 'Execute tool'}
@@ -227,6 +231,22 @@ export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
       </SidebarFooter>
     </Sidebar>
   );
+}
+
+const DISABLED_TOOLS_STORAGE_KEY = 'zeta.tools.disabledToolIds';
+
+function readDisabledToolIds(): string[] {
+  const rawValue = window.localStorage.getItem(DISABLED_TOOLS_STORAGE_KEY);
+  if (!rawValue) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(rawValue) as unknown;
+    return Array.isArray(parsed) ? parsed.filter((value) => typeof value === 'string') : [];
+  } catch {
+    return [];
+  }
 }
 
 function getErrorMessage(error: unknown): string {

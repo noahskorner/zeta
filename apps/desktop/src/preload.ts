@@ -10,8 +10,8 @@ import {
   ListToolsResponse,
   ListTasksResponse,
   ListTasksQuery,
-  PtyStreamDataMessage,
-  PtyStreamExitMessage,
+  ToolExecutionStreamDataMessage,
+  ToolExecutionStreamExitMessage,
 } from '@zeta/commands';
 import { contextBridge, ipcRenderer } from 'electron';
 
@@ -37,13 +37,13 @@ contextBridge.exposeInMainWorld('zetaApi', {
   listTools: (): Promise<ListToolsResponse> => ipcRenderer.invoke('tools:list'),
   executeTool: (command: ExecuteToolCommand): Promise<Omit<ExecuteToolResponse, 'stream'>> =>
     ipcRenderer.invoke('tools:execute', command),
-  onToolOutput: (cb: (message: PtyStreamDataMessage) => void) => {
-    const handler = (_: unknown, msg: PtyStreamDataMessage) => cb(msg);
+  onToolOutput: (cb: (message: ToolExecutionStreamDataMessage) => void) => {
+    const handler = (_: unknown, msg: ToolExecutionStreamDataMessage) => cb(msg);
     ipcRenderer.on('tools:execute:data', handler);
     return () => ipcRenderer.removeListener('tools:execute:data', handler);
   },
-  onToolExit: (cb: (message: PtyStreamExitMessage) => void) => {
-    const handler = (_: unknown, msg: PtyStreamExitMessage) => cb(msg);
+  onToolExit: (cb: (message: ToolExecutionStreamExitMessage) => void) => {
+    const handler = (_: unknown, msg: ToolExecutionStreamExitMessage) => cb(msg);
     ipcRenderer.on('tools:execute:exit', handler);
     return () => ipcRenderer.removeListener('tools:execute:exit', handler);
   },

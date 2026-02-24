@@ -8,6 +8,8 @@ import {
   ListToolsResponse,
   FindTasksResponse,
   ListTasksQuery,
+  PtyStreamDataMessage,
+  PtyStreamExitMessage,
 } from '@zeta/commands';
 
 declare module '*.md?raw' {

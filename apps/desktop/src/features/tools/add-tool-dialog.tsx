@@ -24,8 +24,9 @@ import { Input } from '../../components/ui/input';
 
 const addToolSchema = z.object({
   name: z.string().trim().min(1, 'Name is required.'),
-  command: z.string().trim().min(1, 'Command is required.'),
+  exec: z.string().trim().min(1, 'Executable is required.'),
   args: z.string().optional(),
+  interactive: z.boolean(),
 });
 
 type AddToolValues = z.infer<typeof addToolSchema>;
@@ -42,8 +43,9 @@ export function AddToolDialog(props: AddToolDialogProps) {
     resolver: zodResolver(addToolSchema),
     defaultValues: {
       name: '',
-      command: '',
+      exec: '',
       args: '',
+      interactive: true,
     },
   });
 
@@ -56,8 +58,9 @@ export function AddToolDialog(props: AddToolDialogProps) {
     try {
       const createdTool = await window.zetaApi.addTool({
         name: values.name,
-        command: values.command,
+        exec: values.exec,
         args: parsedArgs.length > 0 ? parsedArgs : undefined,
+        interactive: values.interactive,
       });
 
       setOpen(false);
@@ -98,7 +101,7 @@ export function AddToolDialog(props: AddToolDialogProps) {
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>Add Tool</DialogTitle>
-          <DialogDescription>Save a runnable command to your tool registry.</DialogDescription>
+          <DialogDescription>Save a runnable executable to your tool registry.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -121,13 +124,13 @@ export function AddToolDialog(props: AddToolDialogProps) {
               )}
             />
 
-            {/* Capture the executable command used to launch the tool. */}
+            {/* Capture the portable executable name used to launch the tool. */}
             <FormField
               control={form.control}
-              name="command"
+              name="exec"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Command</FormLabel>
+                  <FormLabel>Executable</FormLabel>
                   <FormControl>
                     <Input placeholder="claude" {...field} />
                   </FormControl>
@@ -151,6 +154,30 @@ export function AddToolDialog(props: AddToolDialogProps) {
                     />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Let users choose PTY interaction vs non-interactive process mode. */}
+            <FormField
+              control={form.control}
+              name="interactive"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-md border p-3">
+                  <div className="space-y-0.5">
+                    <FormLabel>Interactive</FormLabel>
+                    <div className="text-xs text-muted-foreground">
+                      Enable terminal interaction (PTY) for this tool.
+                    </div>
+                  </div>
+                  <FormControl>
+                    <input
+                      checked={field.value}
+                      type="checkbox"
+                      className="h-4 w-4"
+                      onChange={(event) => field.onChange(event.currentTarget.checked)}
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />

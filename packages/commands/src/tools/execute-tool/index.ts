@@ -3,4 +3,7 @@ export * from './execute-tool.error';
 export * from './execute-tool.facade';
 export * from './execute-tool.repository';
 export * from './execute-tool.response';
+export * from './process';
 export * from './pty';
+export * from './tool-execution-stream-message';
+export * from './tool-execution-stream';

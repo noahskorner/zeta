@@ -1,4 +1,4 @@
-import { PtyStreamDataMessage, PtyStreamExitMessage } from '@zeta/commands';
+import { ToolExecutionStreamDataMessage, ToolExecutionStreamExitMessage } from '@zeta/commands';
 import { useEffect, useRef, useState } from 'react';
 
 export function ToolRunner({ toolExecutionId }: { toolExecutionId: string }) {
@@ -20,15 +20,19 @@ export function ToolRunner({ toolExecutionId }: { toolExecutionId: string }) {
   };
 
   useEffect(() => {
-    const offOut = window.zetaApi.onToolOutput(({ runId, data }: PtyStreamDataMessage) => {
-      if (runId != toolExecutionId) return;
-      append(data);
-    });
+    const offOut = window.zetaApi.onToolOutput(
+      ({ runId, data }: ToolExecutionStreamDataMessage) => {
+        if (runId != toolExecutionId) return;
+        append(data);
+      },
+    );
 
-    const offExit = window.zetaApi.onToolExit(({ runId, exitCode }: PtyStreamExitMessage) => {
-      if (runId != toolExecutionId) return;
-      setExitCode(exitCode);
-    });
+    const offExit = window.zetaApi.onToolExit(
+      ({ runId, exitCode }: ToolExecutionStreamExitMessage) => {
+        if (runId != toolExecutionId) return;
+        setExitCode(exitCode);
+      },
+    );
 
     return () => {
       offOut();
@@ -38,7 +42,7 @@ export function ToolRunner({ toolExecutionId }: { toolExecutionId: string }) {
   }, [toolExecutionId]);
 
   return (
-    <pre style={{ whiteSpace: 'pre-wrap' }}>
+    <pre className="whitespace-pre-wrap bg-black p-2">
       {output}
       {exitCode != null ? `\n[exited: ${exitCode}]` : ''}
     </pre>

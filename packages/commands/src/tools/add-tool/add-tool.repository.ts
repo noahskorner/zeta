@@ -19,8 +19,9 @@ export class AddToolRepository extends ToolsRepository {
     const createdTool: ToolEntity = {
       id: crypto.randomUUID(),
       name: model.name,
-      command: model.command,
+      exec: model.exec,
       args: model.args,
+      interactive: model.interactive,
       createdAt: new Date().toISOString(),
     };
 

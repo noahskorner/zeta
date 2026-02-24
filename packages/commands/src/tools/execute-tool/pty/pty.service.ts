@@ -1,11 +1,16 @@
 import type * as NodePty from 'node-pty';
 import { createAsyncQueue } from './create-async-queue';
-import { PtyStreamDataMessage, PtyStreamExitMessage, PtyStreamMessage } from './pty-stream-message';
-import { PtyStream } from './pty-stream';
+import {
+  ToolExecutionStreamDataMessage,
+  ToolExecutionStreamExitMessage,
+  ToolExecutionStreamMessage,
+} from '../tool-execution-stream-message';
+import { ToolExecutionStream } from '../tool-execution-stream';
+import { normalizeExecCommand } from '../normalize-exec-command';
 
 export type StartPtyCommand = {
   id: string;
-  cmd: string;
+  exec: string;
   args?: string[];
   cwd?: string;
   env?: Record<string, string>;
@@ -14,10 +19,13 @@ export type StartPtyCommand = {
 };
 
 export class PtyService {
-  start({ id, cwd, env, cols = 120, rows = 30 }: StartPtyCommand): PtyStream {
+  start({ id, exec, args, cwd, env, cols = 120, rows = 30 }: StartPtyCommand): ToolExecutionStream {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const pty = require('node-pty') as typeof NodePty;
-    const proc = pty.spawn(process.env.COMSPEC ?? 'cmd.exe', ['/d', '/s', '/k', 'codex'], {
+    const normalizedCommand = normalizeExecCommand(exec, args ?? []);
+
+    // Spawn interactive tools directly instead of wrapping with shell commands.
+    const proc = pty.spawn(normalizedCommand.exec, normalizedCommand.args, {
       name: 'xterm-256color',
       cwd: cwd ?? process.cwd(),
       env: { ...process.env, ...env },
@@ -25,13 +33,24 @@ export class PtyService {
       rows,
     });
 
-    const q = createAsyncQueue<PtyStreamMessage>();
+    const q = createAsyncQueue<ToolExecutionStreamMessage>();
 
-    proc.onData((data) => q.push({ type: 'data', runId: id, data } satisfies PtyStreamDataMessage));
+    proc.onData((data) =>
+      q.push({ type: 'data', runId: id, data } satisfies ToolExecutionStreamDataMessage),
+    );
 
-    proc.onExit(({ exitCode, signal }) => {
-      q.push({ type: 'exit', runId: id, exitCode, signal } satisfies PtyStreamExitMessage);
-      q.close();
+    const onExit = new Promise<ToolExecutionStreamExitMessage>((resolve) => {
+      proc.onExit(({ exitCode, signal }) => {
+        const payload = {
+          type: 'exit',
+          runId: id,
+          exitCode,
+          signal,
+        } satisfies ToolExecutionStreamExitMessage;
+        q.push(payload);
+        q.close();
+        resolve(payload);
+      });
     });
 
     return {
@@ -42,6 +61,7 @@ export class PtyService {
         proc.kill();
         // onExit will close the queue
       },
+      onExit,
       messages: q.iterate(),
     };
   }

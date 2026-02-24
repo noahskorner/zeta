@@ -1,5 +1,6 @@
 export interface AddToolCommand {
   name: string;
-  command: string;
+  exec: string;
   args?: string[];
+  interactive: boolean;
 }

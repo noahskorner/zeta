@@ -47,7 +47,15 @@ export function TaskDetail({
   defaultSidebarOpen = true,
 }: TaskDetailProps) {
   return (
-    <SidebarProvider defaultOpen={defaultSidebarOpen} className="h-full min-h-0">
+    <SidebarProvider
+      defaultOpen={defaultSidebarOpen}
+      className="h-full min-h-0"
+      style={
+        {
+          '--sidebar-width': '30rem',
+        } as React.CSSProperties
+      }
+    >
       <TaskDetailLayout
         taskId={taskId}
         createdAt={createdAt}

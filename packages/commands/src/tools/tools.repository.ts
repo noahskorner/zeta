@@ -27,7 +27,8 @@ export class ToolsRepository extends Repository {
         return (
           typeof tool?.id === 'string' &&
           typeof tool?.name === 'string' &&
-          typeof tool?.command === 'string' &&
+          typeof tool?.exec === 'string' &&
+          typeof tool?.interactive === 'boolean' &&
           typeof tool?.createdAt === 'string' &&
           hasValidArgs
         );

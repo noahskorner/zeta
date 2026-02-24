@@ -33,6 +33,23 @@ export class ExecuteToolRepository extends ToolsRepository {
     );
   }
 
+  public async updateExecution(
+    executionId: string,
+    updates: Pick<ToolExecutionEntity, 'status' | 'finishedAt' | 'exitCode'>,
+  ): Promise<void> {
+    await mkdir(ExecuteToolRepository.STORAGE_PATH, { recursive: true });
+
+    const existingExecutions = await this.findAllExecutions();
+    const nextExecutions = existingExecutions.map((execution) =>
+      execution.id === executionId ? { ...execution, ...updates } : execution,
+    );
+
+    await this.writeAtomically(
+      ExecuteToolRepository.TOOL_EXECUTIONS_FILE_PATH,
+      JSON.stringify({ executions: nextExecutions } satisfies ToolExecutionsFileContent, null, 2),
+    );
+  }
+
   private async findAllExecutions(): Promise<ToolExecutionEntity[]> {
     try {
       const raw = await readFile(ExecuteToolRepository.TOOL_EXECUTIONS_FILE_PATH, 'utf8');
@@ -42,24 +59,22 @@ export class ExecuteToolRepository extends ToolsRepository {
       }
 
       return parsed.executions.filter((execution) => {
-        const hasValidArgs =
-          Array.isArray(execution?.args) && execution.args.every((arg) => typeof arg === 'string');
-        const hasValidPid = execution?.pid === undefined || typeof execution.pid === 'number';
-        const hasValidEnv =
-          execution?.env === undefined ||
-          (typeof execution.env === 'object' &&
-            execution.env !== null &&
-            Object.values(execution.env).every((value) => typeof value === 'string'));
+        const hasValidFinishedAt =
+          execution?.finishedAt === undefined || typeof execution.finishedAt === 'string';
+        const hasValidExitCode =
+          execution?.exitCode === undefined || typeof execution.exitCode === 'number';
+        const hasValidStatus =
+          execution?.status === 'running' ||
+          execution?.status === 'completed' ||
+          execution?.status === 'failed';
 
         return (
           typeof execution?.id === 'string' &&
           typeof execution?.toolId === 'string' &&
-          typeof execution?.command === 'string' &&
-          typeof execution?.cwd === 'string' &&
           typeof execution?.startedAt === 'string' &&
-          hasValidArgs &&
-          hasValidPid &&
-          hasValidEnv
+          hasValidFinishedAt &&
+          hasValidExitCode &&
+          hasValidStatus
         );
       });
     } catch (error) {

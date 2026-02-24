@@ -1,8 +1,11 @@
 export interface ListToolResponse {
   id: string;
   name: string;
-  command: string;
+  exec: string;
   args?: string[];
+  interactive: boolean;
+  status: 'ready' | 'needsSetup';
+  resolvedExec?: string;
   createdAt: string;
 }
 

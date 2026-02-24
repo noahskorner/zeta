@@ -1,7 +1,8 @@
 export interface ToolEntity {
   id: string;
   name: string;
-  command: string;
+  exec: string;
   args?: string[];
+  interactive: boolean;
   createdAt: string;
 }

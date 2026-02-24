@@ -14,6 +14,7 @@ import {
   ExecuteToolCommand,
   ExecuteToolFacade,
   ExecuteToolRepository,
+  ProcessService,
   CreateProjectCommand,
   CreateProjectFacade,
   CreateProjectRepository,
@@ -211,9 +212,10 @@ function registerToolIpcHandlers(): void {
 
   ipcMain.handle('tools:execute', async (event, command: ExecuteToolCommand) => {
     // Start a tool process under PTY and return immediately with a start receipt.
-    const service = new PtyService();
+    const ptyService = new PtyService();
+    const processService = new ProcessService();
     const repository = new ExecuteToolRepository();
-    const facade = new ExecuteToolFacade(service, repository);
+    const facade = new ExecuteToolFacade(ptyService, processService, repository);
 
     // Start the tool and get the stream
     const response = await facade.execute(command);

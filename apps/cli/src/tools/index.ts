@@ -6,6 +6,8 @@ import {
   AddToolService,
   ExecuteToolCommand,
   ExecuteToolFacade,
+  ProcessService,
+  PtyService,
   ExecuteToolRepository,
   ListToolResponse,
   ListToolsFacade,
@@ -14,9 +16,10 @@ import {
 
 type AddToolOptions = {
   name: string;
-  command: string;
+  exec: string;
   args?: string;
   arg?: string[];
+  nonInteractive?: boolean;
 };
 
 type ExecuteToolOptions = {
@@ -32,19 +35,26 @@ export function addTools(command: Command) {
   const addToolFacade = new AddToolFacade(service, addToolRepository);
   const listToolsRepository = new ListToolsRepository();
   const listToolsFacade = new ListToolsFacade(listToolsRepository);
+  const ptyService = new PtyService();
+  const processService = new ProcessService();
   const executeToolRepository = new ExecuteToolRepository();
-  const executeToolFacade = new ExecuteToolFacade(executeToolRepository);
+  const executeToolFacade = new ExecuteToolFacade(
+    ptyService,
+    processService,
+    executeToolRepository,
+  );
 
   // Add the command.
   const toolsCommand = command.command('tools').description('Manage saved tools');
 
   toolsCommand
     .command('add')
-    .description('Add a runnable tool command')
+    .description('Add a runnable tool executable')
     .requiredOption('--name <string>', 'Tool name')
-    .requiredOption('--command <string>', 'Executable command')
+    .requiredOption('--exec <string>', 'Executable program name')
     .option('--args <arg1,arg2>', 'Comma-separated tool args')
     .option('--arg <value>', 'Single tool arg (repeatable)', collectOptionValue, [])
+    .option('--non-interactive', 'Run this tool via spawn (not PTY)')
     .action(async (options: AddToolOptions) => {
       try {
         // Normalize args provided via --args or repeated --arg options.
@@ -52,8 +62,9 @@ export function addTools(command: Command) {
 
         const createdTool = await addToolFacade.execute({
           name: options.name,
-          command: options.command,
+          exec: options.exec,
           args: parsedArgs.length > 0 ? parsedArgs : undefined,
+          interactive: !options.nonInteractive,
         } satisfies AddToolCommand);
 
         console.log(`Created tool: ${createdTool.id} (${createdTool.name})`);
@@ -102,10 +113,7 @@ export function addTools(command: Command) {
           cwd: options.cwd,
         } satisfies ExecuteToolCommand);
 
-        const pidText = typeof receipt.pid === 'number' ? String(receipt.pid) : 'n/a';
-        console.log(
-          `Started tool ${options.tool} (pid: ${pidText}) at ${receipt.startedAt}`,
-        );
+        console.log(`Started tool ${options.tool} (execution: ${receipt.toolExecutionId})`);
       } catch (error) {
         if (error instanceof Error) {
           console.error(error.message);
@@ -122,7 +130,10 @@ function collectOptionValue(value: string, previous: string[]): string[] {
   return [...previous, value];
 }
 
-function parseArgs(commaSeparatedArgs: string | undefined, repeatedArgs: string[] | undefined): string[] {
+function parseArgs(
+  commaSeparatedArgs: string | undefined,
+  repeatedArgs: string[] | undefined,
+): string[] {
   const argsFromCsv = commaSeparatedArgs
     ? commaSeparatedArgs
         .split(',')
@@ -142,13 +153,17 @@ function printTools(tools: ListToolResponse[]): void {
     return;
   }
 
-  const sortedTools = [...tools].sort((first, second) => second.createdAt.localeCompare(first.createdAt));
+  const sortedTools = [...tools].sort((first, second) =>
+    second.createdAt.localeCompare(first.createdAt),
+  );
 
   sortedTools.forEach((tool) => {
     const args = tool.args && tool.args.length > 0 ? ` ${tool.args.join(' ')}` : '';
     console.log(`${tool.name}`);
     console.log(`  id: ${tool.id}`);
-    console.log(`  command: ${tool.command}${args}`);
+    console.log(`  exec: ${tool.exec}${args}`);
+    console.log(`  interactive: ${tool.interactive ? 'yes' : 'no'}`);
+    console.log(`  status: ${tool.status}`);
     console.log(`  created: ${tool.createdAt}`);
     console.log('');
   });

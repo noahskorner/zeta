@@ -2,11 +2,14 @@ import { ExecuteToolCommand } from './execute-tool.command';
 import { ExecuteToolError } from './execute-tool.error';
 import { ExecuteToolRepository } from './execute-tool.repository';
 import { ExecuteToolResponse } from './execute-tool.response';
+import { resolveToolExecutable } from '../resolve-tool-executable';
+import { ProcessService } from './process/process.service';
 import { PtyService } from './pty/pty.service';
 
 export class ExecuteToolFacade {
   constructor(
-    private _service: PtyService,
+    private _ptyService: PtyService,
+    private _processService: ProcessService,
     private _repository: ExecuteToolRepository,
   ) {}
 
@@ -22,19 +25,54 @@ export class ExecuteToolFacade {
       throw new ExecuteToolError(`Tool not found: ${toolId}`, toolId);
     }
 
+    const resolution = await resolveToolExecutable(tool.exec);
+    if (resolution.status === 'needsSetup') {
+      throw new ExecuteToolError(`Tool "${tool.name}" needs setup on this machine.`, tool.id);
+    }
+
+    const args = [...(tool.args ?? []), ...(command.argv ?? [])];
     const toolExecutionId = crypto.randomUUID();
     try {
-      // Launch the tool as a PTY process
-      const stream = await this._service.start({
+      const stream = tool.interactive
+        ? this._ptyService.start({
+            id: toolExecutionId,
+            exec: resolution.resolvedExec,
+            args,
+            cwd: command.cwd,
+            env: command.env,
+          })
+        : this._processService.start({
+            id: toolExecutionId,
+            exec: resolution.resolvedExec,
+            args,
+            cwd: command.cwd,
+            env: command.env,
+          });
+
+      // Persist execution lifecycle for status tracking.
+      await this._repository.createExecution({
         id: toolExecutionId,
-        cmd: 'codex',
+        toolId: tool.id,
+        startedAt: new Date().toISOString(),
+        status: 'running',
       });
 
-      // TODO: Persist the execution
+      void stream.onExit
+        .then(async (exit) => {
+          const isSuccess = exit.exitCode === 0;
+          await this._repository.updateExecution(toolExecutionId, {
+            status: isSuccess ? 'completed' : 'failed',
+            exitCode: exit.exitCode,
+            finishedAt: new Date().toISOString(),
+          });
+        })
+        .catch(() => {
+          return;
+        });
 
       return {
-        toolExecutionId: toolExecutionId,
-        stream: stream,
+        toolExecutionId,
+        stream,
       };
     } catch (error) {
       throw new ExecuteToolError(
