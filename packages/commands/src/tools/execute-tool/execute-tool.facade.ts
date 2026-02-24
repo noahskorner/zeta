@@ -1,14 +1,17 @@
-import { spawn } from 'node:child_process';
 import { ExecuteToolCommand } from './execute-tool.command';
 import { ExecuteToolError } from './execute-tool.error';
 import { ExecuteToolRepository } from './execute-tool.repository';
 import { ExecuteToolResponse } from './execute-tool.response';
-import { ToolExecutionEntity } from '../tool-execution.entity';
+import { PtyService } from './pty/pty.service';
 
 export class ExecuteToolFacade {
-  constructor(private _repository: ExecuteToolRepository) {}
+  constructor(
+    private _service: PtyService,
+    private _repository: ExecuteToolRepository,
+  ) {}
 
   public async execute(command: ExecuteToolCommand): Promise<ExecuteToolResponse> {
+    // Validate the tool exists
     const toolId = command.toolId.trim();
     if (!toolId) {
       throw new ExecuteToolError('Tool id is required.', toolId);
@@ -19,41 +22,20 @@ export class ExecuteToolFacade {
       throw new ExecuteToolError(`Tool not found: ${toolId}`, toolId);
     }
 
-    const argv = command.argv.map((arg) => String(arg));
-    const args = [...(tool.args ?? []), ...argv];
-    const startedAt = new Date().toISOString();
-    const cwd = command.cwd ?? process.cwd();
-    const environment = buildSpawnEnvironment(command.env);
-    const executionId = crypto.randomUUID();
-
+    const toolExecutionId = crypto.randomUUID();
     try {
-      // Launch the tool as a detached background process so the desktop app stays responsive.
-      const processHandle = spawn(tool.command, args, {
-        cwd,
-        env: environment,
-        detached: true,
-        stdio: 'ignore',
-        windowsHide: true,
+      // Launch the tool as a PTY process
+      const stream = await this._service.start({
+        id: toolExecutionId,
+        cmd: 'codex',
       });
-      processHandle.unref();
-      const pid = typeof processHandle.pid === 'number' ? processHandle.pid : undefined;
 
-      await this._repository.createExecution({
-        id: executionId,
-        toolId: tool.id,
-        command: tool.command,
-        args,
-        cwd,
-        env: command.env,
-        pid,
-        startedAt,
-      } satisfies ToolExecutionEntity);
+      // TODO: Persist the execution
 
       return {
-        executionId,
-        pid,
-        startedAt,
-      } satisfies ExecuteToolResponse;
+        toolExecutionId: toolExecutionId,
+        stream: stream,
+      };
     } catch (error) {
       throw new ExecuteToolError(
         `Failed to start tool "${tool.name}" (${tool.id}).`,
@@ -62,19 +44,4 @@ export class ExecuteToolFacade {
       );
     }
   }
-}
-
-function buildSpawnEnvironment(overrides?: Record<string, string>): Record<string, string> {
-  const environment: Record<string, string> = {};
-
-  Object.entries(process.env).forEach(([key, value]) => {
-    if (typeof value === 'string') {
-      environment[key] = value;
-    }
-  });
-
-  return {
-    ...environment,
-    ...(overrides ?? {}),
-  };
 }

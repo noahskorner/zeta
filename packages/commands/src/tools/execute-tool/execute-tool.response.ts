@@ -1,5 +1,6 @@
+import { PtyStream } from './pty/pty-stream';
+
 export interface ExecuteToolResponse {
-  executionId: string;
-  pid?: number;
-  startedAt: string;
+  toolExecutionId: string;
+  stream: PtyStream;
 }

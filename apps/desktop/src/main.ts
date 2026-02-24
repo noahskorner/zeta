@@ -26,6 +26,7 @@ import {
   ListToolsRepository,
   ProjectsRepository,
   Repository,
+  PtyService,
 } from '@zeta/commands';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -157,7 +158,7 @@ function registerProjectIpcHandlers(): void {
   });
 
   ipcMain.handle('projects:list', async () => {
-    // Insansitate services
+    // Instantiate services
     const repository = new ProjectsRepository();
     const facade = new FindProjectsFacade(repository);
 
@@ -208,12 +209,30 @@ function registerToolIpcHandlers(): void {
     return facade.execute();
   });
 
-  ipcMain.handle('tools:execute', async (_event, command: ExecuteToolCommand) => {
+  ipcMain.handle('tools:execute', async (event, command: ExecuteToolCommand) => {
     // Start a tool process under PTY and return immediately with a start receipt.
+    const service = new PtyService();
     const repository = new ExecuteToolRepository();
-    const facade = new ExecuteToolFacade(repository);
+    const facade = new ExecuteToolFacade(service, repository);
 
-    return facade.execute(command);
+    // Start the tool and get the stream
+    const response = await facade.execute(command);
+
+    // Forward messages to the renderer that invoked this handler
+    void (async () => {
+      for await (const message of response.stream.messages) {
+        if (event.sender.isDestroyed()) break;
+
+        if (message.type === 'data') {
+          event.sender.send('tools:execute:data', message);
+        } else {
+          event.sender.send('tools:execute:exit', message);
+        }
+      }
+    })();
+
+    // Return immediate receipt to renderer
+    return { toolExecutionId: response.toolExecutionId };
   });
 }
 
@@ -270,7 +289,9 @@ function registerAppIpcHandlers(): void {
 function isSafeExternalUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:' || parsed.protocol === 'mailto:';
+    return (
+      parsed.protocol === 'http:' || parsed.protocol === 'https:' || parsed.protocol === 'mailto:'
+    );
   } catch {
     return false;
   }
@@ -284,10 +305,7 @@ function setWindowZoomFactor(window: BrowserWindow, delta: number): void {
 
 function isZoomInShortcut(input: Electron.Input): boolean {
   return (
-    input.key === '=' ||
-    input.key === '+' ||
-    input.code === 'Equal' ||
-    input.code === 'NumpadAdd'
+    input.key === '=' || input.key === '+' || input.code === 'Equal' || input.code === 'NumpadAdd'
   );
 }
 

@@ -36,7 +36,9 @@ declare global {
       // Manage tools from the desktop renderer.
       addTool: (command: AddToolCommand) => Promise<AddToolResponse>;
       listTools: () => Promise<ListToolsResponse>;
-      executeTool: (command: ExecuteToolCommand) => Promise<ExecuteToolResponse>;
+      executeTool: (command: ExecuteToolCommand) => Promise<Omit<ExecuteToolResponse, 'stream'>>;
+      onToolOutput: (cb: (message: PtyStreamDataMessage) => void) => () => void;
+      onToolExit: (cb: (message: PtyStreamExitMessage) => void) => () => void;
       // Open the shared zeta app data folder in the OS file explorer.
       openAppDataFolder: () => Promise<string>;
       // Open a URL using the operating system default external handler.

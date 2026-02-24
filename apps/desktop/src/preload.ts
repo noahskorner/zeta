@@ -10,6 +10,8 @@ import {
   ListToolsResponse,
   ListTasksResponse,
   ListTasksQuery,
+  PtyStreamDataMessage,
+  PtyStreamExitMessage,
 } from '@zeta/commands';
 import { contextBridge, ipcRenderer } from 'electron';
 
@@ -33,8 +35,18 @@ contextBridge.exposeInMainWorld('zetaApi', {
   addTool: (command: AddToolCommand): Promise<AddToolResponse> =>
     ipcRenderer.invoke('tools:add', command),
   listTools: (): Promise<ListToolsResponse> => ipcRenderer.invoke('tools:list'),
-  executeTool: (command: ExecuteToolCommand): Promise<ExecuteToolResponse> =>
+  executeTool: (command: ExecuteToolCommand): Promise<Omit<ExecuteToolResponse, 'stream'>> =>
     ipcRenderer.invoke('tools:execute', command),
+  onToolOutput: (cb: (message: PtyStreamDataMessage) => void) => {
+    const handler = (_: unknown, msg: PtyStreamDataMessage) => cb(msg);
+    ipcRenderer.on('tools:execute:data', handler);
+    return () => ipcRenderer.removeListener('tools:execute:data', handler);
+  },
+  onToolExit: (cb: (message: PtyStreamExitMessage) => void) => {
+    const handler = (_: unknown, msg: PtyStreamExitMessage) => cb(msg);
+    ipcRenderer.on('tools:execute:exit', handler);
+    return () => ipcRenderer.removeListener('tools:execute:exit', handler);
+  },
   // Open the shared zeta app data folder in the OS file explorer.
   openAppDataFolder: (): Promise<string> => ipcRenderer.invoke('app:open-data-folder'),
   // Open a URL in the user's OS default browser/email client.

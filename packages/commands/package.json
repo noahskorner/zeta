@@ -12,6 +12,12 @@
       "require": "./dist/index.js"
     }
   },
+  "build": {
+    "asarUnpack": [
+      "**/node-pty/prebuilds/**",
+      "**/*.node"
+    ]
+  },
   "scripts": {
     "dev": "tsc -p tsconfig.json",
     "build": "tsc -p tsconfig.json",

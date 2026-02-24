@@ -11,6 +11,7 @@ import {
 } from '../../components/ui/select';
 import { Separator } from '../../components/ui/separator';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '../../components/ui/sidebar';
+import { ToolRunner } from './tool-runner';
 
 type TaskDetailSidebarProps = {
   actions?: React.ReactNode;
@@ -37,6 +38,7 @@ const TASK_FIELD_OPTIONS: TaskFieldOption[] = [
 ];
 
 export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
+  const [toolExecutionId, setToolExecutionId] = useState<string | null>(null);
   const [tools, setTools] = useState<ListToolResponse[]>([]);
   const [isLoadingTools, setIsLoadingTools] = useState(false);
   const [selectedToolId, setSelectedToolId] = useState<string>('');
@@ -98,33 +100,27 @@ export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
     setIsExecuting(true);
 
     try {
-      const argv = argumentSlots
-        .map((_, index) => {
-          const fieldName = slotMappings[index];
-          if (!fieldName) {
-            return null;
-          }
+      // const argv = argumentSlots
+      //   .map((_, index) => {
+      //     const fieldName = slotMappings[index];
+      //     if (!fieldName) {
+      //       return null;
+      //     }
 
-          const value = getTaskFieldValue(props, fieldName);
-          if (value === undefined || value === null) {
-            return null;
-          }
+      //     const value = getTaskFieldValue(props, fieldName);
+      //     if (value === undefined || value === null) {
+      //       return null;
+      //     }
 
-          return String(value);
-        })
-        .filter((value): value is string => value !== null);
+      //     return String(value);
+      //   })
+      //   .filter((value): value is string => value !== null);
 
-      const receipt = await window.zetaApi.executeTool({
+      const { toolExecutionId: executionId } = await window.zetaApi.executeTool({
         toolId: selectedTool.id,
-        argv,
+        argv: [],
       });
-
-      toast.success('Tool started.', {
-        description:
-          typeof receipt.pid === 'number'
-            ? `PID ${receipt.pid}`
-            : `Started at ${receipt.startedAt}`,
-      });
+      setToolExecutionId(executionId);
     } catch (error) {
       toast.error('Failed to start tool.', { description: getErrorMessage(error) });
     } finally {
@@ -217,6 +213,7 @@ export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
             })}
           </div>
         </div>
+        {toolExecutionId && <ToolRunner toolExecutionId={toolExecutionId} />}
       </SidebarContent>
 
       <SidebarFooter className="border-t p-3">
@@ -240,25 +237,25 @@ function getErrorMessage(error: unknown): string {
   return 'Unknown error';
 }
 
-function getTaskFieldValue(
-  props: TaskDetailSidebarProps,
-  fieldName: TaskFieldKey,
-): string | undefined {
-  if (fieldName === 'friendlyName') {
-    return props.friendlyName;
-  }
+// function getTaskFieldValue(
+//   props: TaskDetailSidebarProps,
+//   fieldName: TaskFieldKey,
+// ): string | undefined {
+//   if (fieldName === 'friendlyName') {
+//     return props.friendlyName;
+//   }
 
-  if (fieldName === 'description') {
-    return props.description;
-  }
+//   if (fieldName === 'description') {
+//     return props.description;
+//   }
 
-  if (fieldName === 'taskName') {
-    return props.taskName;
-  }
+//   if (fieldName === 'taskName') {
+//     return props.taskName;
+//   }
 
-  if (fieldName === 'taskId') {
-    return props.taskId;
-  }
+//   if (fieldName === 'taskId') {
+//     return props.taskId;
+//   }
 
-  return props.createdAt;
-}
+//   return props.createdAt;
+// }
