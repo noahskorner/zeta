@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { addProjects } from "./projects";
+import { addProviders } from "./providers";
 import { addTasks } from "./tasks";
 import { addTools } from "./tools";
 
@@ -10,6 +11,7 @@ program.name("zeta").description("CLI wrapper around shared commands").version("
 
 // Add subcommands
 addProjects(program);
+addProviders(program);
 addTasks(program);
 addTools(program);
 
