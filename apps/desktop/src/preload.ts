@@ -8,8 +8,8 @@ import {
   CreateTaskCommand,
   ExecuteToolCommand,
   ExecuteToolResponse,
+  ListProvidersResponse,
   ListProjectsResponse,
-  ProviderEntity,
   ListToolsResponse,
   ListTasksResponse,
   ListTasksQuery,
@@ -40,8 +40,7 @@ contextBridge.exposeInMainWorld('zetaApi', {
   // Manage providers
   addProvider: (command: AddProviderCommand): Promise<AddProviderResponse> =>
     ipcRenderer.invoke('providers:add', command),
-  listProviders: (): Promise<{ providers: ProviderEntity[] }> =>
-    ipcRenderer.invoke('providers:list'),
+  listProviders: (): Promise<ListProvidersResponse> => ipcRenderer.invoke('providers:list'),
   // Manage tools
   addTool: (command: AddToolCommand): Promise<AddToolResponse> =>
     ipcRenderer.invoke('tools:add', command),

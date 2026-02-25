@@ -23,6 +23,9 @@ import {
   CreateProjectFacade,
   CreateProjectRepository,
   CreateProjectService,
+  ListProvidersFacade,
+  ListProvidersResponse,
+  ListProvidersRepository,
   ListProjectsFacade,
   ListTasksFacade,
   ListTasksQuery,
@@ -30,8 +33,6 @@ import {
   ListToolsFacade,
   ListToolsRepository,
   ProjectsRepository,
-  ProviderEntity,
-  ProvidersRepository,
   Repository,
   UpdateTaskCommand,
   UpdateTaskFacade,
@@ -322,13 +323,13 @@ function registerProviderIpcHandlers(): void {
     return facade.execute(command);
   });
 
-  ipcMain.handle('providers:list', async (): Promise<{ providers: ProviderEntity[] }> => {
+  ipcMain.handle('providers:list', async (): Promise<ListProvidersResponse> => {
     // Instantiate services.
-    const repository = new ProvidersRepository();
+    const repository = new ListProvidersRepository();
+    const facade = new ListProvidersFacade(repository);
 
     // Return persisted providers.
-    const providers = await repository.findAllProviders();
-    return { providers };
+    return facade.execute();
   });
 }
 

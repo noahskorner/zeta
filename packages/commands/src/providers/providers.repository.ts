@@ -30,14 +30,15 @@ export class ProvidersRepository extends Repository {
         return [];
       }
 
-      return parsed.providers.filter((provider) =>
-        typeof provider?.id === 'string' &&
-        typeof provider?.provider === 'string' &&
-        typeof provider?.defaultModel === 'string' &&
-        typeof provider?.createdAt === 'string' &&
-        (provider?.baseUrl === undefined || typeof provider.baseUrl === 'string') &&
-        (provider?.organization === undefined || typeof provider.organization === 'string') &&
-        (provider?.project === undefined || typeof provider.project === 'string'),
+      return parsed.providers.filter(
+        (provider) =>
+          typeof provider?.id === 'string' &&
+          typeof provider?.provider === 'string' &&
+          typeof provider?.defaultModel === 'string' &&
+          typeof provider?.createdAt === 'string' &&
+          (provider?.baseUrl === undefined || typeof provider.baseUrl === 'string') &&
+          (provider?.organization === undefined || typeof provider.organization === 'string') &&
+          (provider?.project === undefined || typeof provider.project === 'string'),
       );
     } catch (error) {
       if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
@@ -58,7 +59,8 @@ export class ProvidersRepository extends Repository {
       }
 
       return parsed.credentials.filter((credential) => {
-        const hasValidScheme = credential?.scheme === 'windows-dpapi' || credential?.scheme === 'aes-256-gcm';
+        const hasValidScheme =
+          credential?.scheme === 'windows-dpapi' || credential?.scheme === 'aes-256-gcm';
         const hasValidAesFields =
           credential?.scheme !== 'aes-256-gcm' ||
           (typeof credential.iv === 'string' &&

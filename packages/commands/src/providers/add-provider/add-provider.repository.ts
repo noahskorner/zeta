@@ -72,7 +72,10 @@ export class AddProviderRepository extends ProvidersRepository {
     return providerEntity;
   }
 
-  private async encryptApiKey(apiKey: string, passphrase: string | undefined): Promise<EncryptedSecret> {
+  private async encryptApiKey(
+    apiKey: string,
+    passphrase: string | undefined,
+  ): Promise<EncryptedSecret> {
     // Prefer OS-protected encryption on Windows, then fall back to AES-256-GCM.
     if (process.platform === 'win32') {
       try {
@@ -113,7 +116,7 @@ export class AddProviderRepository extends ProvidersRepository {
 
   private async encryptWithWindowsDpapi(plaintext: string): Promise<string | null> {
     const script =
-      "[Console]::InputEncoding=[System.Text.Encoding]::UTF8;" +
+      '[Console]::InputEncoding=[System.Text.Encoding]::UTF8;' +
       '$plain=[Console]::In.ReadToEnd();' +
       '$bytes=[System.Text.Encoding]::UTF8.GetBytes($plain);' +
       '$protected=[System.Security.Cryptography.ProtectedData]::Protect($bytes,$null,[System.Security.Cryptography.DataProtectionScope]::CurrentUser);' +
