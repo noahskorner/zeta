@@ -1,4 +1,4 @@
-import { FindProjectResponse } from '@zeta/commands';
+import { AddProviderResponse, FindProjectResponse } from '@zeta/commands';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '../components/ui/badge';
@@ -7,6 +7,7 @@ import { SidebarInset, SidebarProvider } from '../components/ui/sidebar';
 import { AppSidebar, type SidebarView } from './app-sidebar';
 import { AppHeader } from './app-header';
 import { MarkdownEditorPanel } from './markdown-editor/markdown-editor-panel';
+import { ProvidersPanel } from './providers/providers-panel';
 import { TasksPanel } from './tasks/tasks-panel';
 import { ToolsPanel } from './tools/tools-panel';
 import { WindowHeader } from './window-header';
@@ -108,6 +109,14 @@ export default function App() {
     toast.success('Tool created.', { description: toolId });
   }
 
+  function handleProviderCreated(provider: AddProviderResponse) {
+    toast.success('Provider added.', { description: provider.id });
+  }
+
+  function handleProviderError(message: string) {
+    toast.error('Provider operation failed.', { description: message });
+  }
+
   async function handleMinimizeWindow() {
     await window.zetaApi.minimizeWindow();
   }
@@ -162,6 +171,12 @@ export default function App() {
                 />
               ) : null}
               {activeView === 'tools' ? <ToolsPanel onToolCreated={handleToolCreated} /> : null}
+              {activeView === 'providers' ? (
+                <ProvidersPanel
+                  onProviderCreated={handleProviderCreated}
+                  onError={handleProviderError}
+                />
+              ) : null}
               {activeView === 'markdownEditor' ? <MarkdownEditorPanel /> : null}
               {activeView === 'agents' ? <AgentsPanel /> : null}
               {activeView === 'automations' ? <AutomationsPanel /> : null}

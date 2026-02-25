@@ -1,10 +1,13 @@
 import {
+  AddProviderCommand,
+  AddProviderResponse,
   AddToolCommand,
   AddToolResponse,
   CreateTaskCommand,
   ExecuteToolCommand,
   ExecuteToolResponse,
   FindProjectsResponse,
+  ProviderEntity,
   ListToolsResponse,
   ListTasksResponse,
   ListTasksQuery,
@@ -38,6 +41,9 @@ declare global {
       // Manage tools from the desktop renderer.
       addTool: (command: AddToolCommand) => Promise<AddToolResponse>;
       listTools: () => Promise<ListToolsResponse>;
+      // Manage providers from the desktop renderer.
+      addProvider: (command: AddProviderCommand) => Promise<AddProviderResponse>;
+      listProviders: () => Promise<{ providers: ProviderEntity[] }>;
       executeTool: (command: ExecuteToolCommand) => Promise<Omit<ExecuteToolResponse, 'stream'>>;
       writeToolInput: (toolExecutionId: string, data: string) => Promise<boolean>;
       resizeToolTerminal: (toolExecutionId: string, cols: number, rows: number) => Promise<boolean>;

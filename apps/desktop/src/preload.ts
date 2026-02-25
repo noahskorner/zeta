@@ -1,12 +1,15 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 import {
+  AddProviderCommand,
+  AddProviderResponse,
   AddToolCommand,
   AddToolResponse,
   CreateTaskCommand,
   ExecuteToolCommand,
   ExecuteToolResponse,
   FindProjectsResponse,
+  ProviderEntity,
   ListToolsResponse,
   ListTasksResponse,
   ListTasksQuery,
@@ -35,6 +38,10 @@ contextBridge.exposeInMainWorld('zetaApi', {
   addTool: (command: AddToolCommand): Promise<AddToolResponse> =>
     ipcRenderer.invoke('tools:add', command),
   listTools: (): Promise<ListToolsResponse> => ipcRenderer.invoke('tools:list'),
+  // Manage providers from the desktop renderer.
+  addProvider: (command: AddProviderCommand): Promise<AddProviderResponse> =>
+    ipcRenderer.invoke('providers:add', command),
+  listProviders: (): Promise<{ providers: ProviderEntity[] }> => ipcRenderer.invoke('providers:list'),
   executeTool: (command: ExecuteToolCommand): Promise<Omit<ExecuteToolResponse, 'stream'>> =>
     ipcRenderer.invoke('tools:execute', command),
   writeToolInput: (toolExecutionId: string, data: string): Promise<boolean> =>

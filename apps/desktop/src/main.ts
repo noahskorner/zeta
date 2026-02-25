@@ -3,6 +3,10 @@ import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import {
+  AddProviderCommand,
+  AddProviderFacade,
+  AddProviderRepository,
+  AddProviderService,
   AddToolCommand,
   AddToolFacade,
   AddToolRepository,
@@ -26,6 +30,8 @@ import {
   ListToolsFacade,
   ListToolsRepository,
   ProjectsRepository,
+  ProviderEntity,
+  ProvidersRepository,
   Repository,
   PtyService,
   ToolExecutionStream,
@@ -129,6 +135,7 @@ app.on('ready', createWindow);
 app.on('ready', registerProjectIpcHandlers);
 app.on('ready', registerTaskIpcHandlers);
 app.on('ready', registerToolIpcHandlers);
+app.on('ready', registerProviderIpcHandlers);
 app.on('ready', registerAppIpcHandlers);
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -293,6 +300,27 @@ function registerToolIpcHandlers(): void {
 
     stream.kill();
     return true;
+  });
+}
+
+function registerProviderIpcHandlers(): void {
+  ipcMain.handle('providers:add', async (_event, command: AddProviderCommand) => {
+    // Instantiate services.
+    const service = new AddProviderService();
+    const repository = new AddProviderRepository();
+    const facade = new AddProviderFacade(service, repository);
+
+    // Persist the provider metadata and encrypted credentials.
+    return facade.execute(command);
+  });
+
+  ipcMain.handle('providers:list', async (): Promise<{ providers: ProviderEntity[] }> => {
+    // Instantiate services.
+    const repository = new ProvidersRepository();
+
+    // Return persisted providers.
+    const providers = await repository.findAllProviders();
+    return { providers };
   });
 }
 

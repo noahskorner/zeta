@@ -4,6 +4,7 @@ import {
   GitBranch,
   Hammer,
   ListTodo,
+  PlugZap,
   PlayCircle,
   RefreshCw,
   Sparkles,
@@ -26,7 +27,13 @@ import {
   SidebarSeparator,
 } from '../components/ui/sidebar';
 
-export type SidebarView = 'tasks' | 'tools' | 'agents' | 'automations' | 'markdownEditor';
+export type SidebarView =
+  | 'tasks'
+  | 'tools'
+  | 'providers'
+  | 'agents'
+  | 'automations'
+  | 'markdownEditor';
 
 type AppSidebarProps = {
   activeView: SidebarView;
@@ -46,6 +53,7 @@ export function AppSidebar(props: AppSidebarProps) {
   }> = [
     { view: 'tasks', label: 'Tasks', icon: ListTodo, badge: '14' },
     { view: 'tools', label: 'Tools', icon: Hammer },
+    { view: 'providers', label: 'Providers', icon: PlugZap },
     { view: 'markdownEditor', label: 'Markdown', icon: FilePenLine },
     { view: 'agents', label: 'Agents', icon: Bot, badge: '3' },
     {
