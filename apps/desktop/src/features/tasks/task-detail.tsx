@@ -3,9 +3,6 @@ import { SidebarProvider, useSidebar } from '../../components/ui/sidebar';
 import { TaskDetailHeader } from './task-detail-header';
 import { TaskDetailSidebar } from './task-detail-sidebar';
 import { MarkdownEditor } from '../../components/markdown-editor/markdown-editor';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import { Separator } from '../../components/ui/separator';
 
 export type TaskDetailProps = {
   taskId?: string;
@@ -107,47 +104,31 @@ function TaskDetailLayout({
     <div className="flex h-full w-full overflow-hidden">
       {/* Left side (main content) */}
       <div className="flex min-h-0 flex-1 flex-col">
-        <TaskDetailHeader actions={isSidebarVisible ? undefined : actions} />
+        <TaskDetailHeader
+          title={title}
+          slug={slug}
+          onTitleChange={onTitleChange}
+          onSlugChange={onSlugChange}
+          titlePlaceholder={titlePlaceholder}
+          slugPlaceholder={slugPlaceholder}
+          editable={editable}
+          slugEditable={slugEditable}
+          titleError={titleError}
+          slugError={slugError}
+          actions={isSidebarVisible ? undefined : actions}
+        />
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
           <div className="mx-auto w-full max-w-4xl space-y-4">
-            {/* Keep shared task identity fields consistent across create and update flows. */}
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug</Label>
-              <Input
-                id="slug"
-                value={slug}
-                onChange={(event) => onSlugChange?.(event.target.value)}
-                placeholder={slugPlaceholder}
-                disabled={!(slugEditable ?? editable)}
-              />
-              {slugError ? <div className="text-sm text-destructive">{slugError}</div> : null}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="task-title">Title</Label>
-              <Input
-                id="task-title"
-                value={title}
-                onChange={(event) => onTitleChange?.(event.target.value)}
-                placeholder={titlePlaceholder}
-                disabled={!editable}
-              />
-              {titleError ? <div className="text-sm text-destructive">{titleError}</div> : null}
-            </div>
-
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Separator className="my-4" />
-              {/* Keep description in markdown editor for both create and detail modes. */}
+            <div className="space-y-2 p-4">
+              {descriptionError ? (
+                <div className="text-sm text-destructive">{descriptionError}</div>
+              ) : null}
               <MarkdownEditor
                 content={description}
                 onContentChange={(content) => onDescriptionChange?.(content)}
                 editable={editable}
               />
-              {descriptionError ? (
-                <div className="text-sm text-destructive">{descriptionError}</div>
-              ) : null}
             </div>
 
             {/* Keep validation and status messaging colocated with editor content. */}

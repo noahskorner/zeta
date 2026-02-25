@@ -38,7 +38,7 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
     defaultValues: {
       slug: '',
       title: '',
-      description: '',
+      description: '## Goal\n\n## Requirements\n\n## Acceptance Criteria',
     },
   });
 
