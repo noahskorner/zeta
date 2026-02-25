@@ -85,12 +85,12 @@ export function ToolsPanel(props: ToolsPanelProps) {
       {/* Surface loading and errors before rendering the list. */}
       {isLoadingTools ? (
         <Card>
-          <CardContent className="pt-6 text-sm text-muted-foreground">Loading tools...</CardContent>
+          <CardContent className="text-sm text-muted-foreground">Loading tools...</CardContent>
         </Card>
       ) : null}
       {errorMessage ? (
         <Card className="border-destructive/50">
-          <CardContent className="pt-6 text-sm text-destructive">
+          <CardContent className="text-sm text-destructive">
             Failed to load tools: {errorMessage}
           </CardContent>
         </Card>

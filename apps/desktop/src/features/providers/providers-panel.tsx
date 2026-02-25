@@ -1,6 +1,12 @@
 import { AddProviderResponse, ProviderEntity } from '@zeta/commands';
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../components/ui/card';
 import { AddProviderDialog } from './add-provider-dialog';
 
 type ProvidersPanelProps = {
@@ -56,14 +62,12 @@ export function ProvidersPanel(props: ProvidersPanelProps) {
       {/* Surface loading and errors before rendering the list. */}
       {isLoadingProviders ? (
         <Card>
-          <CardContent className="pt-6 text-sm text-muted-foreground">
-            Loading providers...
-          </CardContent>
+          <CardContent className="text-sm text-muted-foreground">Loading providers...</CardContent>
         </Card>
       ) : null}
       {errorMessage ? (
         <Card className="border-destructive/50">
-          <CardContent className="pt-6 text-sm text-destructive">
+          <CardContent className="text-sm text-destructive">
             Failed to load providers: {errorMessage}
           </CardContent>
         </Card>
@@ -72,7 +76,7 @@ export function ProvidersPanel(props: ProvidersPanelProps) {
       {/* Render persisted providers with key runtime metadata. */}
       {!isLoadingProviders && !errorMessage && providers.length === 0 ? (
         <Card>
-          <CardContent className="pt-6 text-sm text-muted-foreground">
+          <CardContent className="text-sm text-muted-foreground">
             No providers have been added yet.
           </CardContent>
         </Card>
@@ -88,7 +92,9 @@ export function ProvidersPanel(props: ProvidersPanelProps) {
               <CardContent className="space-y-1 text-xs text-muted-foreground">
                 <div className="font-mono">id: {provider.id}</div>
                 <div>created: {formatCreatedAt(provider.createdAt)}</div>
-                {provider.baseUrl ? <div className="truncate">base url: {provider.baseUrl}</div> : null}
+                {provider.baseUrl ? (
+                  <div className="truncate">base url: {provider.baseUrl}</div>
+                ) : null}
                 {provider.organization ? <div>organization: {provider.organization}</div> : null}
                 {provider.project ? <div>project: {provider.project}</div> : null}
               </CardContent>
