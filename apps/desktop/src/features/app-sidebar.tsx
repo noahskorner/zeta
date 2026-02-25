@@ -1,4 +1,5 @@
 import {
+  AppWindow,
   Bot,
   Clock3,
   FilePenLine,
@@ -30,6 +31,7 @@ import {
 export type SidebarView =
   | 'tasks'
   | 'tools'
+  | 'integrations'
   | 'adapters'
   | 'providers'
   | 'recipes'
@@ -60,6 +62,7 @@ export function AppSidebar(props: AppSidebarProps) {
     },
     { view: 'tasks', label: 'Tasks', icon: ListTodo, badge: '14' },
     { view: 'tools', label: 'Tools', icon: Hammer },
+    { view: 'integrations', label: 'Integrations', icon: AppWindow },
     { view: 'adapters', label: 'Adapters', icon: GitBranch },
     { view: 'recipes', label: 'Recipes', icon: Bot, badge: '3' },
     { view: 'providers', label: 'Providers', icon: PlugZap },

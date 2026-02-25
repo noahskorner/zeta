@@ -5,13 +5,14 @@ import { SidebarInset, SidebarProvider } from '../components/ui/sidebar';
 import { AppSidebar, type SidebarView } from './app-sidebar';
 import { AdaptersPanel } from './adapters/adapters-panel';
 import { AppHeader } from './app-header';
+import { IntegrationsPanel } from './integrations/integrations-panel';
 import { MarkdownEditorPanel } from './markdown-editor/markdown-editor-panel';
 import { ProvidersPanel } from './providers/providers-panel';
+import { RecipesPanel } from './recipes/recipes-panel';
 import { SchedulesPanel } from './schedules/schedules-panel';
 import { TasksPanel } from './tasks/tasks-panel';
 import { ToolsPanel } from './tools/tools-panel';
 import { WindowHeader } from './window-header';
-import { RecipesPanel } from './recipes/recipes-panel';
 
 export default function App() {
   const [projects, setProjects] = useState<ListProjectResponse[]>([]);
@@ -159,6 +160,7 @@ export default function App() {
                 />
               ) : null}
               {activeView === 'tools' ? <ToolsPanel onToolCreated={handleToolCreated} /> : null}
+              {activeView === 'integrations' ? <IntegrationsPanel /> : null}
               {activeView === 'adapters' ? <AdaptersPanel /> : null}
               {activeView === 'providers' ? (
                 <ProvidersPanel
