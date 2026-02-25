@@ -10,18 +10,18 @@ import { Separator } from '../../components/ui/separator';
 export type TaskDetailProps = {
   taskId?: string;
   createdAt?: string;
-  friendlyName: string;
-  taskName: string;
+  slug: string;
+  title: string;
   description: string;
-  onFriendlyNameChange?: (friendlyName: string) => void;
-  onTaskNameChange?: (taskName: string) => void;
+  onSlugChange?: (slug: string) => void;
+  onTitleChange?: (title: string) => void;
   onDescriptionChange?: (description: string) => void;
-  friendlyNamePlaceholder?: string;
-  taskNamePlaceholder?: string;
+  titlePlaceholder?: string;
+  slugPlaceholder?: string;
   editable?: boolean;
-  taskNameEditable?: boolean;
-  friendlyNameError?: string;
-  taskNameError?: string;
+  slugEditable?: boolean;
+  slugError?: string;
+  titleError?: string;
   descriptionError?: string;
   footerContent?: React.ReactNode;
   actions?: React.ReactNode;
@@ -30,19 +30,19 @@ export type TaskDetailProps = {
 
 export function TaskDetail({
   taskId,
-  friendlyName,
-  taskName,
+  slug,
+  title,
   description,
   createdAt,
-  onFriendlyNameChange,
-  onTaskNameChange,
+  onSlugChange,
+  onTitleChange,
   onDescriptionChange,
-  friendlyNamePlaceholder = 'Task name',
-  taskNamePlaceholder = 'task-worktree-name',
+  titlePlaceholder = 'Task title',
+  slugPlaceholder = 'task-worktree-name',
   editable = false,
-  taskNameEditable,
-  friendlyNameError,
-  taskNameError,
+  slugEditable = false,
+  slugError,
+  titleError,
   descriptionError,
   footerContent,
   actions,
@@ -61,18 +61,18 @@ export function TaskDetail({
       <TaskDetailLayout
         taskId={taskId}
         createdAt={createdAt}
-        friendlyName={friendlyName}
-        taskName={taskName}
+        title={title}
+        slug={slug}
         description={description}
-        onFriendlyNameChange={onFriendlyNameChange}
-        onTaskNameChange={onTaskNameChange}
+        onTitleChange={onTitleChange}
+        onSlugChange={onSlugChange}
         onDescriptionChange={onDescriptionChange}
-        friendlyNamePlaceholder={friendlyNamePlaceholder}
-        taskNamePlaceholder={taskNamePlaceholder}
+        titlePlaceholder={titlePlaceholder}
+        slugPlaceholder={slugPlaceholder}
         editable={editable}
-        taskNameEditable={taskNameEditable}
-        friendlyNameError={friendlyNameError}
-        taskNameError={taskNameError}
+        slugEditable={slugEditable}
+        titleError={titleError}
+        slugError={slugError}
         descriptionError={descriptionError}
         footerContent={footerContent}
         actions={actions}
@@ -84,18 +84,18 @@ export function TaskDetail({
 function TaskDetailLayout({
   taskId,
   createdAt,
-  friendlyName,
-  taskName,
+  slug,
+  title,
   description,
-  onFriendlyNameChange,
-  onTaskNameChange,
+  onSlugChange,
+  onTitleChange,
   onDescriptionChange,
-  friendlyNamePlaceholder = 'Task name',
-  taskNamePlaceholder = 'task-worktree-name',
+  slugPlaceholder = 'task-worktree-name',
+  titlePlaceholder = 'Task title',
   editable = false,
-  taskNameEditable,
-  friendlyNameError,
-  taskNameError,
+  slugEditable = false,
+  slugError,
+  titleError,
   descriptionError,
   footerContent,
   actions,
@@ -113,31 +113,27 @@ function TaskDetailLayout({
           <div className="mx-auto w-full max-w-4xl space-y-4">
             {/* Keep shared task identity fields consistent across create and update flows. */}
             <div className="space-y-2">
-              <Label htmlFor="task-friendly-name">Name</Label>
+              <Label htmlFor="slug">Slug</Label>
               <Input
-                id="task-friendly-name"
-                value={friendlyName}
-                onChange={(event) => onFriendlyNameChange?.(event.target.value)}
-                placeholder={friendlyNamePlaceholder}
-                disabled={!editable}
+                id="slug"
+                value={slug}
+                onChange={(event) => onSlugChange?.(event.target.value)}
+                placeholder={slugPlaceholder}
+                disabled={!(slugEditable ?? editable)}
               />
-              {friendlyNameError ? (
-                <div className="text-sm text-destructive">{friendlyNameError}</div>
-              ) : null}
+              {slugError ? <div className="text-sm text-destructive">{slugError}</div> : null}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="task-name">Worktree</Label>
+              <Label htmlFor="task-title">Title</Label>
               <Input
-                id="task-name"
-                value={taskName}
-                onChange={(event) => onTaskNameChange?.(event.target.value)}
-                placeholder={taskNamePlaceholder}
-                disabled={!(taskNameEditable ?? editable)}
+                id="task-title"
+                value={title}
+                onChange={(event) => onTitleChange?.(event.target.value)}
+                placeholder={titlePlaceholder}
+                disabled={!editable}
               />
-              {taskNameError ? (
-                <div className="text-sm text-destructive">{taskNameError}</div>
-              ) : null}
+              {titleError ? <div className="text-sm text-destructive">{titleError}</div> : null}
             </div>
 
             <div className="space-y-2">
@@ -164,8 +160,8 @@ function TaskDetailLayout({
       <TaskDetailSidebar
         actions={actions}
         taskId={taskId}
-        taskName={taskName}
-        friendlyName={friendlyName}
+        slug={slug}
+        title={title}
         description={description}
         createdAt={createdAt}
       />

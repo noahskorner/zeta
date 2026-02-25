@@ -23,32 +23,32 @@ export class CreateTaskService {
     }
 
     // Validate required input fields before touching git state.
-    const name = command.name.trim();
-    const friendlyName = command.friendlyName.trim();
+    const slug = command.slug.trim();
+    const title = command.title.trim();
     const description = command.description.trim();
-    if (!name) {
-      throw new Error('Task name is required.');
+    if (!slug) {
+      throw new Error('Task slug is required.');
     }
-    if (!friendlyName) {
-      throw new Error('Task friendly name is required.');
+    if (!title) {
+      throw new Error('Task title is required.');
     }
     if (!description) {
       throw new Error('Task description is required.');
     }
 
-    // Validate this is a git repository and task name is a valid branch/worktree name.
+    // Validate this is a git repository and task slug is a valid branch/worktree name.
     const git = await createSimpleGit(absoluteProjectPath);
     const isRepository = await git.checkIsRepo();
     if (!isRepository) {
       throw new Error(`Project is not a git repository: ${absoluteProjectPath}`);
     }
-    await git.raw(['check-ref-format', '--branch', name]);
+    await git.raw(['check-ref-format', '--branch', slug]);
 
     return {
       projectPath: absoluteProjectPath,
-      name,
-      friendlyName,
-      description,
+      slug: slug,
+      title: title,
+      description: description,
     } satisfies CreateTaskModel;
   }
 }

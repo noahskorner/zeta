@@ -1,4 +1,4 @@
-export type TaskLaneId = "backlog" | "ready" | "in-progress" | "review" | "done";
+export type TaskLaneId = 'backlog' | 'ready' | 'in-progress' | 'review' | 'done';
 
 export type TaskLane = {
   id: TaskLaneId;
@@ -15,9 +15,9 @@ export type TaskLaneAssignee = {
 
 export type TaskCard = {
   id: string;
-  taskName: string;
+  laneId: TaskLaneId;
+  createdAt: string;
+  slug: string;
   title: string;
   description: string;
-  createdAt: string;
-  laneId: TaskLaneId;
 };

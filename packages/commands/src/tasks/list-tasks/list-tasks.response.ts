@@ -1,9 +1,9 @@
 export interface ListTaskResponse {
   id: string;
-  name: string;
-  friendlyName: string;
-  description: string;
   createdAt: string;
+  slug: string;
+  title: string;
+  description: string;
 }
 
 export interface ListTasksResponse {

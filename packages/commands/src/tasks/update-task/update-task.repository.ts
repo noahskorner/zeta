@@ -1,14 +1,14 @@
-import path from "node:path";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { TaskEntity } from "../task.entity";
-import { UpdateTaskModel } from "./update-task.model";
-import { UpdateTaskResponse } from "./update-task.response";
+import path from 'node:path';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { TaskEntity } from '../task.entity';
+import { UpdateTaskModel } from './update-task.model';
+import { UpdateTaskResponse } from './update-task.response';
 
 export class UpdateTaskRepository {
   public async updateTask(model: UpdateTaskModel): Promise<UpdateTaskResponse> {
     // Ensure project-local metadata storage exists before reading and writing tasks.
-    const metadataDirectoryPath = path.join(model.projectPath, ".zeta");
-    const tasksFilePath = path.join(metadataDirectoryPath, "tasks.json");
+    const metadataDirectoryPath = path.join(model.projectPath, '.zeta');
+    const tasksFilePath = path.join(metadataDirectoryPath, 'tasks.json');
     await mkdir(metadataDirectoryPath, { recursive: true });
 
     const tasks = await this.findAll(tasksFilePath);
@@ -21,17 +21,17 @@ export class UpdateTaskRepository {
     const existingTask = tasks[taskIndex];
     const updatedTask = {
       ...existingTask,
-      friendlyName: model.friendlyName ?? existingTask.friendlyName,
+      title: model.title ?? existingTask.title,
       description: model.description ?? existingTask.description,
     } satisfies TaskEntity;
 
     tasks[taskIndex] = updatedTask;
-    await writeFile(tasksFilePath, JSON.stringify(tasks, null, 2), "utf8");
+    await writeFile(tasksFilePath, JSON.stringify(tasks, null, 2), 'utf8');
 
     return {
       id: updatedTask.id,
-      name: updatedTask.name,
-      friendlyName: updatedTask.friendlyName,
+      slug: updatedTask.slug,
+      title: updatedTask.title,
       description: updatedTask.description,
       createdAt: updatedTask.createdAt,
     } satisfies UpdateTaskResponse;
@@ -39,7 +39,7 @@ export class UpdateTaskRepository {
 
   private async findAll(tasksFilePath: string): Promise<TaskEntity[]> {
     try {
-      const raw = await readFile(tasksFilePath, "utf8");
+      const raw = await readFile(tasksFilePath, 'utf8');
       const parsed = JSON.parse(raw) as TaskEntity[];
       if (!Array.isArray(parsed)) {
         return [];
@@ -47,15 +47,15 @@ export class UpdateTaskRepository {
 
       return parsed.filter((task) => {
         return (
-          typeof task?.id === "string" &&
-          typeof task?.name === "string" &&
-          typeof task?.friendlyName === "string" &&
-          typeof task?.description === "string" &&
-          typeof task?.createdAt === "string"
+          typeof task?.id === 'string' &&
+          typeof task?.slug === 'string' &&
+          typeof task?.title === 'string' &&
+          typeof task?.description === 'string' &&
+          typeof task?.createdAt === 'string'
         );
       });
     } catch (error) {
-      if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
         return [];
       }
 

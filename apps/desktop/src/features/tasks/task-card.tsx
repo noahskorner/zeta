@@ -60,7 +60,7 @@ export function TaskCard(props: TaskCardProps) {
       <TaskDialog
         projectId={props.projectId}
         taskId={props.task.id}
-        taskName={props.task.taskName}
+        slug={props.task.slug}
         title={props.task.title}
         description={props.task.description}
         createdAt={props.task.createdAt}

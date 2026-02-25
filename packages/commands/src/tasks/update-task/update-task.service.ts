@@ -24,18 +24,18 @@ export class UpdateTaskService {
 
     // Normalize and validate update target and any provided field values.
     const taskId = command.taskId.trim();
-    const friendlyName = command.friendlyName?.trim();
+    const title = command.title?.trim();
     const description = command.description?.trim();
     if (!taskId) {
       throw new Error('Task id is required.');
     }
-    if (friendlyName !== undefined && !friendlyName) {
-      throw new Error('Task friendly name is required.');
+    if (title !== undefined && !title) {
+      throw new Error('Task title is required.');
     }
     if (description !== undefined && !description) {
       throw new Error('Task description is required.');
     }
-    if (friendlyName === undefined && description === undefined) {
+    if (title === undefined && description === undefined) {
       throw new Error('Provide at least one field to update.');
     }
 
@@ -49,7 +49,7 @@ export class UpdateTaskService {
     return {
       projectPath: absoluteProjectPath,
       taskId,
-      friendlyName,
+      title: title,
       description,
     } satisfies UpdateTaskModel;
   }

@@ -1,6 +1,6 @@
 export interface UpdateTaskModel {
   projectPath: string;
   taskId: string;
-  friendlyName?: string;
+  title?: string;
   description?: string;
 }

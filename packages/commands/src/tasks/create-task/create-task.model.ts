@@ -1,6 +1,6 @@
 export interface CreateTaskModel {
   projectPath: string;
-  name: string;
-  friendlyName: string;
+  slug: string;
+  title: string;
   description: string;
 }

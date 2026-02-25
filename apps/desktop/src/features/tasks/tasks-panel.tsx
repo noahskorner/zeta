@@ -40,8 +40,8 @@ export function TasksPanel(props: TasksPanelProps) {
       setTasks(
         sortedTasks.map((task) => ({
           id: task.id,
-          taskName: task.name,
-          title: task.friendlyName,
+          slug: task.slug,
+          title: task.title,
           description: task.description,
           createdAt: task.createdAt,
           laneId: 'backlog',

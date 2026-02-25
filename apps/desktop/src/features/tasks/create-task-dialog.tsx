@@ -9,15 +9,12 @@ import { TaskDetail } from './task-detail';
 import { TaskDialogLayout } from './task-dialog-layout';
 
 const createTaskSchema = z.object({
-  name: z
+  slug: z
     .string()
     .trim()
-    .min(1, 'Task name is required.')
-    .refine(
-      (value) => isValidTaskName(value),
-      'Task name must be a valid git branch/worktree name.',
-    ),
-  friendlyName: z.string().trim().min(1, 'Friendly name is required.'),
+    .min(1, 'Slug is required.')
+    .refine((value) => isValidSlug(value), 'Slug must be a valid git branch/worktree name.'),
+  title: z.string().trim().min(1, 'Title is required.'),
   description: z.string().trim().min(1, 'Description is required.'),
 });
 
@@ -39,8 +36,8 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
   const form = useForm<CreateTaskValues>({
     resolver: zodResolver(createTaskSchema),
     defaultValues: {
-      name: '',
-      friendlyName: '',
+      slug: '',
+      title: '',
       description: '',
     },
   });
@@ -55,8 +52,8 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
     try {
       const taskId = await window.zetaApi.addTask({
         projectId: props.selectedProjectId,
-        name: values.name,
-        friendlyName: values.friendlyName,
+        slug: values.slug,
+        title: values.title,
         description: values.description,
       });
 
@@ -87,8 +84,8 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
     event.currentTarget.requestSubmit();
   }
 
-  const friendlyNameValue = form.watch('friendlyName');
-  const taskNameValue = form.watch('name');
+  const slugValue = form.watch('slug');
+  const titleValue = form.watch('title');
   const descriptionValue = form.watch('description');
 
   return (
@@ -115,21 +112,22 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
           onSubmit={form.handleSubmit(handleSubmit)}
         >
           <TaskDetail
-            friendlyName={friendlyNameValue}
-            taskName={taskNameValue}
+            title={titleValue}
+            slug={slugValue}
             description={descriptionValue}
             editable
-            friendlyNamePlaceholder="Create new task"
-            taskNamePlaceholder="feat-add-create-task"
-            onFriendlyNameChange={(value) => {
-              form.setValue('friendlyName', value, {
+            slugEditable
+            titlePlaceholder="Create new task"
+            slugPlaceholder="feat-add-create-task"
+            onTitleChange={(value) => {
+              form.setValue('title', value, {
                 shouldDirty: true,
                 shouldTouch: true,
                 shouldValidate: true,
               });
             }}
-            onTaskNameChange={(value) => {
-              form.setValue('name', value, {
+            onSlugChange={(value) => {
+              form.setValue('slug', value, {
                 shouldDirty: true,
                 shouldTouch: true,
                 shouldValidate: true,
@@ -162,8 +160,8 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
                 </Button>
               </>
             }
-            friendlyNameError={form.formState.errors.friendlyName?.message}
-            taskNameError={form.formState.errors.name?.message}
+            titleError={form.formState.errors.title?.message}
+            slugError={form.formState.errors.slug?.message}
             descriptionError={form.formState.errors.description?.message}
             footerContent={
               <>
@@ -187,7 +185,7 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
   );
 }
 
-function isValidTaskName(name: string): boolean {
+function isValidSlug(name: string): boolean {
   if (name.includes('..')) {
     return false;
   }

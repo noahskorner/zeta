@@ -32,25 +32,25 @@ export function addTasks(command: Command) {
   const tasksCommand = command.command('tasks').description('Manage project tasks');
 
   tasksCommand
-    .command('add <name>')
+    .command('add <slug>')
     .description('Create a task and git worktree in a project')
     .requiredOption('--project-id <projectId>', 'Saved project id')
-    .requiredOption('--friendly-name <friendlyName>', 'Human-friendly task name')
+    .requiredOption('--title <title>', 'Task title')
     .requiredOption('--description <description>', 'Task description')
     .action(
       async (
-        name: string,
+        slug: string,
         options: {
           projectId: string;
-          friendlyName: string;
+          title: string;
           description: string;
         },
       ) => {
         try {
           const taskId = await createTaskFacade.execute({
             projectId: options.projectId,
-            name,
-            friendlyName: options.friendlyName,
+            slug: slug,
+            title: options.title,
             description: options.description,
           } satisfies CreateTaskCommand);
 
@@ -92,14 +92,14 @@ export function addTasks(command: Command) {
     .command('update <taskId>')
     .description("Update a task's metadata in a project")
     .requiredOption('--project-id <projectId>', 'Saved project id')
-    .option('--friendly-name <friendlyName>', 'Updated human-friendly task name')
+    .option('--title <title>', 'Updated task title')
     .option('--description <description>', 'Updated task description')
     .action(
       async (
         taskId: string,
         options: {
           projectId: string;
-          friendlyName?: string;
+          title?: string;
           description?: string;
         },
       ) => {
@@ -107,7 +107,7 @@ export function addTasks(command: Command) {
           const response = await updateTaskFacade.execute({
             projectId: options.projectId,
             taskId,
-            friendlyName: options.friendlyName,
+            title: options.title,
             description: options.description,
           } satisfies UpdateTaskCommand);
 

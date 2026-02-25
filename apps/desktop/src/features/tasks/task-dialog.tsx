@@ -9,7 +9,7 @@ import { TaskDetail } from './task-detail';
 import { TaskDialogLayout } from './task-dialog-layout';
 
 const updateTaskSchema = z.object({
-  friendlyName: z.string().trim().min(1, 'Friendly name is required.'),
+  title: z.string().trim().min(1, 'Title is required.'),
   description: z.string().trim().min(1, 'Description is required.'),
 });
 
@@ -20,7 +20,7 @@ export type TaskDialogProps = {
   onOpenChange: (open: boolean) => void;
   projectId: string | null;
   taskId?: string;
-  taskName?: string;
+  slug?: string;
   title?: string;
   description?: string;
   createdAt?: string;
@@ -34,7 +34,7 @@ export function TaskDialog({
   onOpenChange,
   projectId,
   taskId,
-  taskName,
+  slug,
   title = 'Task',
   description,
   createdAt,
@@ -46,7 +46,7 @@ export function TaskDialog({
   const form = useForm<UpdateTaskValues>({
     resolver: zodResolver(updateTaskSchema),
     defaultValues: {
-      friendlyName: title || '',
+      title: title || '',
       description: description || '',
     },
   });
@@ -54,11 +54,11 @@ export function TaskDialog({
   useEffect(() => {
     if (open) {
       form.reset({
-        friendlyName: title || '',
+        title: title || '',
         description: description || '',
       });
     }
-  }, [description, form, open, taskName, title]);
+  }, [description, form, open, slug, title]);
 
   // Submit task metadata updates through the desktop bridge API.
   async function handleSubmit(values: UpdateTaskValues) {
@@ -75,7 +75,7 @@ export function TaskDialog({
       await window.zetaApi.updateTask({
         projectId,
         taskId,
-        friendlyName: values.friendlyName,
+        title: values.title,
         description: values.description,
       });
       onTaskUpdated(taskId);
@@ -104,7 +104,7 @@ export function TaskDialog({
     event.currentTarget.requestSubmit();
   }
 
-  const friendlyNameValue = form.watch('friendlyName');
+  const titleValue = form.watch('title');
   const descriptionValue = form.watch('description');
 
   return (
@@ -114,7 +114,7 @@ export function TaskDialog({
         onOpenChange(nextOpen);
         if (!nextOpen) {
           form.reset({
-            friendlyName: title || '',
+            title: title || '',
             description: description || '',
           });
         }
@@ -132,13 +132,13 @@ export function TaskDialog({
           <TaskDetail
             taskId={taskId || ''}
             createdAt={createdAt || ''}
-            friendlyName={friendlyNameValue}
-            taskName={taskName || ''}
+            title={titleValue}
+            slug={slug || ''}
             description={descriptionValue}
             editable
-            taskNameEditable={false}
-            onFriendlyNameChange={(value) => {
-              form.setValue('friendlyName', value, {
+            slugEditable={false}
+            onTitleChange={(value) => {
+              form.setValue('title', value, {
                 shouldDirty: true,
                 shouldTouch: true,
                 shouldValidate: true,
@@ -171,7 +171,7 @@ export function TaskDialog({
                 </Button>
               </>
             }
-            friendlyNameError={form.formState.errors.friendlyName?.message}
+            titleError={form.formState.errors.title?.message}
             descriptionError={form.formState.errors.description?.message}
             footerContent={
               form.formState.errors.root?.message ? (

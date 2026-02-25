@@ -17,13 +17,13 @@ import { ToolTerminalPanel } from './tool-terminal-panel';
 type TaskDetailSidebarProps = {
   actions?: React.ReactNode;
   taskId?: string;
-  taskName: string;
-  friendlyName: string;
+  slug: string;
+  title: string;
   description: string;
   createdAt?: string;
 };
 
-type TaskFieldKey = 'friendlyName' | 'description' | 'taskName' | 'taskId' | 'createdAt';
+type TaskFieldKey = 'slug' | 'title' | 'description' | 'taskId' | 'createdAt';
 
 type TaskFieldOption = {
   key: TaskFieldKey;
@@ -31,11 +31,11 @@ type TaskFieldOption = {
 };
 
 const TASK_FIELD_OPTIONS: TaskFieldOption[] = [
-  { key: 'friendlyName', label: 'Title' },
-  { key: 'description', label: 'Description' },
-  { key: 'taskName', label: 'Task Name' },
   { key: 'taskId', label: 'Task ID' },
   { key: 'createdAt', label: 'Created At' },
+  { key: 'slug', label: 'Slug' },
+  { key: 'title', label: 'Title' },
+  { key: 'description', label: 'Description' },
 ];
 
 export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
@@ -62,9 +62,7 @@ export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
   );
 
   const argumentSlots = selectedTool?.args ?? [];
-  const hasTaskContext = Boolean(
-    props.taskId || props.taskName || props.friendlyName || props.description,
-  );
+  const hasTaskContext = Boolean(props.taskId || props.slug || props.title || props.description);
 
   async function loadTools(): Promise<void> {
     setIsLoadingTools(true);
@@ -74,9 +72,7 @@ export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
       const disabledToolIds = readDisabledToolIds();
       const sortedTools = [...response.tools]
         .filter((tool) => !disabledToolIds.includes(tool.id))
-        .sort((first, second) =>
-          second.createdAt.localeCompare(first.createdAt),
-        );
+        .sort((first, second) => second.createdAt.localeCompare(first.createdAt));
       setTools(sortedTools);
 
       if (sortedTools.length > 0) {
@@ -235,7 +231,9 @@ export function TaskDetailSidebar(props: TaskDetailSidebarProps) {
       <SidebarFooter className="border-t p-3">
         <Button
           className="w-full"
-          disabled={!selectedTool || isExecuting || !hasTaskContext || selectedTool.status !== 'ready'}
+          disabled={
+            !selectedTool || isExecuting || !hasTaskContext || selectedTool.status !== 'ready'
+          }
           onClick={() => void handleExecuteTool()}
         >
           {isExecuting ? 'Starting...' : 'Execute tool'}
@@ -273,16 +271,16 @@ function getErrorMessage(error: unknown): string {
 //   props: TaskDetailSidebarProps,
 //   fieldName: TaskFieldKey,
 // ): string | undefined {
-//   if (fieldName === 'friendlyName') {
-//     return props.friendlyName;
+//   if (fieldName === 'title') {
+//     return props.title;
 //   }
 
 //   if (fieldName === 'description') {
 //     return props.description;
 //   }
 
-//   if (fieldName === 'taskName') {
-//     return props.taskName;
+//   if (fieldName === 'slug') {
+//     return props.slug;
 //   }
 
 //   if (fieldName === 'taskId') {
