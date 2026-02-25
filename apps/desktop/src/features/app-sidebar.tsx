@@ -30,6 +30,7 @@ import {
 export type SidebarView =
   | 'tasks'
   | 'tools'
+  | 'adapters'
   | 'providers'
   | 'recipes'
   | 'schedules'
@@ -59,6 +60,7 @@ export function AppSidebar(props: AppSidebarProps) {
     },
     { view: 'tasks', label: 'Tasks', icon: ListTodo, badge: '14' },
     { view: 'tools', label: 'Tools', icon: Hammer },
+    { view: 'adapters', label: 'Adapters', icon: GitBranch },
     { view: 'recipes', label: 'Recipes', icon: Bot, badge: '3' },
     { view: 'providers', label: 'Providers', icon: PlugZap },
     { view: 'markdownEditor', label: 'Markdown', icon: FilePenLine },

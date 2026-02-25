@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { SidebarInset, SidebarProvider } from '../components/ui/sidebar';
 import { AppSidebar, type SidebarView } from './app-sidebar';
+import { AdaptersPanel } from './adapters/adapters-panel';
 import { AppHeader } from './app-header';
 import { MarkdownEditorPanel } from './markdown-editor/markdown-editor-panel';
 import { ProvidersPanel } from './providers/providers-panel';
@@ -158,6 +159,7 @@ export default function App() {
                 />
               ) : null}
               {activeView === 'tools' ? <ToolsPanel onToolCreated={handleToolCreated} /> : null}
+              {activeView === 'adapters' ? <AdaptersPanel /> : null}
               {activeView === 'providers' ? (
                 <ProvidersPanel
                   onProviderCreated={handleProviderCreated}
