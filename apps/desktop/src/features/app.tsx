@@ -1,28 +1,16 @@
 import { AddProviderResponse, ListProjectResponse } from '@zeta/commands';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Badge } from '../components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { SidebarInset, SidebarProvider } from '../components/ui/sidebar';
 import { AppSidebar, type SidebarView } from './app-sidebar';
 import { AppHeader } from './app-header';
 import { MarkdownEditorPanel } from './markdown-editor/markdown-editor-panel';
 import { ProvidersPanel } from './providers/providers-panel';
+import { SchedulesPanel } from './schedules/schedules-panel';
 import { TasksPanel } from './tasks/tasks-panel';
 import { ToolsPanel } from './tools/tools-panel';
 import { WindowHeader } from './window-header';
-
-const mockedAgentRuntimes = [
-  { label: 'Codex', status: 'healthy', latency: '220ms' },
-  { label: 'Claude Code', status: 'healthy', latency: '260ms' },
-  { label: 'GitHub Copilot', status: 'degraded', latency: '480ms' },
-];
-
-const mockedAutomations = [
-  'Nightly repo review',
-  'Spec sync for PRODUCT.md',
-  'Task cleanup and normalization',
-];
+import { RecipesPanel } from './recipes/recipes-panel';
 
 export default function App() {
   const [projects, setProjects] = useState<ListProjectResponse[]>([]);
@@ -177,56 +165,13 @@ export default function App() {
                 />
               ) : null}
               {activeView === 'markdownEditor' ? <MarkdownEditorPanel /> : null}
-              {activeView === 'agents' ? <AgentsPanel /> : null}
-              {activeView === 'automations' ? <AutomationsPanel /> : null}
+              {activeView === 'recipes' ? <RecipesPanel /> : null}
+              {activeView === 'schedules' ? <SchedulesPanel /> : null}
             </main>
           </SidebarInset>
         </SidebarProvider>
       </div>
     </div>
-  );
-}
-
-function AgentsPanel() {
-  return (
-    <div className="grid gap-4 md:grid-cols-3">
-      {mockedAgentRuntimes.map((agent) => (
-        <Card key={agent.label}>
-          <CardHeader>
-            <CardTitle className="text-base">{agent.label}</CardTitle>
-            <CardDescription>Pluggable execution runtime.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex items-center justify-between">
-            <Badge variant={agent.status === 'healthy' ? 'secondary' : 'destructive'}>
-              {agent.status}
-            </Badge>
-            <div className="font-mono text-xs text-muted-foreground">{agent.latency}</div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
-
-function AutomationsPanel() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Scheduled Automation Queue</CardTitle>
-        <CardDescription>Mocked jobs that keep specs and repo state synchronized.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {mockedAutomations.map((automationName) => (
-          <div
-            key={automationName}
-            className="flex items-center justify-between rounded-md border p-3"
-          >
-            <div className="text-sm font-medium">{automationName}</div>
-            <Badge variant="outline">Enabled</Badge>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
   );
 }
 

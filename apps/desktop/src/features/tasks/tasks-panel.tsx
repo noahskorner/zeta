@@ -65,7 +65,7 @@ export function TasksPanel(props: TasksPanelProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="w-full space-y-4">
       {/* Keep task creation near the board and scoped to the selected project. */}
       <div className="flex items-center justify-between gap-3 rounded-md border p-4">
         <div className="text-sm text-muted-foreground">

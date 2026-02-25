@@ -1,5 +1,6 @@
 import {
   Bot,
+  Clock3,
   FilePenLine,
   GitBranch,
   Hammer,
@@ -8,7 +9,6 @@ import {
   PlayCircle,
   RefreshCw,
   Sparkles,
-  Workflow,
 } from 'lucide-react';
 import { type ComponentType } from 'react';
 import { AvatarFooter } from './avatar';
@@ -31,8 +31,8 @@ export type SidebarView =
   | 'tasks'
   | 'tools'
   | 'providers'
-  | 'agents'
-  | 'automations'
+  | 'recipes'
+  | 'schedules'
   | 'markdownEditor';
 
 type AppSidebarProps = {
@@ -51,17 +51,17 @@ export function AppSidebar(props: AppSidebarProps) {
     icon: ComponentType<{ className?: string }>;
     badge?: string;
   }> = [
-    { view: 'tasks', label: 'Tasks', icon: ListTodo, badge: '14' },
-    { view: 'tools', label: 'Tools', icon: Hammer },
-    { view: 'providers', label: 'Providers', icon: PlugZap },
-    { view: 'markdownEditor', label: 'Markdown', icon: FilePenLine },
-    { view: 'agents', label: 'Agents', icon: Bot, badge: '3' },
     {
-      view: 'automations',
-      label: 'Automations',
-      icon: Workflow,
+      view: 'schedules',
+      label: 'Schedules',
+      icon: Clock3,
       badge: '3',
     },
+    { view: 'tasks', label: 'Tasks', icon: ListTodo, badge: '14' },
+    { view: 'tools', label: 'Tools', icon: Hammer },
+    { view: 'recipes', label: 'Recipes', icon: Bot, badge: '3' },
+    { view: 'providers', label: 'Providers', icon: PlugZap },
+    { view: 'markdownEditor', label: 'Markdown', icon: FilePenLine },
   ];
 
   return (
