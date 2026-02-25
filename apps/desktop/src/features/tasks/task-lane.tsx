@@ -1,10 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { TaskCard } from './task-card';
-import type { TaskCard as TaskCardModel, TaskLane as TaskLaneModel } from './types';
+import { TaskLaneAssignees } from './task-lane-assignees';
+import type {
+  TaskCard as TaskCardModel,
+  TaskLane as TaskLaneModel,
+  TaskLaneAssignee,
+} from './types';
 
 type TaskLaneProps = {
   lane: TaskLaneModel;
   tasks: TaskCardModel[];
+  assignees: TaskLaneAssignee[];
   isDropTarget: boolean;
   draggingTaskId: string | null;
   onDropTask: (taskId: string, laneId: TaskLaneModel['id']) => void;
@@ -35,8 +41,11 @@ export function TaskLane(props: TaskLaneProps) {
         props.onDragLeaveLane();
       }}
     >
-      <CardHeader className="space-y-1 px-4 pb-4">
-        <CardTitle className="text-sm">{props.lane.title}</CardTitle>
+      <CardHeader className="space-y-2 px-4 pb-4">
+        <div className="flex items-start justify-between gap-3">
+          <CardTitle className="text-sm">{props.lane.title}</CardTitle>
+          <TaskLaneAssignees assignees={props.assignees} />
+        </div>
         <div className="text-xs text-muted-foreground">{props.lane.description}</div>
       </CardHeader>
 

@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { TaskLane } from './task-lane';
-import type { TaskCard, TaskLane as TaskLaneModel, TaskLaneId } from './types';
+import type {
+  TaskCard,
+  TaskLane as TaskLaneModel,
+  TaskLaneAssignee,
+  TaskLaneId,
+} from './types';
 
 const lanes: TaskLaneModel[] = [
   { id: 'backlog', title: 'Backlog', description: 'Capture and shape upcoming work.' },
@@ -9,6 +14,24 @@ const lanes: TaskLaneModel[] = [
   { id: 'review', title: 'Review', description: 'Waiting on code or QA review.' },
   { id: 'done', title: 'Done', description: 'Completed and verified.' },
 ];
+
+// Mock lane ownership/assignment metadata used for UI-only rendering.
+const laneAssignees: Record<TaskLaneId, TaskLaneAssignee[]> = {
+  backlog: [],
+  ready: [
+    { id: 'u-1', name: 'Ava Lin', initials: 'AL', colorClassName: 'bg-emerald-600' },
+    { id: 'u-2', name: 'Noah Kim', initials: 'NK', colorClassName: 'bg-orange-500' },
+  ],
+  'in-progress': [
+    { id: 'u-3', name: 'Priya Das', initials: 'PD', colorClassName: 'bg-sky-600' },
+    { id: 'u-4', name: 'Jules Park', initials: 'JP', colorClassName: 'bg-rose-500' },
+    { id: 'u-5', name: 'Ravi Shah', initials: 'RS', colorClassName: 'bg-indigo-600' },
+    { id: 'u-6', name: 'Mina Fox', initials: 'MF', colorClassName: 'bg-amber-600' },
+    { id: 'u-7', name: 'Kai Moss', initials: 'KM', colorClassName: 'bg-cyan-700' },
+  ],
+  review: [{ id: 'u-8', name: 'Leo Hart', initials: 'LH', colorClassName: 'bg-violet-600' }],
+  done: [],
+};
 
 type TasksBoardProps = {
   tasks: TaskCard[];
@@ -64,6 +87,7 @@ export function TasksBoard(props: TasksBoardProps) {
             key={lane.id}
             lane={lane}
             tasks={cardsByLane[lane.id]}
+            assignees={laneAssignees[lane.id]}
             draggingTaskId={draggingTaskId}
             isDropTarget={dropTargetLaneId === lane.id}
             onDropTask={moveTaskToLane}

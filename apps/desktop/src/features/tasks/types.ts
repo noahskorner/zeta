@@ -6,6 +6,13 @@ export type TaskLane = {
   description: string;
 };
 
+export type TaskLaneAssignee = {
+  id: string;
+  name: string;
+  initials: string;
+  colorClassName: string;
+};
+
 export type TaskCard = {
   id: string;
   taskName: string;
