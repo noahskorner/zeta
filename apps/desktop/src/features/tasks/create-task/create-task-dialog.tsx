@@ -12,7 +12,7 @@ import { Button } from '../../../components/ui/button';
 import { X } from 'lucide-react';
 
 type CreateTaskDialogProps = {
-  selectedProjectId: string;
+  projectId: string;
   onTaskCreated: (taskId: string) => void;
   onError: (message: string) => void;
 };
@@ -67,7 +67,7 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
         </DialogHeader>
 
         <CreateTaskForm
-          selectedProjectId={props.selectedProjectId}
+          projectId={props.projectId}
           onCreate={handleTaskCreated}
           onError={handleError}
           actions={

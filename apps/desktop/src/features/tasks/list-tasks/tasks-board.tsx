@@ -1,60 +1,41 @@
 import { useEffect, useMemo, useState } from 'react';
-import { TaskLane } from './task-lane';
-import type {
-  TaskCard,
-  TaskLane as TaskLaneModel,
-  TaskLaneAssignee,
-  TaskLaneId,
-} from '../types';
+import { ListTaskLaneResponse, TaskLane } from './task-lane';
+import { ListTaskResponse } from '@zeta/commands';
 
-const lanes: TaskLaneModel[] = [
-  { id: 'backlog', title: 'Backlog', description: 'Capture and shape upcoming work.' },
-  { id: 'ready', title: 'Ready', description: 'Defined tasks ready for pickup.' },
-  { id: 'in-progress', title: 'In Progress', description: 'Actively being implemented.' },
-  { id: 'review', title: 'Review', description: 'Waiting on code or QA review.' },
-  { id: 'done', title: 'Done', description: 'Completed and verified.' },
+const lanes: ListTaskLaneResponse[] = [
+  { status: 'backlog', title: 'Backlog', description: 'Capture and shape upcoming work.' },
+  { status: 'ready', title: 'Ready', description: 'Defined tasks ready for pickup.' },
+  { status: 'in-progress', title: 'In Progress', description: 'Actively being implemented.' },
+  { status: 'review', title: 'Review', description: 'Waiting on code or QA review.' },
+  { status: 'done', title: 'Done', description: 'Completed and verified.' },
 ];
 
-// Mock lane ownership/assignment metadata used for UI-only rendering.
-const laneAssignees: Record<TaskLaneId, TaskLaneAssignee[]> = {
-  backlog: [],
-  ready: [
-    { id: 'u-1', name: 'Ava Lin', initials: 'AL', colorClassName: 'bg-emerald-600' },
-    { id: 'u-2', name: 'Noah Kim', initials: 'NK', colorClassName: 'bg-orange-500' },
-  ],
-  'in-progress': [
-    { id: 'u-3', name: 'Priya Das', initials: 'PD', colorClassName: 'bg-sky-600' },
-    { id: 'u-4', name: 'Jules Park', initials: 'JP', colorClassName: 'bg-rose-500' },
-    { id: 'u-5', name: 'Ravi Shah', initials: 'RS', colorClassName: 'bg-indigo-600' },
-    { id: 'u-6', name: 'Mina Fox', initials: 'MF', colorClassName: 'bg-amber-600' },
-    { id: 'u-7', name: 'Kai Moss', initials: 'KM', colorClassName: 'bg-cyan-700' },
-  ],
-  review: [{ id: 'u-8', name: 'Leo Hart', initials: 'LH', colorClassName: 'bg-violet-600' }],
-  done: [],
-};
-
 type TasksBoardProps = {
-  tasks: TaskCard[];
-  projectId: string | null;
+  projectId: string;
+  tasks: ListTaskResponse[];
   isLoading: boolean;
-  onTaskUpdated: (taskId: string) => void;
+  onTaskUpdated: () => void;
   onError: (message: string) => void;
 };
 
 export function TasksBoard(props: TasksBoardProps) {
-  const [cards, setCards] = useState<TaskCard[]>(props.tasks);
+  const [cards, setCards] = useState<
+    Array<ListTaskResponse & { status: ListTaskLaneResponse['status'] }>
+  >(props.tasks.map((task) => ({ ...task, status: 'backlog' })));
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
-  const [dropTargetLaneId, setDropTargetLaneId] = useState<TaskLaneId | null>(null);
+  const [dropTargetLaneId, setDropTargetLaneId] = useState<ListTaskLaneResponse['status'] | null>(
+    null,
+  );
 
   useEffect(() => {
-    setCards(props.tasks);
+    setCards(props.tasks.map((task) => ({ ...task, status: 'backlog' })));
   }, [props.tasks]);
 
   // Build lane buckets once per state change to keep rendering simple.
   const cardsByLane = useMemo(() => {
-    return lanes.reduce<Record<TaskLaneId, TaskCard[]>>(
+    return lanes.reduce<Record<ListTaskLaneResponse['status'], ListTaskResponse[]>>(
       (buckets, lane) => {
-        buckets[lane.id] = cards.filter((task) => task.laneId === lane.id);
+        buckets[lane.status] = cards.filter((task) => task.status === lane.status);
         return buckets;
       },
       {
@@ -68,7 +49,7 @@ export function TasksBoard(props: TasksBoardProps) {
   }, [cards]);
 
   // Keep drag mutations centralized so lane components stay mostly presentational.
-  function moveTaskToLane(taskId: string, laneId: TaskLaneId) {
+  function moveTaskToLane(taskId: string, laneId: ListTaskLaneResponse['status']) {
     setCards((currentCards) =>
       currentCards.map((card) => {
         if (card.id !== taskId) {
@@ -87,13 +68,12 @@ export function TasksBoard(props: TasksBoardProps) {
       <div className="grid gap-4 xl:grid-cols-5">
         {lanes.map((lane) => (
           <TaskLane
-            key={lane.id}
+            key={lane.status}
             lane={lane}
-            tasks={cardsByLane[lane.id]}
+            tasks={cardsByLane[lane.status]}
             projectId={props.projectId}
-            assignees={laneAssignees[lane.id]}
             draggingTaskId={draggingTaskId}
-            isDropTarget={dropTargetLaneId === lane.id}
+            isDropTarget={dropTargetLaneId === lane.status}
             onDropTask={moveTaskToLane}
             onDragStart={setDraggingTaskId}
             onDragEnd={() => {

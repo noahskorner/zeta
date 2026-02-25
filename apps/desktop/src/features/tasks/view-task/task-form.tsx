@@ -1,43 +1,39 @@
 import { KeyboardEvent } from 'react';
 import { z } from 'zod';
-import { isValidSlug } from '../is-valid-slug';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form } from '../../../components/ui/form';
 import { getErrorMessage } from '../../../lib/get-error-message';
-import { CreateTaskHeader } from './create-task-header';
 import { MarkdownEditor } from '../../../components/markdown-editor/markdown-editor';
+import { TaskHeader } from './task-header';
 
-const CreateTaskSchema = z.object({
-  slug: z
-    .string()
-    .trim()
-    .min(1, 'Slug is required.')
-    .refine((value) => isValidSlug(value), 'Slug must be a valid git branch/worktree name.'),
+const UpdateTaskSchema = z.object({
   title: z.string().trim().min(1, 'Title is required.'),
   description: z.string().trim().min(1, 'Description is required.'),
 });
 
-type CreateTaskRequest = z.infer<typeof CreateTaskSchema>;
+type UpdateTaskRequest = z.infer<typeof UpdateTaskSchema>;
 
-type CreateTaskFormProps = {
+type TaskFormProps = {
+  taskId: string;
   projectId: string;
+  slug: string;
+  title: string;
+  description: string;
   actions: React.ReactNode;
-  onCreate?: (taskId: string) => void;
-  onError?: (message: string) => void;
+  onUpdate: () => void;
+  onError: (message: string) => void;
 };
 
-export function CreateTaskForm(props: CreateTaskFormProps) {
+export function TaskForm(props: TaskFormProps) {
   // Define the form state
-  const form = useForm<CreateTaskRequest>({
-    resolver: zodResolver(CreateTaskSchema),
+  const form = useForm<UpdateTaskRequest>({
+    resolver: zodResolver(UpdateTaskSchema),
     defaultValues: {
-      slug: '',
-      title: '',
-      description: '## Goal\n\n## Requirements\n\n## Acceptance Criteria',
+      title: props.title,
+      description: props.description,
     },
   });
-  const slugValue = form.watch('slug');
   const titleValue = form.watch('title');
   const descriptionValue = form.watch('description');
 
@@ -46,33 +42,27 @@ export function CreateTaskForm(props: CreateTaskFormProps) {
     form.setValue('title', title);
   };
 
-  // Handle slug change
-  const handleSlugChange = (slug: string) => {
-    form.setValue('slug', slug);
-  };
-
   // Handle description change
   const handleDescriptionChange = (description: string) => {
     form.setValue('description', description);
   };
 
   // Handle form submission
-  const handleSubmit = async (values: CreateTaskRequest) => {
+  const handleSubmit = async (values: UpdateTaskRequest) => {
     if (!props.projectId) {
       form.setError('root', { message: 'Select a project before creating a task.' });
       return;
     }
 
     try {
-      const taskId = await window.zetaApi.addTask({
+      await window.zetaApi.updateTask({
         projectId: props.projectId,
-        slug: values.slug,
+        taskId: props.taskId,
         title: values.title,
         description: values.description,
       });
 
       form.reset();
-      props.onCreate?.(taskId);
     } catch (error) {
       props.onError?.(getErrorMessage(error));
     }
@@ -105,14 +95,7 @@ export function CreateTaskForm(props: CreateTaskFormProps) {
         onSubmit={form.handleSubmit(handleSubmit)}
       >
         <div className="flex min-h-0 flex-1 flex-col">
-          <CreateTaskHeader
-            title={titleValue}
-            slug={slugValue}
-            onSlugChange={handleSlugChange}
-            onTitleChange={handleTitleChange}
-            actions={props.actions}
-          />
-
+          <TaskHeader title={titleValue} slug={props.slug} onTitleChange={handleTitleChange} />
           <div className="min-h-0 flex-1 overflow-y-auto p-4">
             <div className="mx-auto w-full max-w-4xl space-y-4">
               <div className="space-y-2 p-4">

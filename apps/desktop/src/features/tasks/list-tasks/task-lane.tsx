@@ -1,24 +1,25 @@
+import { ListTaskResponse } from '@zeta/commands';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
 import { TaskCard } from './task-card';
-import type {
-  TaskCard as TaskCardModel,
-  TaskLane as TaskLaneModel,
-  TaskLaneAssignee,
-} from '../types';
+
+export type ListTaskLaneResponse = {
+  status: 'backlog' | 'ready' | 'in-progress' | 'review' | 'done';
+  title: string;
+  description: string;
+};
 
 type TaskLaneProps = {
-  lane: TaskLaneModel;
-  tasks: TaskCardModel[];
-  projectId: string | null;
-  assignees: TaskLaneAssignee[];
+  lane: ListTaskLaneResponse;
+  tasks: ListTaskResponse[];
+  projectId: string;
   isDropTarget: boolean;
   draggingTaskId: string | null;
-  onDropTask: (taskId: string, laneId: TaskLaneModel['id']) => void;
+  onDropTask: (taskId: string, laneId: ListTaskLaneResponse['status']) => void;
   onDragStart: (taskId: string) => void;
   onDragEnd: () => void;
-  onDragEnterLane: (laneId: TaskLaneModel['id']) => void;
+  onDragEnterLane: (laneId: ListTaskLaneResponse['status']) => void;
   onDragLeaveLane: () => void;
-  onTaskUpdated: (taskId: string) => void;
+  onTaskUpdated: () => void;
   onError: (message: string) => void;
 };
 
@@ -32,13 +33,13 @@ export function TaskLane(props: TaskLaneProps) {
       onDragOver={(event) => {
         event.preventDefault();
       }}
-      onDragEnter={() => props.onDragEnterLane(props.lane.id)}
+      onDragEnter={() => props.onDragEnterLane(props.lane.status)}
       onDragLeave={props.onDragLeaveLane}
       onDrop={(event) => {
         event.preventDefault();
         const taskId = event.dataTransfer.getData('text/task-card-id');
         if (taskId) {
-          props.onDropTask(taskId, props.lane.id);
+          props.onDropTask(taskId, props.lane.status);
         }
         props.onDragLeaveLane();
       }}
@@ -60,8 +61,11 @@ export function TaskLane(props: TaskLaneProps) {
           {props.tasks.map((task) => (
             <TaskCard
               key={task.id}
-              task={task}
+              taskId={task.id}
               projectId={props.projectId}
+              slug={task.slug}
+              title={task.title}
+              description={task.description}
               isDragging={props.draggingTaskId === task.id}
               onDragStart={props.onDragStart}
               onDragEnd={props.onDragEnd}

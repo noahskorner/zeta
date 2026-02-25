@@ -1,38 +1,35 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CreateTaskDialog } from '../create-task/create-task-dialog';
 import { TasksBoard } from './tasks-board';
-import type { TaskCard } from '../types';
+import { ListTaskResponse } from '@zeta/commands';
 
 type TasksPanelProps = {
-  selectedProjectId: string | null;
+  projectId: string;
   onTaskCreated: (taskId: string) => void;
-  onTaskUpdated: (taskId: string) => void;
+  onTaskUpdated: () => void;
   onError: (message: string) => void;
 };
 
 export function TasksPanel(props: TasksPanelProps) {
-  const [tasks, setTasks] = useState<TaskCard[]>([]);
+  const [tasks, setTasks] = useState<ListTaskResponse[]>([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(false);
   const [refreshCount, setRefreshCount] = useState(0);
 
-  const hasSelectedProject = useMemo(
-    () => Boolean(props.selectedProjectId),
-    [props.selectedProjectId],
-  );
+  const hasSelectedProject = useMemo(() => Boolean(props.projectId), [props.projectId]);
 
   useEffect(() => {
     void loadTasks();
-  }, [props.selectedProjectId, refreshCount]);
+  }, [props.projectId, refreshCount]);
 
   async function loadTasks() {
-    if (!props.selectedProjectId) {
+    if (!props.projectId) {
       setTasks([]);
       return;
     }
 
     setIsLoadingTasks(true);
     try {
-      const response = await window.zetaApi.listTasks({ projectId: props.selectedProjectId });
+      const response = await window.zetaApi.listTasks({ projectId: props.projectId });
       const sortedTasks = [...response.tasks].sort((first, second) =>
         second.createdAt.localeCompare(first.createdAt),
       );
@@ -59,8 +56,8 @@ export function TasksPanel(props: TasksPanelProps) {
     setRefreshCount((currentCount) => currentCount + 1);
   }
 
-  function handleTaskUpdated(taskId: string) {
-    props.onTaskUpdated(taskId);
+  function handleTaskUpdated() {
+    props.onTaskUpdated();
     setRefreshCount((currentCount) => currentCount + 1);
   }
 
@@ -71,9 +68,9 @@ export function TasksPanel(props: TasksPanelProps) {
         <div className="text-sm text-muted-foreground">
           Create a task to persist metadata and create a git worktree.
         </div>
-        {props.selectedProjectId && (
+        {props.projectId && (
           <CreateTaskDialog
-            selectedProjectId={props.selectedProjectId}
+            projectId={props.projectId}
             onTaskCreated={handleTaskCreated}
             onError={props.onError}
           />
@@ -87,7 +84,7 @@ export function TasksPanel(props: TasksPanelProps) {
 
       <TasksBoard
         tasks={tasks}
-        projectId={props.selectedProjectId}
+        projectId={props.projectId}
         isLoading={isLoadingTasks}
         onTaskUpdated={handleTaskUpdated}
         onError={props.onError}

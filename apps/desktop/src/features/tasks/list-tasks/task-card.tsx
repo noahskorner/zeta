@@ -1,14 +1,17 @@
 import { useRef, useState } from 'react';
 import { Card, CardContent } from '../../../components/ui/card';
-import type { TaskCard as TaskCardModel } from '../types';
+import { TaskDialog } from '../view-task/task-dialog';
 
 type TaskCardProps = {
-  task: TaskCardModel;
-  projectId: string | null;
+  taskId: string;
+  projectId: string;
+  slug: string;
+  title: string;
+  description: string;
   isDragging: boolean;
   onDragStart: (taskId: string) => void;
   onDragEnd: () => void;
-  onTaskUpdated: (taskId: string) => void;
+  onTaskUpdated: () => void;
   onError: (message: string) => void;
 };
 
@@ -17,8 +20,24 @@ export function TaskCard(props: TaskCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const wasDraggedRef = useRef(false);
 
+  const handleTaskUpdated = () => {
+    props.onTaskUpdated();
+  };
+
+  const handleError = (message: string) => {
+    props.onError(message);
+  };
+
   return (
-    <>
+    <TaskDialog
+      projectId={props.projectId}
+      taskId={props.taskId}
+      slug={props.slug}
+      title={props.title}
+      description={props.description}
+      onUpdate={handleTaskUpdated}
+      onError={handleError}
+    >
       <Card
         draggable
         role="button"
@@ -42,8 +61,8 @@ export function TaskCard(props: TaskCardProps) {
         onDragStart={(event) => {
           wasDraggedRef.current = true;
           event.dataTransfer.effectAllowed = 'move';
-          event.dataTransfer.setData('text/task-card-id', props.task.id);
-          props.onDragStart(props.task.id);
+          event.dataTransfer.setData('text/task-card-id', props.taskId);
+          props.onDragStart(props.taskId);
         }}
         onDragEnd={() => {
           props.onDragEnd();
@@ -53,9 +72,9 @@ export function TaskCard(props: TaskCardProps) {
         }}
       >
         <CardContent className="space-y-2 px-3">
-          <div className="text-sm font-medium">{props.task.title}</div>
+          <div className="text-sm font-medium">{props.title}</div>
         </CardContent>
       </Card>
-    </>
+    </TaskDialog>
   );
 }

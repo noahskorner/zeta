@@ -91,8 +91,8 @@ export default function App() {
     toast.success('Task created.', { description: taskId });
   }
 
-  function handleTaskUpdated(taskId: string) {
-    toast.success('Task updated.', { description: taskId });
+  function handleTaskUpdated() {
+    toast.success('Task updated.');
   }
 
   function handleTaskError(message: string) {
@@ -151,9 +151,9 @@ export default function App() {
             />
 
             <main className="mx-auto flex min-h-0 w-full flex-1 overflow-y-auto p-6">
-              {activeView === 'tasks' ? (
+              {activeView === 'tasks' && selectedProjectId ? (
                 <TasksPanel
-                  selectedProjectId={selectedProjectId}
+                  projectId={selectedProjectId}
                   onTaskCreated={handleTaskCreated}
                   onTaskUpdated={handleTaskUpdated}
                   onError={handleTaskError}
