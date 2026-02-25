@@ -10,7 +10,7 @@ import { MarkdownEditorPanel } from './markdown-editor/markdown-editor-panel';
 import { ProvidersPanel } from './providers/providers-panel';
 import { RecipesPanel } from './recipes/recipes-panel';
 import { SchedulesPanel } from './schedules/schedules-panel';
-import { TasksPanel } from './tasks/tasks-panel';
+import { TasksPanel } from './tasks/list-tasks/tasks-panel';
 import { ToolsPanel } from './tools/tools-panel';
 import { WindowHeader } from './window-header';
 

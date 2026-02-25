@@ -1,18 +1,18 @@
 import type { ListToolResponse } from '@zeta/commands';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { Button } from '../../components/ui/button';
+import { Button } from '../../../components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../components/ui/select';
-import { Separator } from '../../components/ui/separator';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '../../components/ui/sidebar';
-import { TerminalSize } from './execute-tool';
-import { ToolTerminalPanel } from './tool-terminal-panel';
+} from '../../../components/ui/select';
+import { Separator } from '../../../components/ui/separator';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '../../../components/ui/sidebar';
+import { TerminalSize } from '../execute-tool';
+import { ToolTerminalPanel } from '../tool-terminal-panel';
 
 type TaskDetailSidebarProps = {
   actions?: React.ReactNode;

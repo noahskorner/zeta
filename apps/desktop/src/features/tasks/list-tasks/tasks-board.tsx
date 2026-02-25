@@ -5,7 +5,7 @@ import type {
   TaskLane as TaskLaneModel,
   TaskLaneAssignee,
   TaskLaneId,
-} from './types';
+} from '../types';
 
 const lanes: TaskLaneModel[] = [
   { id: 'backlog', title: 'Backlog', description: 'Capture and shape upcoming work.' },

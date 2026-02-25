@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
-import { Card, CardContent } from '../../components/ui/card';
-import { TaskDialog } from './task-dialog';
-import type { TaskCard as TaskCardModel } from './types';
+import { Card, CardContent } from '../../../components/ui/card';
+import type { TaskCard as TaskCardModel } from '../types';
 
 type TaskCardProps = {
   task: TaskCardModel;
@@ -14,6 +13,7 @@ type TaskCardProps = {
 };
 
 export function TaskCard(props: TaskCardProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isExpanded, setIsExpanded] = useState(false);
   const wasDraggedRef = useRef(false);
 
@@ -56,19 +56,6 @@ export function TaskCard(props: TaskCardProps) {
           <div className="text-sm font-medium">{props.task.title}</div>
         </CardContent>
       </Card>
-
-      <TaskDialog
-        projectId={props.projectId}
-        taskId={props.task.id}
-        slug={props.task.slug}
-        title={props.task.title}
-        description={props.task.description}
-        createdAt={props.task.createdAt}
-        open={isExpanded}
-        onOpenChange={setIsExpanded}
-        onTaskUpdated={props.onTaskUpdated}
-        onError={props.onError}
-      />
     </>
   );
 }

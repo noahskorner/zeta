@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CreateTaskDialog } from './create-task-dialog';
+import { CreateTaskDialog } from '../create-task/create-task-dialog';
 import { TasksBoard } from './tasks-board';
-import type { TaskCard } from './types';
+import type { TaskCard } from '../types';
 
 type TasksPanelProps = {
   selectedProjectId: string | null;
@@ -71,11 +71,13 @@ export function TasksPanel(props: TasksPanelProps) {
         <div className="text-sm text-muted-foreground">
           Create a task to persist metadata and create a git worktree.
         </div>
-        <CreateTaskDialog
-          selectedProjectId={props.selectedProjectId}
-          onTaskCreated={handleTaskCreated}
-          onError={props.onError}
-        />
+        {props.selectedProjectId && (
+          <CreateTaskDialog
+            selectedProjectId={props.selectedProjectId}
+            onTaskCreated={handleTaskCreated}
+            onError={props.onError}
+          />
+        )}
       </div>
       {!hasSelectedProject ? (
         <div className="rounded-md border p-3 text-sm text-muted-foreground">
