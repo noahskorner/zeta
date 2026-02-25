@@ -23,7 +23,7 @@ import {
   CreateProjectFacade,
   CreateProjectRepository,
   CreateProjectService,
-  FindProjectsFacade,
+  ListProjectsFacade,
   ListTasksFacade,
   ListTasksQuery,
   ListTasksRepository,
@@ -188,7 +188,7 @@ function registerProjectIpcHandlers(): void {
   ipcMain.handle('projects:list', async () => {
     // Instantiate services
     const repository = new ProjectsRepository();
-    const facade = new FindProjectsFacade(repository);
+    const facade = new ListProjectsFacade(repository);
 
     // Return the projects
     return facade.execute();
@@ -278,33 +278,27 @@ function registerToolIpcHandlers(): void {
     return { toolExecutionId: response.toolExecutionId };
   });
 
-  ipcMain.handle(
-    'tools:execute:write',
-    (_event, command: ToolExecutionControlCommand): boolean => {
-      const stream = activeToolExecutions.get(command.toolExecutionId);
-      if (!stream) {
-        return false;
-      }
+  ipcMain.handle('tools:execute:write', (_event, command: ToolExecutionControlCommand): boolean => {
+    const stream = activeToolExecutions.get(command.toolExecutionId);
+    if (!stream) {
+      return false;
+    }
 
-      stream.write(command.data);
-      return true;
-    },
-  );
+    stream.write(command.data);
+    return true;
+  });
 
-  ipcMain.handle(
-    'tools:execute:resize',
-    (_event, command: ToolExecutionResizeCommand): boolean => {
-      const stream = activeToolExecutions.get(command.toolExecutionId);
-      if (!stream) {
-        return false;
-      }
+  ipcMain.handle('tools:execute:resize', (_event, command: ToolExecutionResizeCommand): boolean => {
+    const stream = activeToolExecutions.get(command.toolExecutionId);
+    if (!stream) {
+      return false;
+    }
 
-      const cols = Math.max(MIN_TERMINAL_COLS, Math.floor(command.cols));
-      const rows = Math.max(MIN_TERMINAL_ROWS, Math.floor(command.rows));
-      stream.resize(cols, rows);
-      return true;
-    },
-  );
+    const cols = Math.max(MIN_TERMINAL_COLS, Math.floor(command.cols));
+    const rows = Math.max(MIN_TERMINAL_ROWS, Math.floor(command.rows));
+    stream.resize(cols, rows);
+    return true;
+  });
 
   ipcMain.handle('tools:execute:kill', (_event, toolExecutionId: string): boolean => {
     const stream = activeToolExecutions.get(toolExecutionId);

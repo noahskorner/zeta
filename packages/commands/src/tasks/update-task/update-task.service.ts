@@ -1,12 +1,22 @@
-import { stat } from "node:fs/promises";
-import path from "node:path";
-import { UpdateTaskCommand } from "./update-task.command";
-import { UpdateTaskModel } from "./update-task.model";
+import { stat } from 'node:fs/promises';
+import path from 'node:path';
+import { ProjectsRepository } from '../../projects';
+import { UpdateTaskCommand } from './update-task.command';
+import { UpdateTaskModel } from './update-task.model';
 
 export class UpdateTaskService {
+  constructor(private _projectsRepository: ProjectsRepository = new ProjectsRepository()) {}
+
   public async execute(command: UpdateTaskCommand): Promise<UpdateTaskModel> {
+    // Validate that the project exists
+    const projects = await this._projectsRepository.findAll();
+    const project = projects.find((candidate) => candidate.id === command.projectId);
+    if (!project) {
+      throw new Error(`Project not found: ${command.projectId}`);
+    }
+
     // Validate the selected project path is an existing directory.
-    const absoluteProjectPath = path.resolve(command.projectPath);
+    const absoluteProjectPath = path.resolve(project.folderPath);
     const projectStats = await stat(absoluteProjectPath);
     if (!projectStats.isDirectory()) {
       throw new Error(`Path is not a directory: ${absoluteProjectPath}`);
@@ -17,16 +27,16 @@ export class UpdateTaskService {
     const friendlyName = command.friendlyName?.trim();
     const description = command.description?.trim();
     if (!taskId) {
-      throw new Error("Task id is required.");
+      throw new Error('Task id is required.');
     }
     if (friendlyName !== undefined && !friendlyName) {
-      throw new Error("Task friendly name is required.");
+      throw new Error('Task friendly name is required.');
     }
     if (description !== undefined && !description) {
-      throw new Error("Task description is required.");
+      throw new Error('Task description is required.');
     }
     if (friendlyName === undefined && description === undefined) {
-      throw new Error("Provide at least one field to update.");
+      throw new Error('Provide at least one field to update.');
     }
 
     // Validate this is a git repository before mutating task metadata.
@@ -50,7 +60,7 @@ type GitClient = {
 };
 
 async function createSimpleGit(baseDir: string): Promise<GitClient> {
-  const moduleName = "simple-git";
+  const moduleName = 'simple-git';
   const simpleGitModule = (await import(moduleName)) as {
     simpleGit: (directory: string) => GitClient;
   };

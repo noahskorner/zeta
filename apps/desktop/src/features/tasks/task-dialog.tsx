@@ -18,7 +18,7 @@ type UpdateTaskValues = z.infer<typeof updateTaskSchema>;
 export type TaskDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  projectPath: string | null;
+  projectId: string | null;
   taskId?: string;
   taskName?: string;
   title?: string;
@@ -32,7 +32,7 @@ export type TaskDialogProps = {
 export function TaskDialog({
   open,
   onOpenChange,
-  projectPath,
+  projectId,
   taskId,
   taskName,
   title = 'Task',
@@ -62,7 +62,7 @@ export function TaskDialog({
 
   // Submit task metadata updates through the desktop bridge API.
   async function handleSubmit(values: UpdateTaskValues) {
-    if (!projectPath) {
+    if (!projectId) {
       form.setError('root', { message: 'Select a project before updating a task.' });
       return;
     }
@@ -73,7 +73,7 @@ export function TaskDialog({
 
     try {
       await window.zetaApi.updateTask({
-        projectPath,
+        projectId,
         taskId,
         friendlyName: values.friendlyName,
         description: values.description,
@@ -156,7 +156,7 @@ export function TaskDialog({
                 <Button
                   type="submit"
                   size="sm"
-                  disabled={form.formState.isSubmitting || !projectPath || !taskId}
+                  disabled={form.formState.isSubmitting || !projectId || !taskId}
                 >
                   {form.formState.isSubmitting ? 'Saving...' : 'Save Task'}
                 </Button>

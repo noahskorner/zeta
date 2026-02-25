@@ -5,7 +5,6 @@ import type { TaskCard } from './types';
 
 type TasksPanelProps = {
   selectedProjectId: string | null;
-  selectedProjectPath: string | null;
   onTaskCreated: (taskId: string) => void;
   onTaskUpdated: (taskId: string) => void;
   onError: (message: string) => void;
@@ -73,7 +72,7 @@ export function TasksPanel(props: TasksPanelProps) {
           Create a task to persist metadata and create a git worktree.
         </div>
         <CreateTaskDialog
-          selectedProjectPath={props.selectedProjectPath}
+          selectedProjectId={props.selectedProjectId}
           onTaskCreated={handleTaskCreated}
           onError={props.onError}
         />
@@ -86,7 +85,7 @@ export function TasksPanel(props: TasksPanelProps) {
 
       <TasksBoard
         tasks={tasks}
-        projectPath={props.selectedProjectPath}
+        projectId={props.selectedProjectId}
         isLoading={isLoadingTasks}
         onTaskUpdated={handleTaskUpdated}
         onError={props.onError}

@@ -1,4 +1,4 @@
-import { AddProviderResponse, FindProjectResponse } from '@zeta/commands';
+import { AddProviderResponse, ListProjectResponse } from '@zeta/commands';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '../components/ui/badge';
@@ -25,7 +25,7 @@ const mockedAutomations = [
 ];
 
 export default function App() {
-  const [projects, setProjects] = useState<FindProjectResponse[]>([]);
+  const [projects, setProjects] = useState<ListProjectResponse[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
@@ -134,11 +134,6 @@ export default function App() {
     await window.zetaApi.closeWindow();
   }
 
-  const selectedProject = selectedProjectId
-    ? (projects.find((project) => project.id === selectedProjectId) ?? null)
-    : null;
-  const selectedProjectPath = selectedProject?.folderPath ?? null;
-
   return (
     <div className="flex h-svh flex-col overflow-hidden">
       <WindowHeader
@@ -169,7 +164,6 @@ export default function App() {
               {activeView === 'tasks' ? (
                 <TasksPanel
                   selectedProjectId={selectedProjectId}
-                  selectedProjectPath={selectedProjectPath}
                   onTaskCreated={handleTaskCreated}
                   onTaskUpdated={handleTaskUpdated}
                   onError={handleTaskError}

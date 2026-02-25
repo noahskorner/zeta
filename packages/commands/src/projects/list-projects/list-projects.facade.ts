@@ -1,10 +1,10 @@
-import { ProjectsRepository } from "../projects.repository";
-import { FindProjectResponse, FindProjectsResponse } from "./find-projects.response";
+import { ProjectsRepository } from '../projects.repository';
+import { ListProjectResponse, ListProjectsResponse } from './list-projects.response';
 
-export class FindProjectsFacade {
+export class ListProjectsFacade {
   constructor(private _repository: ProjectsRepository) {}
 
-  public async execute(): Promise<FindProjectsResponse> {
+  public async execute(): Promise<ListProjectsResponse> {
     // Load the projects
     const projects = await this._repository.findAll();
 
@@ -17,8 +17,8 @@ export class FindProjectsFacade {
             createdAt: project.createdAt,
             name: project.name,
             folderPath: project.folderPath,
-          }) satisfies FindProjectResponse,
+          }) satisfies ListProjectResponse,
       ),
-    } satisfies FindProjectsResponse;
+    } satisfies ListProjectsResponse;
   }
 }

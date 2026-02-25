@@ -1,5 +1,5 @@
 export interface CreateTaskCommand {
-  projectPath: string;
+  projectId: string;
   name: string;
   friendlyName: string;
   description: string;

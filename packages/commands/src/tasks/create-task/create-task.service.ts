@@ -1,12 +1,22 @@
-import { stat } from "node:fs/promises";
-import path from "node:path";
-import { CreateTaskCommand } from "./create-task.command";
-import { CreateTaskModel } from "./create-task.model";
+import { stat } from 'node:fs/promises';
+import path from 'node:path';
+import { ProjectsRepository } from '../../projects';
+import { CreateTaskCommand } from './create-task.command';
+import { CreateTaskModel } from './create-task.model';
 
 export class CreateTaskService {
+  constructor(private _projectsRepository: ProjectsRepository = new ProjectsRepository()) {}
+
   public async execute(command: CreateTaskCommand): Promise<CreateTaskModel> {
+    // Validate that the project exists
+    const projects = await this._projectsRepository.findAll();
+    const project = projects.find((candidate) => candidate.id === command.projectId);
+    if (!project) {
+      throw new Error(`Project not found: ${command.projectId}`);
+    }
+
     // Validate the selected project path is an existing directory.
-    const absoluteProjectPath = path.resolve(command.projectPath);
+    const absoluteProjectPath = path.resolve(project.folderPath);
     const projectStats = await stat(absoluteProjectPath);
     if (!projectStats.isDirectory()) {
       throw new Error(`Path is not a directory: ${absoluteProjectPath}`);
@@ -17,13 +27,13 @@ export class CreateTaskService {
     const friendlyName = command.friendlyName.trim();
     const description = command.description.trim();
     if (!name) {
-      throw new Error("Task name is required.");
+      throw new Error('Task name is required.');
     }
     if (!friendlyName) {
-      throw new Error("Task friendly name is required.");
+      throw new Error('Task friendly name is required.');
     }
     if (!description) {
-      throw new Error("Task description is required.");
+      throw new Error('Task description is required.');
     }
 
     // Validate this is a git repository and task name is a valid branch/worktree name.
@@ -32,7 +42,7 @@ export class CreateTaskService {
     if (!isRepository) {
       throw new Error(`Project is not a git repository: ${absoluteProjectPath}`);
     }
-    await git.raw(["check-ref-format", "--branch", name]);
+    await git.raw(['check-ref-format', '--branch', name]);
 
     return {
       projectPath: absoluteProjectPath,
@@ -49,7 +59,7 @@ type GitClient = {
 };
 
 async function createSimpleGit(baseDir: string): Promise<GitClient> {
-  const moduleName = "simple-git";
+  const moduleName = 'simple-git';
   const simpleGitModule = (await import(moduleName)) as {
     simpleGit: (directory: string) => GitClient;
   };

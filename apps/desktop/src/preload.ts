@@ -8,7 +8,7 @@ import {
   CreateTaskCommand,
   ExecuteToolCommand,
   ExecuteToolResponse,
-  FindProjectsResponse,
+  ListProjectsResponse,
   ProviderEntity,
   ListToolsResponse,
   ListTasksResponse,
@@ -29,7 +29,7 @@ interface ProjectFileContent {
 contextBridge.exposeInMainWorld('zetaApi', {
   // Manage projects
   addProject: (): Promise<string | null> => ipcRenderer.invoke('projects:add'),
-  listProjects: (): Promise<FindProjectsResponse> => ipcRenderer.invoke('projects:list'),
+  listProjects: (): Promise<ListProjectsResponse> => ipcRenderer.invoke('projects:list'),
   // Manage tasks
   addTask: (command: CreateTaskCommand): Promise<string> =>
     ipcRenderer.invoke('tasks:add', command),

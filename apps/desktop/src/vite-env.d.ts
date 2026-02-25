@@ -6,7 +6,7 @@ import {
   CreateTaskCommand,
   ExecuteToolCommand,
   ExecuteToolResponse,
-  FindProjectsResponse,
+  ListProjectsResponse,
   ProviderEntity,
   ListToolsResponse,
   ListTasksResponse,
@@ -36,7 +36,7 @@ declare global {
     zetaApi: {
       // Manage projects from the desktop renderer.
       addProject: () => Promise<string | null>;
-      listProjects: () => Promise<FindProjectsResponse>;
+      listProjects: () => Promise<ListProjectsResponse>;
       // Manage tasks from the desktop renderer.
       addTask: (command: CreateTaskCommand) => Promise<string>;
       listTasks: (query: ListTasksQuery) => Promise<ListTasksResponse>;

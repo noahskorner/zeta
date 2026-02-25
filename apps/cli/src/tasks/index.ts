@@ -34,21 +34,21 @@ export function addTasks(command: Command) {
   tasksCommand
     .command('add <name>')
     .description('Create a task and git worktree in a project')
-    .requiredOption('--project <path>', 'Project folder path')
+    .requiredOption('--project-id <projectId>', 'Saved project id')
     .requiredOption('--friendly-name <friendlyName>', 'Human-friendly task name')
     .requiredOption('--description <description>', 'Task description')
     .action(
       async (
         name: string,
         options: {
-          project: string;
+          projectId: string;
           friendlyName: string;
           description: string;
         },
       ) => {
         try {
           const taskId = await createTaskFacade.execute({
-            projectPath: options.project,
+            projectId: options.projectId,
             name,
             friendlyName: options.friendlyName,
             description: options.description,
@@ -91,21 +91,21 @@ export function addTasks(command: Command) {
   tasksCommand
     .command('update <taskId>')
     .description("Update a task's metadata in a project")
-    .requiredOption('--project <path>', 'Project folder path')
+    .requiredOption('--project-id <projectId>', 'Saved project id')
     .option('--friendly-name <friendlyName>', 'Updated human-friendly task name')
     .option('--description <description>', 'Updated task description')
     .action(
       async (
         taskId: string,
         options: {
-          project: string;
+          projectId: string;
           friendlyName?: string;
           description?: string;
         },
       ) => {
         try {
           const response = await updateTaskFacade.execute({
-            projectPath: options.project,
+            projectId: options.projectId,
             taskId,
             friendlyName: options.friendlyName,
             description: options.description,

@@ -5,7 +5,7 @@ import type { TaskCard as TaskCardModel } from './types';
 
 type TaskCardProps = {
   task: TaskCardModel;
-  projectPath: string | null;
+  projectId: string | null;
   isDragging: boolean;
   onDragStart: (taskId: string) => void;
   onDragEnd: () => void;
@@ -58,7 +58,7 @@ export function TaskCard(props: TaskCardProps) {
       </Card>
 
       <TaskDialog
-        projectPath={props.projectPath}
+        projectId={props.projectId}
         taskId={props.task.id}
         taskName={props.task.taskName}
         title={props.task.title}

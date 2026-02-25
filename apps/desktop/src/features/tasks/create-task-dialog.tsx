@@ -24,7 +24,7 @@ const createTaskSchema = z.object({
 type CreateTaskValues = z.infer<typeof createTaskSchema>;
 
 type CreateTaskDialogProps = {
-  selectedProjectPath: string | null;
+  selectedProjectId: string | null;
   onTaskCreated: (taskId: string) => void;
   onError: (message: string) => void;
 };
@@ -33,7 +33,7 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
   const [open, setOpen] = useState(false);
 
   // Disable task creation until a project has been selected.
-  const hasProject = useMemo(() => Boolean(props.selectedProjectPath), [props.selectedProjectPath]);
+  const hasProject = useMemo(() => Boolean(props.selectedProjectId), [props.selectedProjectId]);
 
   // Keep form state and validation colocated in the dialog.
   const form = useForm<CreateTaskValues>({
@@ -47,14 +47,14 @@ export function CreateTaskDialog(props: CreateTaskDialogProps) {
 
   // Submit task creation request through the desktop bridge API.
   async function handleSubmit(values: CreateTaskValues) {
-    if (!props.selectedProjectPath) {
+    if (!props.selectedProjectId) {
       form.setError('root', { message: 'Select a project before creating a task.' });
       return;
     }
 
     try {
       const taskId = await window.zetaApi.addTask({
-        projectPath: props.selectedProjectPath,
+        projectId: props.selectedProjectId,
         name: values.name,
         friendlyName: values.friendlyName,
         description: values.description,

@@ -1,10 +1,10 @@
-import type { FindProjectResponse } from '@zeta/commands';
+import type { ListProjectResponse } from '@zeta/commands';
 import { Separator } from '../components/ui/separator';
 import { SidebarTrigger } from '../components/ui/sidebar';
 import { ProjectDropdown } from './projects/project-dropdown';
 
 type AppHeaderProps = {
-  projects: FindProjectResponse[];
+  projects: ListProjectResponse[];
   selectedProjectId: string | null;
   isLoadingProjects: boolean;
   onSelectProject: (projectId: string) => void;

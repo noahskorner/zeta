@@ -1,5 +1,5 @@
 export interface UpdateTaskCommand {
-  projectPath: string;
+  projectId: string;
   taskId: string;
   friendlyName?: string;
   description?: string;

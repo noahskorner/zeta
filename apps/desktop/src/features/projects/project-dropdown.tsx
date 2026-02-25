@@ -1,4 +1,4 @@
-import { FindProjectResponse } from '@zeta/commands';
+import { ListProjectResponse } from '@zeta/commands';
 import {
   Select,
   SelectContent,
@@ -8,7 +8,7 @@ import {
 } from '../../components/ui/select';
 
 type ProjectDropdownProps = {
-  projects: FindProjectResponse[];
+  projects: ListProjectResponse[];
   selectedProjectId: string | null;
   isLoadingProjects: boolean;
   onSelectProject: (projectId: string) => void;
