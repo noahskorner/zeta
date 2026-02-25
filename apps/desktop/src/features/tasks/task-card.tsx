@@ -5,9 +5,12 @@ import type { TaskCard as TaskCardModel } from './types';
 
 type TaskCardProps = {
   task: TaskCardModel;
+  projectPath: string | null;
   isDragging: boolean;
   onDragStart: (taskId: string) => void;
   onDragEnd: () => void;
+  onTaskUpdated: (taskId: string) => void;
+  onError: (message: string) => void;
 };
 
 export function TaskCard(props: TaskCardProps) {
@@ -55,6 +58,7 @@ export function TaskCard(props: TaskCardProps) {
       </Card>
 
       <TaskDialog
+        projectPath={props.projectPath}
         taskId={props.task.id}
         taskName={props.task.taskName}
         title={props.task.title}
@@ -62,6 +66,8 @@ export function TaskCard(props: TaskCardProps) {
         createdAt={props.task.createdAt}
         open={isExpanded}
         onOpenChange={setIsExpanded}
+        onTaskUpdated={props.onTaskUpdated}
+        onError={props.onError}
       />
     </>
   );

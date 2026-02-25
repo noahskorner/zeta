@@ -35,7 +35,10 @@ const laneAssignees: Record<TaskLaneId, TaskLaneAssignee[]> = {
 
 type TasksBoardProps = {
   tasks: TaskCard[];
+  projectPath: string | null;
   isLoading: boolean;
+  onTaskUpdated: (taskId: string) => void;
+  onError: (message: string) => void;
 };
 
 export function TasksBoard(props: TasksBoardProps) {
@@ -87,6 +90,7 @@ export function TasksBoard(props: TasksBoardProps) {
             key={lane.id}
             lane={lane}
             tasks={cardsByLane[lane.id]}
+            projectPath={props.projectPath}
             assignees={laneAssignees[lane.id]}
             draggingTaskId={draggingTaskId}
             isDropTarget={dropTargetLaneId === lane.id}
@@ -98,6 +102,8 @@ export function TasksBoard(props: TasksBoardProps) {
             }}
             onDragEnterLane={setDropTargetLaneId}
             onDragLeaveLane={() => setDropTargetLaneId(null)}
+            onTaskUpdated={props.onTaskUpdated}
+            onError={props.onError}
           />
         ))}
       </div>

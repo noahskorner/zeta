@@ -13,6 +13,8 @@ import {
   ListToolsResponse,
   ListTasksResponse,
   ListTasksQuery,
+  UpdateTaskCommand,
+  UpdateTaskResponse,
   ToolExecutionStreamDataMessage,
   ToolExecutionStreamExitMessage,
 } from '@zeta/commands';
@@ -25,23 +27,25 @@ interface ProjectFileContent {
 }
 
 contextBridge.exposeInMainWorld('zetaApi', {
-  // Manage projects from the desktop renderer.
+  // Manage projects
   addProject: (): Promise<string | null> => ipcRenderer.invoke('projects:add'),
   listProjects: (): Promise<FindProjectsResponse> => ipcRenderer.invoke('projects:list'),
-  // Manage tasks from the desktop renderer.
+  // Manage tasks
   addTask: (command: CreateTaskCommand): Promise<string> =>
     ipcRenderer.invoke('tasks:add', command),
-  // List tasks for a specific project.
   listTasks: (query: ListTasksQuery): Promise<ListTasksResponse> =>
     ipcRenderer.invoke('tasks:list', query),
-  // Manage tools from the desktop renderer.
+  updateTask: (command: UpdateTaskCommand): Promise<UpdateTaskResponse> =>
+    ipcRenderer.invoke('tasks:update', command),
+  // Manage providers
+  addProvider: (command: AddProviderCommand): Promise<AddProviderResponse> =>
+    ipcRenderer.invoke('providers:add', command),
+  listProviders: (): Promise<{ providers: ProviderEntity[] }> =>
+    ipcRenderer.invoke('providers:list'),
+  // Manage tools
   addTool: (command: AddToolCommand): Promise<AddToolResponse> =>
     ipcRenderer.invoke('tools:add', command),
   listTools: (): Promise<ListToolsResponse> => ipcRenderer.invoke('tools:list'),
-  // Manage providers from the desktop renderer.
-  addProvider: (command: AddProviderCommand): Promise<AddProviderResponse> =>
-    ipcRenderer.invoke('providers:add', command),
-  listProviders: (): Promise<{ providers: ProviderEntity[] }> => ipcRenderer.invoke('providers:list'),
   executeTool: (command: ExecuteToolCommand): Promise<Omit<ExecuteToolResponse, 'stream'>> =>
     ipcRenderer.invoke('tools:execute', command),
   writeToolInput: (toolExecutionId: string, data: string): Promise<boolean> =>

@@ -9,11 +9,7 @@ export function MarkdownEditorPanel() {
   return (
     <div className="flex w-full justify-center">
       <div className="w-full max-w-3xl">
-        <MarkdownEditor
-          content={content}
-          onContentChange={setContent}
-          autoFocus
-        />
+        <MarkdownEditor content={content} onContentChange={setContent} autoFocus />
       </div>
     </div>
   );

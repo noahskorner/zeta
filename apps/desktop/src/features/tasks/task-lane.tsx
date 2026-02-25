@@ -10,6 +10,7 @@ import type {
 type TaskLaneProps = {
   lane: TaskLaneModel;
   tasks: TaskCardModel[];
+  projectPath: string | null;
   assignees: TaskLaneAssignee[];
   isDropTarget: boolean;
   draggingTaskId: string | null;
@@ -18,6 +19,8 @@ type TaskLaneProps = {
   onDragEnd: () => void;
   onDragEnterLane: (laneId: TaskLaneModel['id']) => void;
   onDragLeaveLane: () => void;
+  onTaskUpdated: (taskId: string) => void;
+  onError: (message: string) => void;
 };
 
 export function TaskLane(props: TaskLaneProps) {
@@ -60,9 +63,12 @@ export function TaskLane(props: TaskLaneProps) {
             <TaskCard
               key={task.id}
               task={task}
+              projectPath={props.projectPath}
               isDragging={props.draggingTaskId === task.id}
               onDragStart={props.onDragStart}
               onDragEnd={props.onDragEnd}
+              onTaskUpdated={props.onTaskUpdated}
+              onError={props.onError}
             />
           ))}
         </div>

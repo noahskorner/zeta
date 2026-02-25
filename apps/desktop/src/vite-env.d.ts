@@ -11,6 +11,8 @@ import {
   ListToolsResponse,
   ListTasksResponse,
   ListTasksQuery,
+  UpdateTaskCommand,
+  UpdateTaskResponse,
   ToolExecutionStreamDataMessage,
   ToolExecutionStreamExitMessage,
 } from '@zeta/commands';
@@ -38,6 +40,7 @@ declare global {
       // Manage tasks from the desktop renderer.
       addTask: (command: CreateTaskCommand) => Promise<string>;
       listTasks: (query: ListTasksQuery) => Promise<ListTasksResponse>;
+      updateTask: (command: UpdateTaskCommand) => Promise<UpdateTaskResponse>;
       // Manage tools from the desktop renderer.
       addTool: (command: AddToolCommand) => Promise<AddToolResponse>;
       listTools: () => Promise<ListToolsResponse>;

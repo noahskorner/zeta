@@ -19,6 +19,7 @@ export type TaskDetailProps = {
   friendlyNamePlaceholder?: string;
   taskNamePlaceholder?: string;
   editable?: boolean;
+  taskNameEditable?: boolean;
   friendlyNameError?: string;
   taskNameError?: string;
   descriptionError?: string;
@@ -36,9 +37,10 @@ export function TaskDetail({
   onFriendlyNameChange,
   onTaskNameChange,
   onDescriptionChange,
-  friendlyNamePlaceholder = 'Create new task',
-  taskNamePlaceholder = 'feat-add-create-task',
+  friendlyNamePlaceholder = 'Task name',
+  taskNamePlaceholder = 'task-worktree-name',
   editable = false,
+  taskNameEditable,
   friendlyNameError,
   taskNameError,
   descriptionError,
@@ -68,6 +70,7 @@ export function TaskDetail({
         friendlyNamePlaceholder={friendlyNamePlaceholder}
         taskNamePlaceholder={taskNamePlaceholder}
         editable={editable}
+        taskNameEditable={taskNameEditable}
         friendlyNameError={friendlyNameError}
         taskNameError={taskNameError}
         descriptionError={descriptionError}
@@ -87,9 +90,10 @@ function TaskDetailLayout({
   onFriendlyNameChange,
   onTaskNameChange,
   onDescriptionChange,
-  friendlyNamePlaceholder = 'Create new task',
-  taskNamePlaceholder = 'feat-add-create-task',
+  friendlyNamePlaceholder = 'Task name',
+  taskNamePlaceholder = 'task-worktree-name',
   editable = false,
+  taskNameEditable,
   friendlyNameError,
   taskNameError,
   descriptionError,
@@ -107,7 +111,7 @@ function TaskDetailLayout({
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
           <div className="mx-auto w-full max-w-4xl space-y-4">
-            {/* Keep shared task identity fields consistent across create and detail modes. */}
+            {/* Keep shared task identity fields consistent across create and update flows. */}
             <div className="space-y-2">
               <Label htmlFor="task-friendly-name">Name</Label>
               <Input
@@ -129,7 +133,7 @@ function TaskDetailLayout({
                 value={taskName}
                 onChange={(event) => onTaskNameChange?.(event.target.value)}
                 placeholder={taskNamePlaceholder}
-                disabled={!editable}
+                disabled={!(taskNameEditable ?? editable)}
               />
               {taskNameError ? (
                 <div className="text-sm text-destructive">{taskNameError}</div>

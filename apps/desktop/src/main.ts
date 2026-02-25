@@ -33,6 +33,10 @@ import {
   ProviderEntity,
   ProvidersRepository,
   Repository,
+  UpdateTaskCommand,
+  UpdateTaskFacade,
+  UpdateTaskRepository,
+  UpdateTaskService,
   PtyService,
   ToolExecutionStream,
 } from '@zeta/commands';
@@ -210,6 +214,16 @@ function registerTaskIpcHandlers(): void {
 
     // Return project tasks.
     return facade.execute(query);
+  });
+
+  ipcMain.handle('tasks:update', async (_event, command: UpdateTaskCommand) => {
+    // Instantiate services.
+    const service = new UpdateTaskService();
+    const repository = new UpdateTaskRepository();
+    const facade = new UpdateTaskFacade(service, repository);
+
+    // Persist task metadata updates.
+    return facade.execute(command);
   });
 }
 

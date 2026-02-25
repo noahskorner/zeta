@@ -101,6 +101,10 @@ export default function App() {
     toast.success('Task created.', { description: taskId });
   }
 
+  function handleTaskUpdated(taskId: string) {
+    toast.success('Task updated.', { description: taskId });
+  }
+
   function handleTaskError(message: string) {
     toast.error('Task operation failed.', { description: message });
   }
@@ -167,6 +171,7 @@ export default function App() {
                   selectedProjectId={selectedProjectId}
                   selectedProjectPath={selectedProjectPath}
                   onTaskCreated={handleTaskCreated}
+                  onTaskUpdated={handleTaskUpdated}
                   onError={handleTaskError}
                 />
               ) : null}

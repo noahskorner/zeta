@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import { Command } from 'commander';
 import {
   CreateTaskCommand,
   CreateTaskFacade,
@@ -8,23 +8,35 @@ import {
   ListTasksRepository,
   ListTasksQuery,
   ProjectsRepository,
-} from "@zeta/commands";
+  UpdateTaskCommand,
+  UpdateTaskFacade,
+  UpdateTaskRepository,
+  UpdateTaskService,
+} from '@zeta/commands';
 
 export function addTasks(command: Command) {
   // Instantiate services.
-  const service = new CreateTaskService();
-  const repository = new CreateTaskRepository();
-  const facade = new CreateTaskFacade(service, repository);
+  const createTaskService = new CreateTaskService();
+  const createTaskRepository = new CreateTaskRepository();
+  const createTaskFacade = new CreateTaskFacade(createTaskService, createTaskRepository);
+
+  const projectsRepository = new ProjectsRepository();
+  const listTasksRepository = new ListTasksRepository();
+  const listTasksFacade = new ListTasksFacade(projectsRepository, listTasksRepository);
+
+  const updateTaskService = new UpdateTaskService();
+  const updateTaskRepository = new UpdateTaskRepository();
+  const updateTaskFacade = new UpdateTaskFacade(updateTaskService, updateTaskRepository);
 
   // Add the command.
-  const tasksCommand = command.command("tasks").description("Manage project tasks");
+  const tasksCommand = command.command('tasks').description('Manage project tasks');
 
   tasksCommand
-    .command("add <name>")
-    .description("Create a task and git worktree in a project")
-    .requiredOption("--project <path>", "Project folder path")
-    .requiredOption("--friendly-name <friendlyName>", "Human-friendly task name")
-    .requiredOption("--description <description>", "Task description")
+    .command('add <name>')
+    .description('Create a task and git worktree in a project')
+    .requiredOption('--project <path>', 'Project folder path')
+    .requiredOption('--friendly-name <friendlyName>', 'Human-friendly task name')
+    .requiredOption('--description <description>', 'Task description')
     .action(
       async (
         name: string,
@@ -35,7 +47,7 @@ export function addTasks(command: Command) {
         },
       ) => {
         try {
-          const taskId = await facade.execute({
+          const taskId = await createTaskFacade.execute({
             projectPath: options.project,
             name,
             friendlyName: options.friendlyName,
@@ -47,7 +59,7 @@ export function addTasks(command: Command) {
           if (error instanceof Error) {
             console.error(error.message);
           } else {
-            console.error("Failed to add task.");
+            console.error('Failed to add task.');
           }
 
           process.exitCode = 1;
@@ -56,15 +68,11 @@ export function addTasks(command: Command) {
     );
 
   tasksCommand
-    .command("list <projectId>")
-    .description("List tasks for a saved project")
+    .command('list <projectId>')
+    .description('List tasks for a saved project')
     .action(async (projectId: string) => {
       try {
-        const tasksRepository = new ListTasksRepository();
-        const projectsRepository = new ProjectsRepository();
-        const findTasksFacade = new ListTasksFacade(projectsRepository, tasksRepository);
-
-        const response = await findTasksFacade.execute({
+        const response = await listTasksFacade.execute({
           projectId,
         } satisfies ListTasksQuery);
 
@@ -73,10 +81,46 @@ export function addTasks(command: Command) {
         if (error instanceof Error) {
           console.error(error.message);
         } else {
-          console.error("Failed to list tasks.");
+          console.error('Failed to list tasks.');
         }
 
         process.exitCode = 1;
       }
     });
+
+  tasksCommand
+    .command('update <taskId>')
+    .description("Update a task's metadata in a project")
+    .requiredOption('--project <path>', 'Project folder path')
+    .option('--friendly-name <friendlyName>', 'Updated human-friendly task name')
+    .option('--description <description>', 'Updated task description')
+    .action(
+      async (
+        taskId: string,
+        options: {
+          project: string;
+          friendlyName?: string;
+          description?: string;
+        },
+      ) => {
+        try {
+          const response = await updateTaskFacade.execute({
+            projectPath: options.project,
+            taskId,
+            friendlyName: options.friendlyName,
+            description: options.description,
+          } satisfies UpdateTaskCommand);
+
+          console.log(JSON.stringify(response, null, 2));
+        } catch (error) {
+          if (error instanceof Error) {
+            console.error(error.message);
+          } else {
+            console.error('Failed to update task.');
+          }
+
+          process.exitCode = 1;
+        }
+      },
+    );
 }

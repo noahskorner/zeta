@@ -7,6 +7,7 @@ type TasksPanelProps = {
   selectedProjectId: string | null;
   selectedProjectPath: string | null;
   onTaskCreated: (taskId: string) => void;
+  onTaskUpdated: (taskId: string) => void;
   onError: (message: string) => void;
 };
 
@@ -59,6 +60,11 @@ export function TasksPanel(props: TasksPanelProps) {
     setRefreshCount((currentCount) => currentCount + 1);
   }
 
+  function handleTaskUpdated(taskId: string) {
+    props.onTaskUpdated(taskId);
+    setRefreshCount((currentCount) => currentCount + 1);
+  }
+
   return (
     <div className="space-y-4">
       {/* Keep task creation near the board and scoped to the selected project. */}
@@ -78,7 +84,13 @@ export function TasksPanel(props: TasksPanelProps) {
         </div>
       ) : null}
 
-      <TasksBoard tasks={tasks} isLoading={isLoadingTasks} />
+      <TasksBoard
+        tasks={tasks}
+        projectPath={props.selectedProjectPath}
+        isLoading={isLoadingTasks}
+        onTaskUpdated={handleTaskUpdated}
+        onError={props.onError}
+      />
     </div>
   );
 }
