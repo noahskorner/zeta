@@ -5,6 +5,7 @@ import { ExecuteToolResponse } from './execute-tool.response';
 import { resolveToolExecutable } from '../resolve-tool-executable';
 import { ProcessService } from './process/process.service';
 import { PtyService } from './pty/pty.service';
+import { renderToolArgs } from '../tool-arg';
 
 export class ExecuteToolFacade {
   constructor(
@@ -30,7 +31,8 @@ export class ExecuteToolFacade {
       throw new ExecuteToolError(`Tool "${tool.name}" needs setup on this machine.`, tool.id);
     }
 
-    const args = [...(tool.args ?? []), ...(command.argv ?? [])];
+    // Build argv from saved structured args and runtime overrides.
+    const args = [...renderToolArgs(tool.args), ...(command.argv ?? [])];
     const toolExecutionId = crypto.randomUUID();
     try {
       const stream = tool.interactive

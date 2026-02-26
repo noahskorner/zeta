@@ -1,15 +1,14 @@
 import path from 'node:path';
 import { AddToolCommand } from './add-tool.command';
 import { AddToolModel } from './add-tool.model';
+import { normalizeToolArgs } from '../tool-arg';
 
 export class AddToolService {
   public async execute(command: AddToolCommand): Promise<AddToolModel> {
     // Validate required fields and normalize optional args before persistence.
     const name = command.name.trim();
     const exec = command.exec.trim();
-    const args = command.args
-      ?.map((arg) => arg.trim())
-      .filter((arg) => arg.length > 0);
+    const args = normalizeToolArgs(command.args);
 
     if (!name) {
       throw new Error('Tool name is required.');
@@ -27,7 +26,7 @@ export class AddToolService {
     return {
       name,
       exec,
-      args: args && args.length > 0 ? args : undefined,
+      args,
       interactive: command.interactive,
     } satisfies AddToolModel;
   }

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMemo, useState, type KeyboardEvent } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '../../components/ui/button';
 import {
@@ -22,14 +22,41 @@ import {
 } from '../../components/ui/form';
 import { Input } from '../../components/ui/input';
 
+const toolArgValueSchema = z.object({
+  type: z.enum(['literal', 'template']),
+  value: z.string().trim().min(1, 'Value is required.'),
+});
+
+const toolArgSchema = z.discriminatedUnion('t', [
+  z.object({
+    t: z.literal('literal'),
+    v: z.string().trim().min(1, 'Literal value is required.'),
+  }),
+  z.object({
+    t: z.literal('template'),
+    v: z.string().trim().min(1, 'Template value is required.'),
+  }),
+  z.object({
+    t: z.literal('flag'),
+    name: z.string().trim().min(1, 'Flag name is required.'),
+  }),
+  z.object({
+    t: z.literal('param'),
+    name: z.string().trim().min(1, 'Param name is required.'),
+    value: toolArgValueSchema,
+  }),
+]);
+
 const addToolSchema = z.object({
   name: z.string().trim().min(1, 'Name is required.'),
   exec: z.string().trim().min(1, 'Executable is required.'),
-  args: z.string().optional(),
+  args: z.array(toolArgSchema),
   interactive: z.boolean(),
 });
 
 type AddToolValues = z.infer<typeof addToolSchema>;
+type AddToolArg = AddToolValues['args'][number];
+type AddToolArgType = AddToolArg['t'];
 
 type AddToolDialogProps = {
   onToolCreated: (toolId: string) => void;
@@ -44,22 +71,27 @@ export function AddToolDialog(props: AddToolDialogProps) {
     defaultValues: {
       name: '',
       exec: '',
-      args: '',
+      args: [],
       interactive: true,
     },
   });
 
+  // Keep argument rows synced with react-hook-form.
+  const argFields = useFieldArray({
+    control: form.control,
+    name: 'args',
+  });
+
   const isSubmitting = useMemo(() => form.formState.isSubmitting, [form.formState.isSubmitting]);
+  const watchedArgs = form.watch('args');
 
   // Submit tool creation request through the desktop bridge API.
   async function handleSubmit(values: AddToolValues) {
-    const parsedArgs = parseArgs(values.args);
-
     try {
       const createdTool = await window.zetaApi.addTool({
         name: values.name,
         exec: values.exec,
-        args: parsedArgs.length > 0 ? parsedArgs : undefined,
+        args: values.args.length > 0 ? values.args : undefined,
         interactive: values.interactive,
       });
 
@@ -83,6 +115,11 @@ export function AddToolDialog(props: AddToolDialogProps) {
 
     event.preventDefault();
     event.currentTarget.requestSubmit();
+  }
+
+  // Allow users to switch row type while resetting stale fields.
+  function changeArgType(index: number, nextType: AddToolArgType): void {
+    argFields.update(index, createArgByType(nextType));
   }
 
   return (
@@ -139,24 +176,148 @@ export function AddToolDialog(props: AddToolDialogProps) {
               )}
             />
 
-            {/* Capture optional tool arguments as comma or newline-separated values. */}
-            <FormField
-              control={form.control}
-              name="args"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Args (optional)</FormLabel>
-                  <FormControl>
-                    <textarea
-                      {...field}
-                      placeholder={'--model,sonnet-4.5\n--verbose'}
-                      className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring min-h-24 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Build structured arguments with row-level typing. */}
+            <div className="space-y-2 rounded-md border p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <FormLabel>Arguments (optional)</FormLabel>
+                  <div className="text-xs text-muted-foreground">
+                    Add literals, templates, flags, and params as structured rows.
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => argFields.append(createArgByType('literal'))}
+                >
+                  Add argument
+                </Button>
+              </div>
+
+              {argFields.fields.length === 0 ? (
+                <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
+                  No arguments configured.
+                </div>
+              ) : null}
+
+              {argFields.fields.map((field, index) => {
+                const currentArg = watchedArgs[index];
+                if (!currentArg) {
+                  return null;
+                }
+
+                return (
+                  <div key={field.id} className="space-y-2 rounded-md border p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <label className="text-sm font-medium">Argument {index + 1}</label>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={currentArg.t}
+                          className="border-input bg-background h-9 rounded-md border px-2 text-sm"
+                          onChange={(event) => changeArgType(index, event.target.value as AddToolArgType)}
+                        >
+                          <option value="literal">literal</option>
+                          <option value="template">template</option>
+                          <option value="flag">flag</option>
+                          <option value="param">param</option>
+                        </select>
+                        <Button type="button" variant="ghost" onClick={() => argFields.remove(index)}>
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+
+                    {currentArg.t === 'literal' || currentArg.t === 'template' ? (
+                      <FormField
+                        control={form.control}
+                        name={`args.${index}.v`}
+                        render={({ field: valueField }) => (
+                          <FormItem>
+                            <FormLabel>Value</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={currentArg.t === 'template' ? '{{prompt}}' : 'exec'}
+                                {...valueField}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ) : null}
+
+                    {currentArg.t === 'flag' ? (
+                      <FormField
+                        control={form.control}
+                        name={`args.${index}.name`}
+                        render={({ field: nameField }) => (
+                          <FormItem>
+                            <FormLabel>Flag name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="--verbose" {...nameField} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ) : null}
+
+                    {currentArg.t === 'param' ? (
+                      <div className="grid gap-2 md:grid-cols-[1fr_180px_1fr]">
+                        <FormField
+                          control={form.control}
+                          name={`args.${index}.name`}
+                          render={({ field: nameField }) => (
+                            <FormItem>
+                              <FormLabel>Param name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="--model" {...nameField} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name={`args.${index}.value.type`}
+                          render={({ field: valueTypeField }) => (
+                            <FormItem>
+                              <FormLabel>Value type</FormLabel>
+                              <FormControl>
+                                <select
+                                  value={valueTypeField.value}
+                                  className="border-input bg-background h-10 rounded-md border px-2 text-sm"
+                                  onChange={(event) => valueTypeField.onChange(event.target.value)}
+                                >
+                                  <option value="literal">literal</option>
+                                  <option value="template">template</option>
+                                </select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name={`args.${index}.value.value`}
+                          render={({ field: valueField }) => (
+                            <FormItem>
+                              <FormLabel>Value</FormLabel>
+                              <FormControl>
+                                <Input placeholder="{{model}}" {...valueField} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
 
             {/* Let users choose PTY interaction vs non-interactive process mode. */}
             <FormField
@@ -200,15 +361,27 @@ export function AddToolDialog(props: AddToolDialogProps) {
   );
 }
 
-function parseArgs(rawArgs: string | undefined): string[] {
-  if (!rawArgs) {
-    return [];
+function createArgByType(type: AddToolArgType): AddToolArg {
+  if (type === 'literal') {
+    return { t: 'literal', v: '' };
   }
 
-  return rawArgs
-    .split(/[\n,]/g)
-    .map((arg) => arg.trim())
-    .filter((arg) => arg.length > 0);
+  if (type === 'template') {
+    return { t: 'template', v: '' };
+  }
+
+  if (type === 'flag') {
+    return { t: 'flag', name: '' };
+  }
+
+  return {
+    t: 'param',
+    name: '',
+    value: {
+      type: 'literal',
+      value: '',
+    },
+  };
 }
 
 function getErrorMessage(error: unknown): string {

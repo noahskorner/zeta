@@ -6,12 +6,14 @@ import {
   AddToolService,
   ExecuteToolCommand,
   ExecuteToolFacade,
-  ProcessService,
-  PtyService,
   ExecuteToolRepository,
   ListToolResponse,
   ListToolsFacade,
   ListToolsRepository,
+  ProcessService,
+  PtyService,
+  renderToolArgs,
+  ToolArg,
 } from '@zeta/commands';
 
 type AddToolOptions = {
@@ -63,7 +65,7 @@ export function addTools(command: Command) {
         const createdTool = await addToolFacade.execute({
           name: options.name,
           exec: options.exec,
-          args: parsedArgs.length > 0 ? parsedArgs : undefined,
+          args: parsedArgs.length > 0 ? parsedArgs.map((arg) => ({ t: 'literal', v: arg })) : undefined,
           interactive: !options.nonInteractive,
         } satisfies AddToolCommand);
 
@@ -158,7 +160,7 @@ function printTools(tools: ListToolResponse[]): void {
   );
 
   sortedTools.forEach((tool) => {
-    const args = tool.args && tool.args.length > 0 ? ` ${tool.args.join(' ')}` : '';
+    const args = buildToolArgDisplay(tool.args);
     console.log(`${tool.name}`);
     console.log(`  id: ${tool.id}`);
     console.log(`  exec: ${tool.exec}${args}`);
@@ -167,4 +169,9 @@ function printTools(tools: ListToolResponse[]): void {
     console.log(`  created: ${tool.createdAt}`);
     console.log('');
   });
+}
+
+function buildToolArgDisplay(args: ToolArg[] | undefined): string {
+  const renderedArgs = renderToolArgs(args);
+  return renderedArgs.length > 0 ? ` ${renderedArgs.join(' ')}` : '';
 }

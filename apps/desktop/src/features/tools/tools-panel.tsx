@@ -1,4 +1,4 @@
-import { ListToolResponse } from '@zeta/commands';
+import { ListToolResponse, renderToolArgs } from '@zeta/commands';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { AddToolDialog } from './add-tool-dialog';
@@ -163,7 +163,8 @@ export function ToolsPanel(props: ToolsPanelProps) {
 }
 
 function buildToolDescription(tool: ListToolResponse): string {
-  const joinedArgs = tool.args && tool.args.length > 0 ? ` ${tool.args.join(' ')}` : '';
+  const normalizedArgs = renderToolArgs(tool.args);
+  const joinedArgs = normalizedArgs.length > 0 ? ` ${normalizedArgs.join(' ')}` : '';
   return `${tool.exec}${joinedArgs}`;
 }
 
