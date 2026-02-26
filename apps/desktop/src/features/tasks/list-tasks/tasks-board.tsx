@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ListTaskLaneResponse, TaskLane } from './task-lane';
-import { ListTaskResponse } from '@zeta/commands';
+import type { ListTaskResponse } from '@zeta/commands';
 
 const lanes: ListTaskLaneResponse[] = [
   { status: 'backlog', title: 'Backlog', description: 'Capture and shape upcoming work.' },

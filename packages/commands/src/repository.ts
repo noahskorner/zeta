@@ -6,21 +6,26 @@ export abstract class Repository {
   protected static readonly STORAGE_PATH = Repository.getStoragePath();
 
   public static getStoragePath(): string {
+    const runtimeProcess = typeof process !== 'undefined' ? process : undefined;
+    if (!runtimeProcess) {
+      return Repository.ROOT_DIR;
+    }
+
     // If the platform is Windows, use the APPDATA environment variable
-    if (process.platform === 'win32') {
-      const appDataPath = process.env.APPDATA;
+    if (runtimeProcess.platform === 'win32') {
+      const appDataPath = runtimeProcess.env.APPDATA;
       if (appDataPath) {
         return path.join(appDataPath, Repository.ROOT_DIR);
       }
     }
 
     // If the platform is macOS, use the Library/Application Support directory
-    if (process.platform === 'darwin') {
+    if (runtimeProcess.platform === 'darwin') {
       return path.join(os.homedir(), 'Library', 'Application Support', Repository.ROOT_DIR);
     }
 
     // For Linux and other platforms, use the XDG_CONFIG_HOME environment variable or default to ~/.config
-    const xdgConfigHome = process.env.XDG_CONFIG_HOME;
+    const xdgConfigHome = runtimeProcess.env.XDG_CONFIG_HOME;
     if (xdgConfigHome) {
       return path.join(xdgConfigHome, Repository.ROOT_DIR);
     }

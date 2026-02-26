@@ -1,4 +1,4 @@
-import { ListTaskResponse } from '@zeta/commands';
+import type { ListTaskResponse } from '@zeta/commands';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
 import { TaskCard } from './task-card';
 

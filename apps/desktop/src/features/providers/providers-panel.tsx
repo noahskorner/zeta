@@ -1,4 +1,4 @@
-import { AddProviderResponse, ProviderEntity } from '@zeta/commands';
+import type { AddProviderResponse, ProviderEntity } from '@zeta/commands';
 import { useEffect, useState } from 'react';
 import {
   Card,

@@ -1,4 +1,4 @@
-import { ListToolResponse, renderToolArgs } from '@zeta/commands';
+import type { ListToolResponse } from '@zeta/commands';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { AddToolDialog } from './add-tool-dialog';
@@ -166,6 +166,25 @@ function buildToolDescription(tool: ListToolResponse): string {
   const normalizedArgs = renderToolArgs(tool.args);
   const joinedArgs = normalizedArgs.length > 0 ? ` ${normalizedArgs.join(' ')}` : '';
   return `${tool.exec}${joinedArgs}`;
+}
+
+// Render persisted structured args into a readable argv string for cards.
+function renderToolArgs(args: ListToolResponse['args']): string[] {
+  if (!args || args.length === 0) {
+    return [];
+  }
+
+  return args.flatMap((arg) => {
+    if (arg.t === 'literal' || arg.t === 'template') {
+      return [arg.v];
+    }
+
+    if (arg.t === 'flag') {
+      return [arg.name];
+    }
+
+    return [arg.name, arg.value.value];
+  });
 }
 
 const DISABLED_TOOLS_STORAGE_KEY = 'zeta.tools.disabledToolIds';

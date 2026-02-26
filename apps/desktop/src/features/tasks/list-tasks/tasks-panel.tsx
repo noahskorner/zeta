@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CreateTaskDialog } from '../create-task/create-task-dialog';
 import { TasksBoard } from './tasks-board';
-import { ListTaskResponse } from '@zeta/commands';
+import type { ListTaskResponse } from '@zeta/commands';
 
 type TasksPanelProps = {
   projectId: string;

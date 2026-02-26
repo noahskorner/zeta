@@ -1,4 +1,4 @@
-import { ListProjectResponse } from '@zeta/commands';
+import type { ListProjectResponse } from '@zeta/commands';
 import {
   Select,
   SelectContent,

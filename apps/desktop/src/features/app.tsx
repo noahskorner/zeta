@@ -1,4 +1,4 @@
-import { AddProviderResponse, ListProjectResponse } from '@zeta/commands';
+import type { AddProviderResponse, ListProjectResponse } from '@zeta/commands';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { SidebarInset, SidebarProvider } from '../components/ui/sidebar';

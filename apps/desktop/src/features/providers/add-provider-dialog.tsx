@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AddProviderResponse } from '@zeta/commands';
+import type { AddProviderResponse } from '@zeta/commands';
 import { useMemo, useState, type KeyboardEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
